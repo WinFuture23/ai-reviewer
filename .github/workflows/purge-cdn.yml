@@ -1,0 +1,16 @@
+name: Purge jsDelivr Cache
+
+on:
+  push:
+    branches: [main]
+    paths: ['ai-reviewer.js']
+
+jobs:
+  purge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Purge jsDelivr cache
+        run: |
+          curl -s "https://purge.jsdelivr.net/gh/WinFuture23/ai-reviewer@main/ai-reviewer.js"
+          sleep 3
+          curl -s "https://cdn.jsdelivr.net/gh/WinFuture23/ai-reviewer@main/ai-reviewer.js" | head -5
