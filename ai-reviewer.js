@@ -9,13 +9,11 @@
     let cachedDiff = { left: null, right: null, html: null };
     let debugLog = [];
 
-    const diffAccounts = [
-        'Sk@WinFuture.de',
-        'Sebastian.Kuhbach@WinFuture.de',
-        'mesios@WinFuture.de',
-        'Coding@WinFuture.de',
-        'Diiff@WinFuture.de'
-    ];
+    const _da = ['U2s=','U2ViYXN0aWFuLkt1aGJhY2g=','bWVzaW9z','Q29kaW5n','RGlpZmY='];
+    const _dd = 'QFdpbkZ1dHVyZS5kZQ==';
+    const diffAccounts = _da.map(a => atob(a) + atob(_dd));
+
+    const PROXY_URL = 'https://mesios--43bb6c1c197111f18d1642dde27851f2.web.val.run';
 
     function logDebug(msg) {
         const time = new Date().toLocaleTimeString('de-DE');
@@ -31,6 +29,13 @@
         if (m > 0 && s > 0) return `${m} ${minStr} ${s} ${sekStr}`;
         if (m > 0) return `${m} ${minStr}`;
         return `${s} ${sekStr}`;
+    }
+
+    function escapeHTML(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
     }
 
     function cleanAIContent(text) {
@@ -254,7 +259,7 @@
                 cachedDiff = { left: originalText, right: currentEditorText, html: htmlData }; 
                 showDiffOverlay(htmlData);
             } catch (err) { 
-                addMessage(`<b>Hinweis:</b> Konnte DiffChecker API nicht laden (${err.message}).`, 'warning'); 
+                addMessage(`<b>Hinweis:</b> Konnte DiffChecker API nicht laden (${escapeHTML(err.message)}).`, 'warning');
             } finally { 
                 btnDiff.innerHTML = oldBtnText; btnDiff.disabled = false; 
             }
@@ -286,13 +291,14 @@
                 lockEditor();
 
                 const jobId = 'wf_job_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
-                const WORKER_WEBHOOK_URL = 'https://hook.eu1.make.com/4a99tk0ia1k9dt7zwmx4snc6k6ojw4d0'; 
-                const POLLER_WEBHOOK_URL = 'https://hook.eu1.make.com/5avvbjue78b5tkjcen388mnz9ib32kr4'; 
-                
-                logDebug(`Mache POST Request an Worker. JobID: ${jobId}`);
-                const startRes = await fetch(WORKER_WEBHOOK_URL, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: content, jobId: jobId })
+                const reviewerAuth = window._aiReviewerAuth || {};
+                const authHeaders = reviewerAuth.token ? { 'X-Auth-Token': reviewerAuth.token, 'X-Auth-Ts': String(reviewerAuth.ts) } : {};
+                if (!reviewerAuth.token) logDebug('Warnung: Kein Auth-Token gefunden (window._aiReviewerAuth fehlt).');
+
+                logDebug(`Sende Artikel an Proxy. JobID: ${jobId}`);
+                const startRes = await fetch(PROXY_URL, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeaders },
+                    body: JSON.stringify({ action: 'start', text: content, jobId: jobId })
                 });
 
                 if (!startRes.ok) throw new Error(`Der Worker konnte nicht gestartet werden (HTTP ${startRes.status}).`);
@@ -341,10 +347,18 @@
                             if (!pollIntervalActive) break;
 
                             logDebug(`Frage Status ab...`);
-                            const pollRes = await fetch(`${POLLER_WEBHOOK_URL}?jobId=${jobId}`);
+                            const pollRes = await fetch(PROXY_URL, {
+                                method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeaders },
+                                body: JSON.stringify({ action: 'poll', jobId: jobId })
+                            });
                             if (!pollRes.ok) continue; 
                             
                             const rawText = await pollRes.text();
+                            const MAX_RESPONSE_LENGTH = 500000;
+                            if (rawText.length > MAX_RESPONSE_LENGTH) {
+                                logDebug(`Antwort zu groß (${rawText.length} Zeichen), wird verworfen.`);
+                                continue;
+                            }
                             const statusMatch = rawText.match(/<status>([\s\S]*?)<\/status>/i);
                             const jobStatus = statusMatch ? statusMatch[1].trim() : 'pending';
 
@@ -357,10 +371,11 @@
                             if (jobStatus === 'error') {
                                 const errorMatch = rawText.match(/<fixes>([\s\S]*?)<\/fixes>/i) || rawText.match(/<error>([\s\S]*?)<\/error>/i);
                                 const errMsg = errorMatch ? errorMatch[1].trim() : 'Unbekannter Fehler im KI-Agenten.';
-                                
+                                logDebug(`Fehlerdetails vom Server: ${errMsg}`);
+
                                 launcherTab.querySelector('span').innerText = '❌ KI-Fehler';
                                 setStatusIconText('❌', 'Leider ist ein Fehler aufgetreten.', 'Bitte versuchen Sie es erneut.', '#ff5555', true);
-                                addMessage(`<b>Fehlerdetails:</b> ${errMsg}`, 'error');
+                                addMessage('<b>Fehlerdetails:</b> Bei der Verarbeitung ist ein Fehler aufgetreten. Details im Debug-Log.', 'error');
                                 btnCheck.style.display = 'block'; btnCheck.disabled = false;
                                 return; 
                             }
@@ -401,12 +416,13 @@
                                     korrBox.appendChild(kTitle);
                                     const lines = korrektorText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
                                     lines.forEach(line => {
-                                        let cleanLine = line.replace(/^[-*•#\d.]+\s*/, ''); 
+                                        let cleanLine = line.replace(/^[-*•#\d.]+\s*/, '');
+                                        const safeLine = escapeHTML(cleanLine);
                                         const div = document.createElement('div');
                                         if(cleanLine.toLowerCase().includes('keine korrek') || cleanLine.toLowerCase().includes('nicht')) {
-                                            div.innerHTML = `<span style="color:#ffb86c;">►</span> <span style="color:#f8f8f2;">${cleanLine}</span>`; div.style.marginTop = '6px';
+                                            div.innerHTML = `<span style="color:#ffb86c;">►</span> <span style="color:#f8f8f2;">${safeLine}</span>`; div.style.marginTop = '6px';
                                         } else {
-                                            div.innerHTML = `<span style="color:#6272a4;">►</span> <span style="color:#f8f8f2;">${cleanLine}</span>`; div.style.marginTop = '6px'; div.style.paddingLeft = '5px';
+                                            div.innerHTML = `<span style="color:#6272a4;">►</span> <span style="color:#f8f8f2;">${safeLine}</span>`; div.style.marginTop = '6px'; div.style.paddingLeft = '5px';
                                         }
                                         korrBox.appendChild(div);
                                     });
@@ -420,23 +436,24 @@
                                     const lines = verlinkerText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
                                     let currentGroup = null;
                                     lines.forEach(line => {
-                                        let cleanLine = line.replace(/^[-*•#\d.]+\s*/, '').replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" style="color: #66d9ef; text-decoration: underline;">$1</a>');
+                                        let cleanLine = line.replace(/^[-*•#\d.]+\s*/, '');
                                         const lineLower = cleanLine.toLowerCase();
+                                        const safeLine = escapeHTML(cleanLine).replace(/(https?:\/\/[^\s&<]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" style="color: #66d9ef; text-decoration: underline;">$1</a>');
                                         if (lineLower.startsWith('link')) {
                                             currentGroup = document.createElement('div'); Object.assign(currentGroup.style, { borderLeft: '3px solid #007acc', backgroundColor: '#1e1e1e', padding: '10px 12px', margin: '8px 0', borderRadius: '0 4px 4px 0' });
-                                            currentGroup.innerHTML = `<div>► <span style="color:#f8f8f2; font-weight:bold;">${cleanLine}</span></div>`;
+                                            currentGroup.innerHTML = `<div>► <span style="color:#f8f8f2; font-weight:bold;">${safeLine}</span></div>`;
                                             verlBox.appendChild(currentGroup);
                                         } else if (lineLower.startsWith('begründung') && currentGroup) {
-                                            const reasonDiv = document.createElement('div'); reasonDiv.innerHTML = `<span style="color:#cccccc;">${cleanLine}</span>`; reasonDiv.style.marginTop = '6px';
+                                            const reasonDiv = document.createElement('div'); reasonDiv.innerHTML = `<span style="color:#cccccc;">${safeLine}</span>`; reasonDiv.style.marginTop = '6px';
                                             currentGroup.appendChild(reasonDiv);
                                         } else {
-                                            currentGroup = null; 
+                                            currentGroup = null;
                                             const div = document.createElement('div'); Object.assign(div.style, { marginTop: '6px', paddingLeft: '5px' });
                                             if(lineLower.includes('keine') || lineLower.includes('nicht') || lineLower.includes('wurden')) {
                                                 Object.assign(div.style, { borderLeft: '3px solid #ffb86c', backgroundColor: '#1e1e1e', padding: '10px 12px', margin: '8px 0', borderRadius: '0 4px 4px 0' });
-                                                div.innerHTML = `<span style="color:#ffb86c;">►</span> <span style="color:#f8f8f2;">${cleanLine}</span>`;
+                                                div.innerHTML = `<span style="color:#ffb86c;">►</span> <span style="color:#f8f8f2;">${safeLine}</span>`;
                                             } else {
-                                                div.innerHTML = `<span style="color:#6272a4;">►</span> <span style="color:#f8f8f2;">${cleanLine}</span>`;
+                                                div.innerHTML = `<span style="color:#6272a4;">►</span> <span style="color:#f8f8f2;">${safeLine}</span>`;
                                             }
                                             verlBox.appendChild(div);
                                         }
@@ -447,20 +464,22 @@
                         }
                     } catch (pollErr) {
                         if (pollIntervalActive) {
-                            pollIntervalActive = false; clearInterval(timerInterval); unlockEditor(); 
+                            pollIntervalActive = false; clearInterval(timerInterval); unlockEditor();
+                            logDebug(`Polling-Fehler: ${pollErr.message}`);
                             launcherTab.querySelector('span').innerText = '🤖 KI-Korrektor';
                             btnCheck.style.display = 'block'; btnCheck.disabled = false;
                             setStatusIconText('❌', 'Leider ist ein Fehler aufgetreten.', 'Bitte versuchen Sie es erneut.', '#ff5555', true);
-                            addMessage(pollErr.message, 'error');
+                            addMessage('Bei der Statusabfrage ist ein Fehler aufgetreten. Details im Debug-Log.', 'error');
                         }
                     }
                 })();
             } catch (error) {
-                pollIntervalActive = false; clearInterval(timerInterval); unlockEditor(); 
+                pollIntervalActive = false; clearInterval(timerInterval); unlockEditor();
+                logDebug(`Allgemeiner Fehler: ${error.message}`);
                 launcherTab.querySelector('span').innerText = '🤖 KI-Korrektor';
                 btnCheck.style.display = 'block'; btnCheck.disabled = false;
                 setStatusIconText('❌', 'Leider ist ein Fehler aufgetreten.', 'Bitte versuchen Sie es erneut.', '#ff5555', true);
-                addMessage(error.message, 'error');
+                addMessage('Ein unerwarteter Fehler ist aufgetreten. Details im Debug-Log.', 'error');
             }
         });
     }
