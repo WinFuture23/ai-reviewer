@@ -1,13 +1,14 @@
 (function() {
     // Verhindert doppeltes Laden, falls das Skript mehrfach eingebunden wird
-    if (window._aiReviewerInitialized) return;
-    window._aiReviewerInitialized = true;
+    if (window.wfv4_ai_reviewer_loaded) return;
+    window.wfv4_ai_reviewer_loaded = true;
 
     let terminalContainer = null;
     let launcherTab = null;
     let pollIntervalActive = false;
     let cachedDiff = { left: null, right: null, html: null };
     let debugLog = [];
+    let backup_content = null;
 
     const _da = ['U2s=','U2ViYXN0aWFuLkt1aGJhY2g=','bWVzaW9z','Q29kaW5n','RGlpZmY='];
     const _dd = 'QFdpbkZ1dHVyZS5kZQ==';
@@ -60,10 +61,10 @@
             if (aceContainer) {
                 aceContainer.style.transition = 'opacity 0.3s ease';
                 aceContainer.style.opacity = '0.5'; 
-                let overlay = document.getElementById('ai-ace-overlay');
+                let overlay = document.getElementById('ai-reviewer-ace-overlay');
                 if (!overlay) {
                     overlay = document.createElement('div');
-                    overlay.id = 'ai-ace-overlay';
+                    overlay.id = 'ai-reviewer-ace-overlay';
                     Object.assign(overlay.style, {
                         position: 'absolute', top: '0', left: '0', width: '100%', height: '100%',
                         zIndex: '9999', cursor: 'not-allowed', backgroundColor: 'rgba(255, 255, 255, 0.1)'
@@ -89,7 +90,7 @@
             const aceContainer = window.news_text_editor.container;
             if (aceContainer) {
                 aceContainer.style.opacity = '1';
-                let overlay = document.getElementById('ai-ace-overlay');
+                let overlay = document.getElementById('ai-reviewer-ace-overlay');
                 if (overlay) overlay.remove();
             }
         } else {
@@ -240,7 +241,7 @@
             const oldBtnText = btnDiff.innerHTML; btnDiff.innerHTML = '⏳ Lade...'; btnDiff.disabled = true;
             try {
                 let currentEditorText = window.news_text_editor ? window.news_text_editor.getValue() : (document.getElementById('news_text') ? document.getElementById('news_text').value : '');
-                const originalText = window._aiReviewerBackup || '';
+                const originalText = backup_content || '';
                 
                 if (cachedDiff.html && cachedDiff.left === originalText && cachedDiff.right === currentEditorText) { 
                     showDiffOverlay(cachedDiff.html); return; 
@@ -266,8 +267,8 @@
         };
 
         btnUndo.onclick = () => {
-            if (window.news_text_editor && typeof window.news_text_editor.setValue === 'function') window.news_text_editor.setValue(window._aiReviewerBackup, -1);
-            else if (document.getElementById('news_text')) document.getElementById('news_text').value = window._aiReviewerBackup;
+            if (window.news_text_editor && typeof window.news_text_editor.setValue === 'function') window.news_text_editor.setValue(backup_content, -1);
+            else if (document.getElementById('news_text')) document.getElementById('news_text').value = backup_content;
             addMessage('<b>Hinweis:</b> Originaltext wurde wiederhergestellt.', 'warning'); logDebug('Originaltext wiederhergestellt.');
         };
 
@@ -286,14 +287,14 @@
                 setStatusIconText('⏳', 'Lese Editor-Inhalt aus...', null, '#8be9fd');
                 let content = window.news_text_editor ? window.news_text_editor.getValue() : (document.getElementById('news_text') ? document.getElementById('news_text').value : '');
                 if (!content || !content.trim()) throw new Error('Der Editor ist leer. Abbruch.');
-                window._aiReviewerBackup = content;
+                backup_content = content;
 
                 lockEditor();
 
                 const jobId = 'wf_job_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
-                const reviewerAuth = window._aiReviewerAuth || {};
+                const reviewerAuth = window.wfv4_ai_reviewer_auth || {};
                 const authHeaders = reviewerAuth.token ? { 'X-Auth-Token': reviewerAuth.token, 'X-Auth-Ts': String(reviewerAuth.ts) } : {};
-                if (!reviewerAuth.token) logDebug('Warnung: Kein Auth-Token gefunden (window._aiReviewerAuth fehlt).');
+                if (!reviewerAuth.token) logDebug('Warnung: Kein Auth-Token gefunden (window.wfv4_ai_reviewer_auth fehlt).');
 
                 logDebug(`Sende Artikel an Proxy. JobID: ${jobId}`);
                 const startRes = await fetch(PROXY_URL, {
@@ -397,7 +398,7 @@
 
                                 newContent = cleanAIContent(newContent);
                                 setStatusIconText('⏳', 'Schreibe Text in Editor...', null, '#8be9fd');
-                                window._aiReviewerNewText = newContent; 
+                                // new_text_content kept in IIFE scope for potential future use
                                 
                                 if (window.news_text_editor && typeof window.news_text_editor.setValue === 'function') {
                                     window.news_text_editor.setValue(newContent, -1); window.wfv4_news_changed = true;
