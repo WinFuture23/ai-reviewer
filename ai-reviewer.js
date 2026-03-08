@@ -176,18 +176,13 @@
         Object.assign(header.style, { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 15px', backgroundColor: '#333333', borderBottom: '1px solid #222', color: '#ccc', fontSize: '12px', userSelect: 'none' });
         header.innerHTML = '<span>🤖 KI-Korrektor & Verlinker</span>';
         
-        const headerActions = document.createElement('div'); headerActions.style.display = 'flex'; headerActions.style.gap = '15px';
-        const debugBtn = document.createElement('span'); debugBtn.innerHTML = '📋 Debug kopieren';
-        Object.assign(debugBtn.style, { cursor: 'pointer', color: '#8be9fd', transition: 'color 0.2s' });
-        debugBtn.onclick = () => { navigator.clipboard.writeText(debugLog.join('\n')).then(() => { const oldText = debugBtn.innerHTML; debugBtn.innerHTML = '✅ Kopiert!'; setTimeout(() => debugBtn.innerHTML = oldText, 2000); }); };
-
         // MINIMIEREN STATT LÖSCHEN
         const closeHeaderBtn = document.createElement('span'); closeHeaderBtn.innerHTML = '▼ Verbergen';
         Object.assign(closeHeaderBtn.style, { cursor: 'pointer', fontWeight: 'bold', color: '#ffb86c', transition: 'color 0.2s' });
         closeHeaderBtn.onmouseover = () => closeHeaderBtn.style.color = '#ff9900'; closeHeaderBtn.onmouseout = () => closeHeaderBtn.style.color = '#ffb86c';
         closeHeaderBtn.onclick = () => { terminalContainer.style.display = 'none'; launcherTab.style.display = 'flex'; };
-        
-        headerActions.appendChild(debugBtn); headerActions.appendChild(closeHeaderBtn); header.appendChild(headerActions);
+
+        header.appendChild(closeHeaderBtn);
 
         // Content Area
         const contentArea = document.createElement('div');
@@ -214,10 +209,11 @@
         Object.assign(btnUndo.style, actionBtnStyle, { backgroundColor: '#d9534f', color: '#ffffff' });
         btnUndo.onmouseover = () => btnUndo.style.backgroundColor = '#c9302c'; btnUndo.onmouseout = () => btnUndo.style.backgroundColor = '#d9534f';
 
-        const btnCloseBottom = document.createElement('button'); btnCloseBottom.innerHTML = '▼ Verbergen';
-        Object.assign(btnCloseBottom.style, actionBtnStyle, { backgroundColor: '#44475a', color: '#f8f8f2' });
-        btnCloseBottom.onmouseover = () => btnCloseBottom.style.backgroundColor = '#6272a4'; btnCloseBottom.onmouseout = () => btnCloseBottom.style.backgroundColor = '#44475a';
-        btnCloseBottom.onclick = () => { terminalContainer.style.display = 'none'; launcherTab.style.display = 'flex'; };
+        const btnCloseBottom = document.createElement('button'); btnCloseBottom.innerHTML = '💾 Speichern';
+        btnCloseBottom.className = 'css_button green';
+        Object.assign(btnCloseBottom.style, actionBtnStyle, { backgroundColor: '#008800', color: '#fff', borderColor: '#7dc07d #003300 #003300 #7dc07d' });
+        btnCloseBottom.onmouseover = () => btnCloseBottom.style.backgroundColor = '#006600'; btnCloseBottom.onmouseout = () => btnCloseBottom.style.backgroundColor = '#008800';
+        btnCloseBottom.onclick = () => { wfv4_news_submit(); terminalContainer.style.display = 'none'; };
 
         footer.appendChild(btnCheck); footer.appendChild(btnDiff); footer.appendChild(btnUndo); footer.appendChild(btnCloseBottom);
         terminalContainer.appendChild(header); terminalContainer.appendChild(contentArea); terminalContainer.appendChild(footer); 
@@ -310,12 +306,28 @@
                 setStatusIconText('⏳', `Artikel wird verarbeitet... (0 Sekunden)`, `Geschätzte Dauer: ca. 3 - 4 Minuten`, '#f1fa8c', true);
                 const startTime = Date.now();
                 
+                let lastTimerTick = 0;
+                let visibilityPollTriggered = false;
+                let earlyPollWakeup = false;
+
                 timerInterval = setInterval(() => {
                     if (!pollIntervalActive) return;
-                    elapsedSeconds++;
+                    const nowElapsed = Math.round((Date.now() - startTime) / 1000);
+                    const jumped = nowElapsed - lastTimerTick;
+                    lastTimerTick = nowElapsed;
+                    elapsedSeconds = nowElapsed;
+
+                    // Bei Zeitsprung > 60s (Tab war im Hintergrund): sofort Polling auslösen
+                    if (jumped > 60 && !visibilityPollTriggered) {
+                        visibilityPollTriggered = true;
+                        logDebug(`Tab-Rückkehr erkannt (Sprung: ${jumped}s). Wecke pollLoop auf für sofortige Status-Abfrage.`);
+                        earlyPollWakeup = true;
+                        visibilityPollTriggered = false;
+                    }
+
                     const timeStr = formatDurationFriendly(elapsedSeconds);
                     setStatusIconText('⏳', `Artikel wird verarbeitet... (${timeStr})`, `Geschätzte Dauer: ca. 3 - 4 Minuten`, '#f1fa8c', false);
-                    
+
                     if (elapsedSeconds >= timeoutMax) {
                         pollIntervalActive = false; clearInterval(timerInterval); unlockEditor();
                         launcherTab.querySelector('span').innerText = '🤖 KI-Korrektor';
@@ -340,7 +352,8 @@
                             let sleepSecs = nextTarget - currentElapsed;
                             if (sleepSecs > 0) {
                                 for(let i=0; i < sleepSecs; i++) {
-                                    if (!pollIntervalActive) return; 
+                                    if (!pollIntervalActive) return;
+                                    if (earlyPollWakeup) { earlyPollWakeup = false; logDebug('Sleep unterbrochen: sofortige Abfrage nach Tab-Rückkehr.'); break; }
                                     await sleep(1000);
                                 }
                             }
