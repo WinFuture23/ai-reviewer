@@ -5,12 +5,53 @@ on:
     branches: [main]
     paths: ['ai-reviewer.js']
 
+concurrency:
+  group: purge-cdn
+  cancel-in-progress: true
+
 jobs:
   purge:
     runs-on: ubuntu-latest
     steps:
-      - name: Purge jsDelivr cache
+      - uses: actions/checkout@v4
+
+      - name: Purge jsDelivr cache (with retry on throttle)
         run: |
-          curl -s "https://purge.jsdelivr.net/gh/WinFuture23/ai-reviewer@main/ai-reviewer.js"
-          sleep 3
-          curl -s "https://cdn.jsdelivr.net/gh/WinFuture23/ai-reviewer@main/ai-reviewer.js" | head -5
+          FILE_URL="https://cdn.jsdelivr.net/gh/WinFuture23/ai-reviewer@main/ai-reviewer.js"
+          PURGE_URL="https://purge.jsdelivr.net/gh/WinFuture23/ai-reviewer@main/ai-reviewer.js"
+          LOCAL_SIZE=$(wc -c < ai-reviewer.js | tr -d ' ')
+          echo "Local file size: ${LOCAL_SIZE} bytes"
+
+          for attempt in 1 2 3 4 5; do
+            echo "=== Purge attempt ${attempt} ==="
+            RESPONSE=$(curl -s "$PURGE_URL")
+            echo "$RESPONSE"
+
+            THROTTLED=$(echo "$RESPONSE" | jq -r '.paths[].throttled // false')
+            if [ "$THROTTLED" = "true" ]; then
+              RESET=$(echo "$RESPONSE" | jq -r '.paths[].throttlingReset // 60')
+              # Cap wait at 10 minutes per attempt
+              if [ "$RESET" -gt 600 ]; then RESET=600; fi
+              echo "Throttled. Waiting ${RESET}s..."
+              sleep "$RESET"
+              continue
+            fi
+
+            # Wait for CDN edge propagation
+            sleep 10
+
+            # Verify new version is served
+            CDN_SIZE=$(curl -sI "$FILE_URL" | grep -i content-length | awk '{print $2}' | tr -d '\r')
+            echo "CDN file size: ${CDN_SIZE} bytes (expected: ${LOCAL_SIZE})"
+
+            if [ "$CDN_SIZE" = "$LOCAL_SIZE" ]; then
+              echo "Purge verified — new version is live."
+              exit 0
+            else
+              echo "Size mismatch, retrying..."
+              sleep 5
+            fi
+          done
+
+          echo "WARNING: Could not verify purge after 5 attempts."
+          exit 1
