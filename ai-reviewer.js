@@ -115,8 +115,10 @@
         Object.assign(closeDiffBtn.style, { backgroundColor: '#ff5555', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px' });
         closeDiffBtn.onclick = () => overlay.remove(); headerBar.appendChild(closeDiffBtn);
         const iframe = document.createElement('iframe'); Object.assign(iframe.style, { flexGrow: '1', width: '100%', backgroundColor: '#fff', border: 'none', borderRadius: '6px' });
-        iframe.srcdoc = htmlData; 
+        iframe.srcdoc = htmlData;
         overlay.appendChild(headerBar); overlay.appendChild(iframe); document.body.appendChild(overlay);
+        const escHandler = (e) => { if (e.key === 'Escape') { overlay.remove(); document.removeEventListener('keydown', escHandler); } };
+        document.addEventListener('keydown', escHandler);
     }
 
     // --- INITIALISIERUNG DES WIDGETS (LIPPE) ---
@@ -477,6 +479,16 @@
                                     });
                                     resultsArea.appendChild(verlBox);
                                 }
+
+                                // Auto-Resize: Höhe an Inhalt anpassen
+                                requestAnimationFrame(() => {
+                                    const headerH = header.offsetHeight;
+                                    const footerH = footer.offsetHeight;
+                                    const contentH = contentArea.scrollHeight;
+                                    const needed = headerH + contentH + footerH + 2;
+                                    const maxH = window.innerHeight - 40;
+                                    terminalContainer.style.height = Math.min(needed, maxH) + 'px';
+                                });
                             }
                         }
                     } catch (pollErr) {
