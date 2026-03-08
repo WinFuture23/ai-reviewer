@@ -9,6 +9,7 @@
     let cachedDiff = { left: null, right: null, html: null };
     let debugLog = [];
     let backup_content = null;
+    let btnCheck = null;
 
     const _da = ['U2s=','U2ViYXN0aWFuLkt1aGJhY2g=','bWVzaW9z','Q29kaW5n','RGlpZmY='];
     const _dd = 'QFdpbkZ1dHVyZS5kZQ==';
@@ -141,6 +142,8 @@
             } else {
                 terminalContainer.style.display = 'flex'; // Zeigt das versteckte Terminal wieder
             }
+            // Artikel-Prüfung direkt auslösen, wenn Button sichtbar und aktiviert ist
+            setTimeout(() => { if (btnCheck && btnCheck.style.display !== 'none' && !btnCheck.disabled) btnCheck.click(); }, 50);
         };
 
         document.body.appendChild(launcherTab);
@@ -195,7 +198,7 @@
         const footer = document.createElement('div');
         Object.assign(footer.style, { padding: '15px', backgroundColor: '#252526', display: 'flex', gap: '10px', justifyContent: 'center', alignItems: 'stretch', borderTop: '1px solid #333', width: '100%', boxSizing: 'border-box' });
 
-        const btnCheck = document.createElement('button'); btnCheck.innerHTML = '🚀 Artikel überprüfen';
+        btnCheck = document.createElement('button'); btnCheck.innerHTML = '🚀 Artikel überprüfen';
         Object.assign(btnCheck.style, { backgroundColor: '#007acc', color: '#ffffff', border: '1px solid #005f9e', padding: '10px 24px', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Consolas, "Courier New", monospace', fontWeight: 'bold', fontSize: '14px', transition: 'all 0.2s ease', outline: 'none', display: 'block' });
         btnCheck.onmouseover = () => btnCheck.style.backgroundColor = '#005f9e'; btnCheck.onmouseout = () => btnCheck.style.backgroundColor = '#007acc';
 
