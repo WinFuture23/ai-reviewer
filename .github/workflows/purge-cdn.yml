@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
     paths: ['ai-reviewer.js']
+  workflow_dispatch:
 
 concurrency:
   group: purge-cdn
