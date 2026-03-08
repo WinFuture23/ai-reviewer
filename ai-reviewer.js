@@ -143,7 +143,7 @@
                 terminalContainer.style.display = 'flex'; // Zeigt das versteckte Terminal wieder
             }
             // Artikel-Prüfung direkt auslösen, wenn Button sichtbar und aktiviert ist
-            setTimeout(() => { if (btnCheck && btnCheck.style.display !== 'none' && !btnCheck.disabled) btnCheck.click(); }, 50);
+            requestAnimationFrame(() => setTimeout(() => { if (btnCheck && btnCheck.style.display !== 'none' && !btnCheck.disabled) btnCheck.click(); }, 100));
         };
 
         document.body.appendChild(launcherTab);
