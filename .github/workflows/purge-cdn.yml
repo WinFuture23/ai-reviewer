@@ -1,4 +1,4 @@
-name: Purge jsDelivr Cache
+name: Deploy to GitHub Pages
 
 on:
   push:
@@ -7,52 +7,30 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: purge-cdn
+  group: pages-deploy
   cancel-in-progress: true
 
+permissions:
+  pages: write
+  id-token: write
+
 jobs:
-  purge:
+  deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Purge jsDelivr cache (with retry on throttle)
+      - name: Prepare deployment (only ai-reviewer.js)
         run: |
-          FILE_URL="https://cdn.jsdelivr.net/gh/WinFuture23/ai-reviewer@main/ai-reviewer.js"
-          PURGE_URL="https://purge.jsdelivr.net/gh/WinFuture23/ai-reviewer@main/ai-reviewer.js"
-          LOCAL_SIZE=$(wc -c < ai-reviewer.js | tr -d ' ')
-          echo "Local file size: ${LOCAL_SIZE} bytes"
+          mkdir _site
+          cp ai-reviewer.js _site/
 
-          for attempt in 1 2 3 4 5; do
-            echo "=== Purge attempt ${attempt} ==="
-            RESPONSE=$(curl -s "$PURGE_URL")
-            echo "$RESPONSE"
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
 
-            THROTTLED=$(echo "$RESPONSE" | jq -r '.paths[].throttled // false')
-            if [ "$THROTTLED" = "true" ]; then
-              RESET=$(echo "$RESPONSE" | jq -r '.paths[].throttlingReset // 60')
-              # Cap wait at 10 minutes per attempt
-              if [ "$RESET" -gt 600 ]; then RESET=600; fi
-              echo "Throttled. Waiting ${RESET}s..."
-              sleep "$RESET"
-              continue
-            fi
-
-            # Wait for CDN edge propagation
-            sleep 10
-
-            # Verify new version is served
-            CDN_SIZE=$(curl -sI "$FILE_URL" | grep -i content-length | awk '{print $2}' | tr -d '\r')
-            echo "CDN file size: ${CDN_SIZE} bytes (expected: ${LOCAL_SIZE})"
-
-            if [ "$CDN_SIZE" = "$LOCAL_SIZE" ]; then
-              echo "Purge verified — new version is live."
-              exit 0
-            else
-              echo "Size mismatch, retrying..."
-              sleep 5
-            fi
-          done
-
-          echo "WARNING: Could not verify purge after 5 attempts."
-          exit 1
+      - id: deployment
+        uses: actions/deploy-pages@v4
