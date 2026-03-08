@@ -1,0 +1,8 @@
+# Sensible Dateien (enthalten Secrets/Webhook-URLs)
+docs/SETUP.md
+docs/townie-prompt.md
+docs/test.html
+
+# Umgebung
+.env
+*.env.*
