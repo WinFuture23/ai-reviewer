@@ -20,7 +20,7 @@
     function logDebug(msg) {
         const time = new Date().toLocaleTimeString('de-DE');
         debugLog.push(`[${time}] ${msg}`);
-        console.log(`🤖 AI-Reviewer: ${msg}`);
+        console.log(`🤖 AI-Reviewer [${time}]: ${msg}`);
     }
 
     function formatDurationFriendly(totalSeconds) {
@@ -312,8 +312,8 @@
                 const startTime = Date.now();
                 
                 let lastTimerTick = 0;
-                let visibilityPollTriggered = false;
                 let earlyPollWakeup = false;
+                let cachedPollResponse = null;
 
                 timerInterval = setInterval(() => {
                     if (!pollIntervalActive) return;
@@ -325,7 +325,6 @@
                     // Bei Zeitsprung > 60s (Tab war im Hintergrund): sofort Server abfragen
                     if (jumped > 60) {
                         logDebug(`Tab-Rückkehr erkannt (Sprung: ${jumped}s). Sofortige Server-Abfrage...`);
-                        earlyPollWakeup = true;
                         (async () => {
                             try {
                                 const pollRes = await fetch(PROXY_URL, {
@@ -337,11 +336,15 @@
                                     const statusMatch = rawText.match(/<status>([\s\S]*?)<\/status>/i);
                                     const jobStatus = statusMatch ? statusMatch[1].trim() : 'pending';
                                     if (jobStatus !== 'pending') {
-                                        logDebug(`Ergebnis nach Tab-Rückkehr erhalten: ${jobStatus}. pollLoop verarbeitet.`);
-                                        return; // pollLoop wird das Ergebnis beim nächsten Poll abholen
+                                        logDebug(`Ergebnis nach Tab-Rückkehr erhalten: ${jobStatus}. Übergebe an pollLoop.`);
+                                        cachedPollResponse = rawText;
+                                        earlyPollWakeup = true;
+                                        return;
                                     }
                                 }
                             } catch(e) { logDebug(`Tab-Rückkehr-Abfrage fehlgeschlagen: ${e.message}`); }
+                            // Kein Ergebnis: pollLoop aufwecken für eigenen Versuch
+                            earlyPollWakeup = true;
                             // Kein Ergebnis und Timeout überschritten? Dann abbrechen.
                             if (elapsedSeconds >= timeoutMax) {
                                 pollIntervalActive = false; clearInterval(timerInterval); unlockEditor();
@@ -389,14 +392,21 @@
 
                             if (!pollIntervalActive) break;
 
-                            logDebug(`Frage Status ab...`);
-                            const pollRes = await fetch(PROXY_URL, {
-                                method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeaders },
-                                body: JSON.stringify({ action: 'poll', jobId: jobId })
-                            });
-                            if (!pollRes.ok) continue; 
-                            
-                            const rawText = await pollRes.text();
+                            // Gecachte Antwort von Tab-Rückkehr verwenden, falls vorhanden
+                            let rawText;
+                            if (cachedPollResponse) {
+                                logDebug('Verwende gecachte Antwort von Tab-Rückkehr.');
+                                rawText = cachedPollResponse;
+                                cachedPollResponse = null;
+                            } else {
+                                logDebug(`Frage Status ab...`);
+                                const pollRes = await fetch(PROXY_URL, {
+                                    method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeaders },
+                                    body: JSON.stringify({ action: 'poll', jobId: jobId })
+                                });
+                                if (!pollRes.ok) continue;
+                                rawText = await pollRes.text();
+                            }
                             const MAX_RESPONSE_LENGTH = 500000;
                             if (rawText.length > MAX_RESPONSE_LENGTH) {
                                 logDebug(`Antwort zu groß (${rawText.length} Zeichen), wird verworfen.`);
