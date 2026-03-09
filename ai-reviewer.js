@@ -144,8 +144,8 @@
             } else {
                 terminalContainer.style.display = 'flex'; // Zeigt das versteckte Terminal wieder
             }
-            // Artikel-Prüfung direkt auslösen, wenn Button sichtbar und aktiviert ist
-            requestAnimationFrame(() => setTimeout(() => { if (btnCheck && btnCheck.style.display !== 'none' && !btnCheck.disabled) btnCheck.click(); }, 100));
+            // Artikel-Prüfung direkt auslösen (Button ist initial hidden, nur bei Fehler sichtbar)
+            requestAnimationFrame(() => setTimeout(() => { if (btnCheck && !btnCheck.disabled) btnCheck.click(); }, 100));
         };
 
         document.body.appendChild(launcherTab);
@@ -201,7 +201,7 @@
         Object.assign(footer.style, { padding: '15px', backgroundColor: '#252526', display: 'flex', gap: '10px', justifyContent: 'center', alignItems: 'stretch', borderTop: '1px solid #333', width: '100%', boxSizing: 'border-box' });
 
         btnCheck = document.createElement('button'); btnCheck.innerHTML = '🚀 Artikel überprüfen';
-        Object.assign(btnCheck.style, { backgroundColor: '#007acc', color: '#ffffff', border: '1px solid #005f9e', padding: '10px 24px', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Consolas, "Courier New", monospace', fontWeight: 'bold', fontSize: '14px', transition: 'all 0.2s ease', outline: 'none', display: 'block' });
+        Object.assign(btnCheck.style, { backgroundColor: '#007acc', color: '#ffffff', border: '1px solid #005f9e', padding: '10px 24px', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Consolas, "Courier New", monospace', fontWeight: 'bold', fontSize: '14px', transition: 'all 0.2s ease', outline: 'none', display: 'none' });
         btnCheck.onmouseover = () => btnCheck.style.backgroundColor = '#005f9e'; btnCheck.onmouseout = () => btnCheck.style.backgroundColor = '#007acc';
 
         const actionBtnStyle = { padding: '10px 5px', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Consolas, "Courier New", monospace', fontWeight: 'bold', fontSize: '13px', outline: 'none', border: 'none', display: 'none', justifyContent: 'center', alignItems: 'center', gap: '6px', transition: 'all 0.2s ease', flex: '1', whiteSpace: 'nowrap' };
@@ -322,12 +322,36 @@
                     lastTimerTick = nowElapsed;
                     elapsedSeconds = nowElapsed;
 
-                    // Bei Zeitsprung > 60s (Tab war im Hintergrund): sofort Polling auslösen
-                    if (jumped > 60 && !visibilityPollTriggered) {
-                        visibilityPollTriggered = true;
-                        logDebug(`Tab-Rückkehr erkannt (Sprung: ${jumped}s). Wecke pollLoop auf für sofortige Status-Abfrage.`);
+                    // Bei Zeitsprung > 60s (Tab war im Hintergrund): sofort Server abfragen
+                    if (jumped > 60) {
+                        logDebug(`Tab-Rückkehr erkannt (Sprung: ${jumped}s). Sofortige Server-Abfrage...`);
                         earlyPollWakeup = true;
-                        visibilityPollTriggered = false;
+                        (async () => {
+                            try {
+                                const pollRes = await fetch(PROXY_URL, {
+                                    method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeaders },
+                                    body: JSON.stringify({ action: 'poll', jobId: jobId })
+                                });
+                                if (pollRes.ok) {
+                                    const rawText = await pollRes.text();
+                                    const statusMatch = rawText.match(/<status>([\s\S]*?)<\/status>/i);
+                                    const jobStatus = statusMatch ? statusMatch[1].trim() : 'pending';
+                                    if (jobStatus !== 'pending') {
+                                        logDebug(`Ergebnis nach Tab-Rückkehr erhalten: ${jobStatus}. pollLoop verarbeitet.`);
+                                        return; // pollLoop wird das Ergebnis beim nächsten Poll abholen
+                                    }
+                                }
+                            } catch(e) { logDebug(`Tab-Rückkehr-Abfrage fehlgeschlagen: ${e.message}`); }
+                            // Kein Ergebnis und Timeout überschritten? Dann abbrechen.
+                            if (elapsedSeconds >= timeoutMax) {
+                                pollIntervalActive = false; clearInterval(timerInterval); unlockEditor();
+                                launcherTab.querySelector('span').innerText = '🤖 KI-Korrektor';
+                                setStatusIconText('❌', 'Leider ist ein Fehler aufgetreten.', 'Bitte versuchen Sie es erneut.', '#ff5555', true);
+                                addMessage(`Das Polling wurde nach ${formatDurationFriendly(timeoutMax)} abgebrochen.`, 'error');
+                                btnCheck.style.display = 'block'; btnCheck.disabled = false;
+                            }
+                        })();
+                        return; // Timer-Tick beenden, async übernimmt
                     }
 
                     const timeStr = formatDurationFriendly(elapsedSeconds);
