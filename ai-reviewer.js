@@ -551,12 +551,14 @@
                 let elapsed_seconds = 0; 
                 const TIMEOUT_MAX = 600; // 10 Minuten
                 
-                set_status('⏳', `Artikel wird verarbeitet... (0 Sekunden)`, `Geschätzte Dauer: ca. 1 - 2 Minuten`, '#f1fa8c', true);
+                set_status('⏳', `Artikel wird verarbeitet... (0 Sekunden)`, `Geschätzte Dauer: ca. 2 - 3 Minuten`, '#f1fa8c', true);
                 const start_time = Date.now();
-                
+
                 let cached_poll_response = null;
                 let last_poll_time = 0;
-                let manual_poll_btn = null;
+                let next_poll_time = Date.now() + 30000; // first poll after 30s grace
+                let manual_poll_area = null;  // persistent container below status
+                let poll_result_el = null;    // shows last poll result (highlighted)
 
                 // Promise-based sleep that can be resolved early via wakeup().
                 // Overcomes browser throttling of setTimeout in background tabs.
@@ -599,44 +601,79 @@
                 }
                 document.addEventListener('visibilitychange', on_visibility_change);
 
+                // Build persistent poll info area (below status, never destroyed by set_status)
+                manual_poll_area = document.createElement('div');
+                manual_poll_area.style.cssText = 'margin-top: 6px; font-size: 12px; color: #aaa; display: none;';
+
+                // Countdown line: "Nächste Abfrage in 12s"
+                const countdown_el = document.createElement('div');
+                countdown_el.style.cssText = 'color: #6272a4; margin-bottom: 4px;';
+                manual_poll_area.appendChild(countdown_el);
+
+                // Last poll result (highlighted)
+                poll_result_el = document.createElement('div');
+                poll_result_el.style.cssText = 'display: none; margin-bottom: 6px; padding: 4px 8px; border-radius: 4px; font-weight: bold;';
+                manual_poll_area.appendChild(poll_result_el);
+
+                // Manual poll button row
+                const poll_btn_row = document.createElement('div');
+                poll_btn_row.style.cssText = 'cursor: pointer; color: #8be9fd; display: inline-flex; align-items: center; gap: 6px; display: none;';
+                const poll_icon = document.createElement('span'); poll_icon.textContent = '🔄'; poll_icon.style.cssText = 'display: inline-block; transition: transform 0.3s;';
+                const poll_label = document.createElement('span'); poll_label.textContent = 'Jetzt Status abfragen';
+                poll_btn_row.appendChild(poll_icon); poll_btn_row.appendChild(poll_label);
+                poll_btn_row.addEventListener('click', async () => {
+                    poll_icon.style.animation = 'ai-reviewer-spin 1s linear infinite';
+                    poll_label.textContent = 'Frage ab...';
+                    await do_manual_poll('Manuell');
+                    poll_icon.style.animation = '';
+                    poll_label.textContent = 'Jetzt Status abfragen';
+                    // Update next_poll_time so countdown resets
+                    const ce = Math.round((Date.now() - start_time) / 1000);
+                    const wait_sec = ce < 90 ? 15 : ce < 300 ? 2 : 30;
+                    next_poll_time = Date.now() + wait_sec * 1000;
+                    // Show result with highlight
+                    if (cached_poll_response) {
+                        poll_result_el.textContent = '✅ Ergebnis erhalten!';
+                        poll_result_el.style.cssText = 'display: block; margin-bottom: 6px; padding: 4px 8px; border-radius: 4px; font-weight: bold; background: #1a3a1a; color: #50fa7b; border: 1px solid #2d5a2d;';
+                    } else {
+                        poll_result_el.textContent = '⏳ Wird noch bearbeitet...';
+                        poll_result_el.style.cssText = 'display: block; margin-bottom: 6px; padding: 4px 8px; border-radius: 4px; font-weight: bold; background: #3a3000; color: #f1fa8c; border: 1px solid #5a4a00;';
+                    }
+                });
+                manual_poll_area.appendChild(poll_btn_row);
+                // Insert right after status_el so set_status() never destroys it
+                status_el.after(manual_poll_area);
+
                 timer_interval = setInterval(() => {
                     if (!poll_active) return;
                     elapsed_seconds = Math.round((Date.now() - start_time) / 1000);
                     const time_str = format_duration_friendly(elapsed_seconds);
-                    set_status('⏳', `Artikel wird verarbeitet... (${time_str})`, `Geschätzte Dauer: ca. 1 - 2 Minuten`, '#f1fa8c', false);
+                    set_status('⏳', `Artikel wird verarbeitet... (${time_str})`, `Geschätzte Dauer: ca. 2 - 3 Minuten`, '#f1fa8c', false);
 
-                    // Nach 2 Minuten: manuellen Abfrage-Button anzeigen
-                    if (!manual_poll_btn && elapsed_seconds >= 120) {
-                        manual_poll_btn = document.createElement('div');
-                        manual_poll_btn.style.cssText = 'margin-top: 8px; cursor: pointer; color: #8be9fd; font-size: 12px; display: flex; align-items: center; gap: 6px;';
-                        const poll_icon = document.createElement('span'); poll_icon.textContent = '🔄'; poll_icon.style.cssText = 'display: inline-block; transition: transform 0.3s;';
-                        const poll_label = document.createElement('span'); poll_label.textContent = 'Jetzt Status abfragen';
-                        const poll_status = document.createElement('span'); poll_status.style.cssText = 'color: #aaa; font-size: 11px;';
-                        manual_poll_btn.appendChild(poll_icon); manual_poll_btn.appendChild(poll_label); manual_poll_btn.appendChild(poll_status);
-                        manual_poll_btn.addEventListener('click', async () => {
-                            poll_icon.style.animation = 'ai-reviewer-spin 1s linear infinite';
-                            poll_label.textContent = 'Frage ab...';
-                            poll_status.textContent = '';
-                            await do_manual_poll('Manuell');
-                            poll_icon.style.animation = '';
-                            poll_label.textContent = 'Jetzt Status abfragen';
-                            if (cached_poll_response) { poll_status.textContent = '✅ Ergebnis erhalten!'; poll_status.style.color = '#50fa7b'; }
-                            else { poll_status.textContent = '— wird noch bearbeitet'; poll_status.style.color = '#aaa'; }
-                            setTimeout(() => { poll_status.textContent = ''; }, 4000);
-                        });
+                    // Show poll area after 30s (countdown visible), manual button after 2 min
+                    if (elapsed_seconds >= 30) {
+                        manual_poll_area.style.display = 'block';
+                        // Countdown to next automatic poll
+                        const secs_to_next = Math.max(0, Math.round((next_poll_time - Date.now()) / 1000));
+                        countdown_el.textContent = secs_to_next > 0
+                            ? `Nächste automatische Abfrage in ${secs_to_next}s`
+                            : 'Abfrage läuft...';
                     }
-                    if (manual_poll_btn) status_el.appendChild(manual_poll_btn);
+                    // Show manual button after 2 minutes
+                    if (elapsed_seconds >= 120) {
+                        poll_btn_row.style.display = 'inline-flex';
+                    }
 
                     if (elapsed_seconds >= TIMEOUT_MAX) {
                         // Vor Abbruch: letzte Server-Abfrage
                         (async () => {
                             await do_manual_poll('Timeout-Abfrage');
                             if (cached_poll_response) return; // poll_loop verarbeitet
-                            // Wirklich kein Ergebnis
                             poll_active = false; clearInterval(timer_interval); unlock_editor();
                             document.removeEventListener('visibilitychange', on_visibility_change);
                             launcher_tab.querySelector('span').innerText = '🤖 KI-Korrektor';
                             set_status('❌', 'Leider ist ein Fehler aufgetreten.', 'Bitte versuchen Sie es erneut.', '#ff5555', true);
+                            manual_poll_area.style.display = 'none';
                             add_message(`Das Polling wurde nach ${format_duration_friendly(TIMEOUT_MAX)} abgebrochen.`, 'error');
                             btn_check.style.display = 'block'; btn_check.disabled = false;
                         })();
@@ -667,15 +704,16 @@
                                     const poll_res = await fetch(`${POLLER_URL}?jobId=${encodeURIComponent(job_id)}`, {
                                         method: 'GET', headers: { 'x-api-key': POLLER_API_KEY }
                                     });
-                                    if (!poll_res.ok) { await interruptible_sleep(2000); continue; }
+                                    if (!poll_res.ok) { next_poll_time = Date.now() + 2000; await interruptible_sleep(2000); continue; }
                                     data = await poll_res.json();
-                                } catch(e) { log_debug(`Poll-Fehler: ${e.message}`); await interruptible_sleep(2000); continue; }
+                                } catch(e) { log_debug(`Poll-Fehler: ${e.message}`); next_poll_time = Date.now() + 2000; await interruptible_sleep(2000); continue; }
                             }
                             const job_status = data.status || 'pending';
 
                             if (job_status === 'pending') {
                                 // Adaptive wait: slow at start, fast mid-range, slow after 5 min
                                 const wait_sec = current_elapsed < 90 ? 15 : current_elapsed < 300 ? 2 : 30;
+                                next_poll_time = Date.now() + wait_sec * 1000;
                                 if (!poll_active) return;
                                 await interruptible_sleep(wait_sec * 1000);
                                 continue;
@@ -683,6 +721,7 @@
 
                             poll_active = false; clearInterval(timer_interval); unlock_editor();
                             document.removeEventListener('visibilitychange', on_visibility_change);
+                            manual_poll_area.style.display = 'none';
                             const final_duration_str = format_duration_friendly(Math.round((Date.now() - start_time) / 1000));
                             log_debug(`Job abgeschlossen: ${job_status}.`);
 
@@ -849,6 +888,7 @@
                         if (poll_active) {
                             poll_active = false; clearInterval(timer_interval); unlock_editor();
                             document.removeEventListener('visibilitychange', on_visibility_change);
+                            if (manual_poll_area) manual_poll_area.style.display = 'none';
                             log_debug(`Polling-Fehler: ${poll_err.message}`);
                             launcher_tab.querySelector('span').innerText = '🤖 KI-Korrektor';
                             btn_check.style.display = 'block'; btn_check.disabled = false;
@@ -860,6 +900,7 @@
             } catch (error) {
                 poll_active = false; clearInterval(timer_interval); unlock_editor();
                 if (typeof on_visibility_change === 'function') document.removeEventListener('visibilitychange', on_visibility_change);
+                if (manual_poll_area) manual_poll_area.style.display = 'none';
                 log_debug(`Allgemeiner Fehler: ${error.message}`);
                 launcher_tab.querySelector('span').innerText = '🤖 KI-Korrektor';
                 btn_check.style.display = 'block'; btn_check.disabled = false;
