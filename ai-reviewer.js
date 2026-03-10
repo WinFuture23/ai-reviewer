@@ -46,15 +46,29 @@
         let hide_timer = null;
         let show_timer = null;
 
-        // Fetch page head, extract OG metadata
+        /**
+         * Detect charset from raw bytes by scanning for meta charset declaration.
+         * Falls back to 'utf-8' if nothing is found.
+         */
+        function detect_charset( raw_bytes ) {
+            // Quick ASCII-safe scan of first 2 KB for charset declaration
+            const peek = new TextDecoder( 'ascii' ).decode( raw_bytes.slice( 0, 2048 ) );
+            // Match: <meta ... charset=iso-8859-1 /> or <meta charset="utf-8">
+            const m = peek.match( /charset=["']?([a-zA-Z0-9_-]+)/i );
+            return m ? m[1].toLowerCase() : 'utf-8';
+        }
+
+        // Fetch page head, detect charset, extract OG metadata
         async function fetch_meta( url ) {
             if (cache.has( url )) return;
             cache.set( url, null );
             try {
                 const resp = await fetch( url, { credentials: 'same-origin' } );
                 if (!resp.ok) return;
-                // response.text() respects Content-Type charset (fixes Umlauts)
-                const html = await resp.text();
+                // Read raw bytes, detect charset from HTML, then decode correctly
+                const buf = await resp.arrayBuffer();
+                const charset = detect_charset( buf );
+                const html = new TextDecoder( charset ).decode( buf );
                 const head_end = html.indexOf( '</head>' );
                 const head_html = html.substring( 0, head_end > 0 ? head_end + 7 : 20000 );
                 const doc = new DOMParser().parseFromString( head_html, 'text/html' );
@@ -89,7 +103,9 @@
             card = document.createElement( 'div' );
             card.className = 'wfv4-link-preview';
             Object.assign( card.style, {
-                position: 'fixed', zIndex: '1000000', width: '420px', maxWidth: 'calc(100vw - 24px)',
+                position: 'fixed', zIndex: '1000000',
+                minWidth: '360px', maxWidth: 'min(600px, calc(100vw - 24px))',
+                width: 'auto',
                 backgroundColor: '#1e1e1e', border: '1px solid #555', borderRadius: '10px',
                 boxShadow: '0 8px 28px rgba(0,0,0,0.55)', overflow: 'hidden',
                 opacity: '0', transform: 'translateY(6px)',
@@ -113,17 +129,17 @@
             const c = ensure_card();
             c._url = url;
             const img_html = data.image
-                ? `<img src="${esc( data.image )}" style="width:120px; min-width:120px; height:auto; min-height:80px; max-height:120px; object-fit:cover; border-radius:6px; background:#2a2a2c;" onerror="this.style.display='none'">`
+                ? `<img src="${esc( data.image )}" style="width:150px; min-width:150px; height:auto; min-height:100px; max-height:150px; object-fit:cover; border-radius:6px; background:#2a2a2c;" onerror="this.style.display='none'">`
                 : '';
             const desc_html = data.description
-                ? `<div style="font-size:12px; color:#bbb; line-height:1.4; margin-top:5px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;">${esc( data.description )}</div>`
+                ? `<div style="font-size:12px; color:#bbb; line-height:1.4; margin-top:6px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;">${esc( data.description )}</div>`
                 : '';
-            c.innerHTML = `<div style="display:flex; gap:12px; padding:12px 14px; align-items:flex-start;">`
+            c.innerHTML = `<div style="display:flex; gap:14px; padding:14px 16px; align-items:flex-start;">`
                 + img_html
                 + `<div style="flex:1; min-width:0;">`
-                + `<div style="font-size:14px; font-weight:600; color:#f0f0f0; line-height:1.35; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;">${esc( data.title )}</div>`
+                + `<div style="font-size:14px; font-weight:600; color:#f0f0f0; line-height:1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${esc( data.title )}</div>`
                 + desc_html
-                + `<div style="font-size:10px; color:#666; margin-top:5px;">↗ Artikel öffnen</div>`
+                + `<div style="font-size:10px; color:#666; margin-top:6px;">↗ Artikel öffnen</div>`
                 + `</div></div>`;
 
             c.style.opacity = '0';
