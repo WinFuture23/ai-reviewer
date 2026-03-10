@@ -1,9 +1,21 @@
+/**
+ * wfv4_ai_reviewer — AI-powered article review widget for WinFuture.de.
+ *
+ * Sends the current editor content to a Make.com backend (via Val.town proxy),
+ * polls for the result, and displays corrections and link suggestions in a
+ * terminal-style overlay. Auth is handled via HMAC-SHA256 tokens injected by
+ * the PHP integration class (wfv4_ai_reviewer::render).
+ *
+ * @author  mesios
+ * @version 2 2026-03-10
+ * @see     docs/winfuture-integration.php
+ */
 (function() {
-    // Verhindert doppeltes Laden, falls das Skript mehrfach eingebunden wird
+    // Guard: prevent double initialisation when script is included twice
     if (window.wfv4_ai_reviewer_loaded) return;
     window.wfv4_ai_reviewer_loaded = true;
 
-    // CSS-Animationen
+    // --- CSS ANIMATIONS (global, injected once) ---
     if (!document.getElementById('ai-reviewer-styles')) {
         const style = document.createElement('style'); style.id = 'ai-reviewer-styles';
         style.textContent = '@keyframes ai-reviewer-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }';
@@ -183,28 +195,36 @@
         return { attach, destroy, cache };
     })();
 
-    let terminal_container = null;
-    let launcher_tab = null;
-    let poll_active = false;
-    let cached_diff = { left: null, right: null, html: null };
-    let debug_log = [];
-    let backup_content = null;
-    let btn_check = null;
+    // --- MODULE STATE ---
+    let terminal_container = null;  // Main overlay DOM element
+    let launcher_tab = null;        // Bottom-right launcher tab
+    let poll_active = false;        // True while a job is being polled
+    let cached_diff = { left: null, right: null, html: null }; // Diffchecker cache
+    let debug_log = [];             // Debug messages (copyable via header button)
+    let backup_content = null;      // Editor text before AI modification (for undo)
+    let btn_check = null;           // "Artikel überprüfen" button reference
 
+    // --- CONFIGURATION ---
+    // Diffchecker API accounts (Base64 to avoid plain-text in source)
     const _da = ['U2s=','U2ViYXN0aWFuLkt1aGJhY2g=','bWVzaW9z','Q29kaW5n','RGlpZmY='];
     const _dd = 'QFdpbkZ1dHVyZS5kZQ==';
     const DIFF_ACCOUNTS = _da.map(a => atob(a) + atob(_dd));
 
+    // Val.town proxy endpoints
     const PROXY_URL = 'https://mesios--43bb6c1c197111f18d1642dde27851f2.web.val.run';
     const POLLER_URL = 'https://mesios--f12a09281c8f11f1845142dde27851f2.web.val.run';
     const POLLER_API_KEY = 'wf_super_secret_key_2026_xyz';
 
+    // --- UTILITY FUNCTIONS ---
+
+    /** Append a timestamped message to the debug log and browser console. */
     function log_debug(msg) {
         const time = new Date().toLocaleTimeString('de-DE');
         debug_log.push(`[${time}] ${msg}`);
         console.log(`🤖 AI-Reviewer [${time}]: ${msg}`);
     }
 
+    /** Format seconds as human-readable German duration string (e.g. "2 Minuten 15 Sekunden"). */
     function format_duration_friendly(total_seconds) {
         const m = Math.floor(total_seconds / 60);
         const s = total_seconds % 60;
@@ -215,6 +235,7 @@
         return `${s} ${sek_str}`;
     }
 
+    /** Escape HTML special characters to prevent XSS (Sicherheitsrichtlinie §14/§24). */
     function escape_html(str) {
         if (!str) return '';
         const div = document.createElement('div');
@@ -222,6 +243,7 @@
         return div.innerHTML;
     }
 
+    /** Strip JSON wrapper if backend returns { Content: "..." } instead of raw text. */
     function clean_ai_content(text) {
         if (!text) return text;
         let t = text.trim();
@@ -237,6 +259,7 @@
         return t; 
     }
 
+    /** Lock the Ace editor (or textarea fallback) with a semi-transparent overlay. */
     function lock_editor() {
         if (window.news_text_editor && typeof window.news_text_editor.setReadOnly === 'function') {
             window.news_text_editor.setReadOnly(true);
@@ -267,6 +290,7 @@
         log_debug('Editor gesperrt (Overlay aktiv).');
     }
 
+    /** Remove editor lock and restore normal editing. */
     function unlock_editor() {
         if (window.news_text_editor && typeof window.news_text_editor.setReadOnly === 'function') {
             window.news_text_editor.setReadOnly(false);
@@ -287,7 +311,7 @@
         log_debug('Editor freigegeben.');
     }
 
-    // --- DIFFCHECKER API OVERLAY ---
+    /** Show a full-screen overlay with the Diffchecker HTML comparison in a sandboxed iframe. */
     function show_diff_overlay(html_data) {
         const overlay = document.createElement('div');
         Object.assign(overlay.style, { position: 'fixed', top: '0', left: '0', width: '100vw', height: '100vh', backgroundColor: 'rgba(0,0,0,0.85)', zIndex: '9999999', display: 'flex', flexDirection: 'column', padding: '20px', boxSizing: 'border-box' });
@@ -307,7 +331,8 @@
         document.addEventListener('keydown', esc_handler);
     }
 
-    // --- INITIALISIERUNG DES WIDGETS (LIPPE) ---
+    // --- WIDGET INITIALISATION (LAUNCHER TAB) ---
+    /** Create and attach the bottom-right launcher tab. Terminal is built lazily on first click. */
     function init_widget() {
         launcher_tab = document.createElement('div');
         launcher_tab.id = 'ai-reviewer-launcher';
@@ -337,7 +362,8 @@
         document.body.appendChild(launcher_tab);
     }
 
-    // --- AUFBAU DES HAUPT-TERMINALS ---
+    // --- MAIN TERMINAL (OVERLAY UI) ---
+    /** Build the terminal overlay with header, content area, footer buttons, and resize handles. */
     function build_terminal() {
         terminal_container = document.createElement('div');
         terminal_container.id = 'ai-reviewer-terminal';
@@ -423,11 +449,13 @@
         terminal_container.appendChild(header); terminal_container.appendChild(content_area); terminal_container.appendChild(footer); 
         document.body.appendChild(terminal_container);
 
+        /** Update the status line in the content area (icon, text, optional subtitle). */
         function set_status(icon, main_text, sub_text = null, color = '#f8f8f2', write_to_debug = true) {
             status_el.innerHTML = `<div style="display: flex; align-items: flex-start; gap: 8px; color: ${color};"><span style="line-height: 1.4; font-size: 14px; width: 20px; text-align: center;">${icon}</span><div style="display: flex; flex-direction: column;"><span style="line-height: 1.4;">${main_text}</span>${sub_text ? `<span style="font-size: 11px; color: #aaaaaa; font-weight: normal; margin-top: 2px;">${sub_text}</span>` : ''}</div></div>`;
             if (write_to_debug) log_debug(`Status: ${main_text}`);
         }
 
+        /** Append a message to the results area (types: info, error, warning, success). */
         function add_message(msg, type = 'info') {
             const entry = document.createElement('div'); entry.innerHTML = msg;
             if (type === 'error') entry.style.color = '#ff5555'; if (type === 'warning') entry.style.color = '#ffb86c'; if (type === 'success') entry.style.color = '#50fa7b';
@@ -436,7 +464,8 @@
 
         set_status('🟢', 'Bereit.', null, '#50fa7b');
 
-        // --- DiffChecker Button Logic ---
+        // --- DIFFCHECKER BUTTON ---
+        /** Fetch word-level diff from Diffchecker API and display in sandboxed iframe overlay. */
         btn_diff.onclick = async () => {
             const old_btn_text = btn_diff.innerHTML; btn_diff.innerHTML = '⏳ Lade...'; btn_diff.disabled = true;
             try {
@@ -466,13 +495,12 @@
             }
         };
 
+        /** Restore original editor content from backup. */
         btn_undo.onclick = () => {
             if (window.news_text_editor && typeof window.news_text_editor.setValue === 'function') window.news_text_editor.setValue(backup_content, -1);
             else if (document.getElementById('news_text')) document.getElementById('news_text').value = backup_content;
             add_message('<b>Hinweis:</b> Originaltext wurde wiederhergestellt.', 'warning'); log_debug('Originaltext wiederhergestellt.');
         };
-
-        const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
         // --- HAUPT-POLLING LOGIK ---
         btn_check.addEventListener('click', async () => {
@@ -514,7 +542,8 @@
                 let last_poll_time = 0;
                 let manual_poll_btn = null;
 
-                // Sofort auflösbare Sleep-Funktion (überwindet Browser-Throttling)
+                // Promise-based sleep that can be resolved early via wakeup().
+                // Overcomes browser throttling of setTimeout in background tabs.
                 let wakeup_resolve = null;
                 function wakeup() { if (wakeup_resolve) { wakeup_resolve(); wakeup_resolve = null; } }
                 function interruptible_sleep(ms) {
@@ -524,7 +553,7 @@
                     });
                 }
 
-                // Manuelle Abfrage: Server-Anfrage und Ergebnis an poll_loop übergeben
+                // Manual server poll: fetches status, caches result, and wakes poll_loop
                 async function do_manual_poll(label) {
                     log_debug(`${label}: Server-Abfrage...`);
                     last_poll_time = Date.now();
@@ -544,7 +573,7 @@
                     wakeup(); // poll_loop sofort aufwecken
                 }
 
-                // visibilitychange: feuert zuverlässig wenn Tab wieder aktiv wird
+                // Tab return handler: fires reliably when user switches back to this tab
                 function on_visibility_change() {
                     if (document.visibilityState !== 'visible' || !poll_active) return;
                     elapsed_seconds = Math.round((Date.now() - start_time) / 1000);
@@ -598,16 +627,18 @@
                     }
                 }, 1000);
                 
+                // Main polling loop (async IIFE, runs alongside the 1s timer)
+                // Adaptive intervals: 30s initial wait → 15s (30-90s) → 2s (90-300s) → 30s (300s+)
                 (async function poll_loop() {
                     try {
-                        // Erste 30 Sekunden warten (keine Anfragen)
+                        // Initial grace period — backend needs time to start processing
                         if (poll_active) await interruptible_sleep(30000);
 
                         while (poll_active) {
                             let current_elapsed = Math.round((Date.now() - start_time) / 1000);
                             if (current_elapsed >= TIMEOUT_MAX) break;
 
-                            // Gecachte Antwort von Tab-Rückkehr verwenden, falls vorhanden
+                            // Use cached response from tab-return or manual poll if available
                             let data;
                             if (cached_poll_response) {
                                 log_debug('Verwende gecachte Antwort von Tab-Rückkehr.');
@@ -627,7 +658,7 @@
                             const job_status = data.status || 'pending';
 
                             if (job_status === 'pending') {
-                                // 30s-90s: alle 15s | 90s-300s: alle 2s | 300s+: alle 30s
+                                // Adaptive wait: slow at start, fast mid-range, slow after 5 min
                                 const wait_sec = current_elapsed < 90 ? 15 : current_elapsed < 300 ? 2 : 30;
                                 if (!poll_active) return;
                                 await interruptible_sleep(wait_sec * 1000);
@@ -650,6 +681,7 @@
                                 return;
                             }
 
+                            // --- SUCCESS: Parse response, update editor, render results ---
                             if (job_status === 'success') {
                                 launcher_tab.querySelector('span').innerText = '✅ KI Fertig';
                                 let new_content = data.content || null;
@@ -665,8 +697,8 @@
 
                                 new_content = clean_ai_content(new_content);
                                 set_status('⏳', 'Schreibe Text in Editor...', null, '#8be9fd');
-                                // new_text_content kept in IIFE scope for potential future use
-                                
+
+                                // Korrigierten Text in den Editor (Ace oder Textarea) zurückschreiben
                                 if (window.news_text_editor && typeof window.news_text_editor.setValue === 'function') {
                                     window.news_text_editor.setValue(new_content, -1); window.wfv4_news_changed = true;
                                 } else {
@@ -786,7 +818,7 @@
                                     wfv4_link_preview.attach(verl_box, '[data-preview-url]', el => el.dataset.previewUrl);
                                 }
 
-                                // Auto-Resize: Höhe an Inhalt anpassen
+                                // Auto-resize terminal height to fit content (up to viewport - 40px)
                                 requestAnimationFrame(() => {
                                     const header_h = header.offsetHeight;
                                     const footer_h = footer.offsetHeight;
@@ -821,7 +853,7 @@
         });
     }
 
-    // Wenn das DOM bereits geladen ist, direkt starten. Ansonsten auf DOMContentLoaded warten.
+    // Start immediately if DOM is ready, otherwise wait for DOMContentLoaded
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init_widget);
     } else {
