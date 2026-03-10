@@ -603,7 +603,7 @@
 
                 // Build persistent poll info area (below status, never destroyed by set_status)
                 manual_poll_area = document.createElement('div');
-                manual_poll_area.style.cssText = 'margin-top: 6px; font-size: 12px; color: #aaa; display: none;';
+                manual_poll_area.style.cssText = 'margin-top: 2px; margin-left: 28px; font-size: 12px; color: #aaa; display: none;';
 
                 // Countdown line: "Nächste Abfrage in 12s"
                 const countdown_el = document.createElement('div');
