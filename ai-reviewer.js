@@ -137,7 +137,7 @@
             c.innerHTML = `<div style="display:flex; gap:14px; padding:14px 16px; align-items:flex-start;">`
                 + img_html
                 + `<div style="flex:1; min-width:0;">`
-                + `<div style="font-size:14px; font-weight:600; color:#f0f0f0; line-height:1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${esc( data.title )}</div>`
+                + `<div style="font-size:14px; font-weight:600; color:#f0f0f0; line-height:1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; text-wrap:balance;">${esc( data.title )}</div>`
                 + desc_html
                 + `<div style="font-size:10px; color:#666; margin-top:6px;">↗ Artikel öffnen</div>`
                 + `</div></div>`;
