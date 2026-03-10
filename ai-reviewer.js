@@ -528,8 +528,55 @@
                                         const lineLower = cleanLine.toLowerCase();
                                         const safeLine = escapeHTML(cleanLine).replace(/(https?:\/\/[^\s&<]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" style="color: #66d9ef; text-decoration: underline;">$1</a>');
                                         if (lineLower.startsWith('link')) {
-                                            currentGroup = document.createElement('div'); Object.assign(currentGroup.style, { borderLeft: '3px solid #007acc', backgroundColor: '#1e1e1e', padding: '10px 12px', margin: '8px 0', borderRadius: '0 4px 4px 0' });
+                                            // URL und Linktext aus der Zeile extrahieren
+                                            const urlMatch = cleanLine.match(/(https?:\/\/[^\s]+)/);
+                                            const linkTextMatch = cleanLine.match(/[""„]([^""„"]+)[""„"]/);
+                                            const linkUrl = urlMatch ? urlMatch[1] : null;
+                                            const linkText = linkTextMatch ? linkTextMatch[1] : null;
+
+                                            currentGroup = document.createElement('div'); Object.assign(currentGroup.style, { borderLeft: '3px solid #007acc', backgroundColor: '#1e1e1e', padding: '10px 12px', margin: '8px 0', borderRadius: '0 4px 4px 0', position: 'relative', transition: 'opacity 0.3s, max-height 0.3s, margin 0.3s, padding 0.3s', overflow: 'hidden' });
                                             currentGroup.innerHTML = `<div>► <span style="color:#f8f8f2; font-weight:bold;">${safeLine}</span></div>`;
+
+                                            // X-Button zum Entfernen des Links
+                                            if (linkUrl) {
+                                                const removeBtn = document.createElement('span');
+                                                removeBtn.innerHTML = '✕';
+                                                Object.assign(removeBtn.style, { position: 'absolute', top: '6px', right: '8px', cursor: 'pointer', color: '#ff5555', fontSize: '14px', fontWeight: 'bold', lineHeight: '1', opacity: '0.6', transition: 'opacity 0.2s' });
+                                                removeBtn.onmouseover = () => removeBtn.style.opacity = '1'; removeBtn.onmouseout = () => removeBtn.style.opacity = '0.6';
+                                                const groupRef = currentGroup;
+                                                removeBtn.onclick = () => {
+                                                    // Link aus dem Editor-Text entfernen (Linktext behalten)
+                                                    let editorContent = '';
+                                                    if (window.news_text_editor && typeof window.news_text_editor.getValue === 'function') {
+                                                        editorContent = window.news_text_editor.getValue();
+                                                    } else {
+                                                        const el = document.getElementById('news_text');
+                                                        if (el) editorContent = el.value;
+                                                    }
+                                                    // <a href="URL">text</a> → text (verschiedene Schreibweisen)
+                                                    const escapedUrl = linkUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                                                    const linkRegex = new RegExp(`<a\\s[^>]*href=["']${escapedUrl}["'][^>]*>(.*?)<\\/a>`, 'gi');
+                                                    const newContent = editorContent.replace(linkRegex, '$1');
+                                                    if (newContent !== editorContent) {
+                                                        if (window.news_text_editor && typeof window.news_text_editor.setValue === 'function') {
+                                                            window.news_text_editor.setValue(newContent, -1);
+                                                        } else {
+                                                            const el = document.getElementById('news_text');
+                                                            if (el) el.value = newContent;
+                                                        }
+                                                        window.wfv4_news_changed = true;
+                                                        logDebug(`Link entfernt: ${linkUrl}`);
+                                                    } else {
+                                                        logDebug(`Link nicht im Text gefunden: ${linkUrl}`);
+                                                    }
+                                                    // Box ausblenden mit Animation
+                                                    groupRef.style.maxHeight = groupRef.scrollHeight + 'px';
+                                                    requestAnimationFrame(() => { groupRef.style.opacity = '0'; groupRef.style.maxHeight = '0'; groupRef.style.margin = '0'; groupRef.style.padding = '0'; });
+                                                    setTimeout(() => groupRef.remove(), 350);
+                                                };
+                                                currentGroup.appendChild(removeBtn);
+                                            }
+
                                             verlBox.appendChild(currentGroup);
                                         } else if (lineLower.startsWith('begründung') && currentGroup) {
                                             const reasonDiv = document.createElement('div'); reasonDiv.innerHTML = `<span style="color:#cccccc;">${safeLine}</span>`; reasonDiv.style.marginTop = '6px';
