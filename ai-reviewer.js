@@ -115,11 +115,13 @@
         headerBar.innerHTML = '<h2 style="margin:0;">🔍 Diff-Ansicht: Vorher vs. Nachher</h2>';
         const closeDiffBtn = document.createElement('button'); closeDiffBtn.innerHTML = '✖ Ansicht schließen';
         Object.assign(closeDiffBtn.style, { backgroundColor: '#ff5555', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px' });
-        closeDiffBtn.onclick = () => overlay.remove(); headerBar.appendChild(closeDiffBtn);
+        function closeDiff() { overlay.remove(); document.body.style.overflow = ''; document.removeEventListener('keydown', escHandler); }
+        closeDiffBtn.onclick = closeDiff; headerBar.appendChild(closeDiffBtn);
         const iframe = document.createElement('iframe'); Object.assign(iframe.style, { flexGrow: '1', width: '100%', backgroundColor: '#fff', border: 'none', borderRadius: '6px' });
         iframe.srcdoc = htmlData;
         overlay.appendChild(headerBar); overlay.appendChild(iframe); document.body.appendChild(overlay);
-        const escHandler = (e) => { if (e.key === 'Escape') { overlay.remove(); document.removeEventListener('keydown', escHandler); } };
+        document.body.style.overflow = 'hidden';
+        const escHandler = (e) => { if (e.key === 'Escape') closeDiff(); };
         document.addEventListener('keydown', escHandler);
     }
 
@@ -402,8 +404,6 @@
                             let currentElapsed = Math.round((Date.now() - startTime) / 1000);
                             if (currentElapsed >= timeoutMax) break;
 
-                            if (!pollIntervalActive) break;
-
                             // Gecachte Antwort von Tab-Rückkehr verwenden, falls vorhanden
                             let data;
                             if (cachedPollResponse) {
@@ -417,13 +417,22 @@
                                     const pollRes = await fetch(`${POLLER_URL}?jobId=${encodeURIComponent(jobId)}`, {
                                         method: 'GET', headers: { 'x-api-key': POLLER_API_KEY }
                                     });
-                                    if (!pollRes.ok) { await sleep(1000); continue; }
+                                    if (!pollRes.ok) { await sleep(2000); continue; }
                                     data = await pollRes.json();
-                                } catch(e) { logDebug(`Poll-Fehler: ${e.message}`); await sleep(1000); continue; }
+                                } catch(e) { logDebug(`Poll-Fehler: ${e.message}`); await sleep(2000); continue; }
                             }
                             const jobStatus = data.status || 'pending';
 
-                            if (jobStatus === 'pending') { await sleep(1000); continue; }
+                            if (jobStatus === 'pending') {
+                                // 30s-90s: alle 15s | 90s-300s: alle 2s | 300s+: alle 30s
+                                const waitSec = currentElapsed < 90 ? 15 : currentElapsed < 300 ? 2 : 30;
+                                for (let i = 0; i < waitSec; i++) {
+                                    if (!pollIntervalActive) return;
+                                    if (earlyPollWakeup) { earlyPollWakeup = false; break; }
+                                    await sleep(1000);
+                                }
+                                continue;
+                            }
 
                             pollIntervalActive = false; clearInterval(timerInterval); unlockEditor();
                             document.removeEventListener('visibilitychange', onVisibilityChange);
