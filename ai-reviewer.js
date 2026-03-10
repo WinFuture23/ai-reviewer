@@ -656,6 +656,7 @@
 
                                     function showPreviewCard(url, x, y) {
                                         const data = previewCache.get(url);
+                                        logDebug(`showPreviewCard aufgerufen: ${url}, data=${!!data}, x=${x}, y=${y}`);
                                         if (!data) return;
                                         const card = createPreviewCard();
                                         card._url = url;
@@ -693,7 +694,8 @@
 
                                     function hidePreviewCard() {
                                         clearTimeout(previewShowTimer);
-                                        if (!previewCard) return;
+                                        if (!previewCard) { logDebug('hidePreviewCard: keine Karte'); return; }
+                                        logDebug('hidePreviewCard: ausblenden');
                                         previewCard.style.opacity = '0';
                                         previewCard.style.transform = 'translateY(6px)';
                                         previewHideTimer = setTimeout(() => { if (previewCard) previewCard.style.display = 'none'; }, 200);
@@ -715,6 +717,7 @@
                                             a._lastMx = e.clientX; a._lastMy = e.clientY;
                                         });
                                         a.addEventListener('mouseleave', () => {
+                                            logDebug('mouseleave: Timer gestoppt');
                                             clearTimeout(previewShowTimer);
                                             previewHideTimer = setTimeout(() => hidePreviewCard(), 200);
                                         });
