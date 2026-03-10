@@ -16,6 +16,8 @@
     const diffAccounts = _da.map(a => atob(a) + atob(_dd));
 
     const PROXY_URL = 'https://mesios--43bb6c1c197111f18d1642dde27851f2.web.val.run';
+    const POLLER_URL = 'https://mesios--f12a09281c8f11f1845142dde27851f2.web.val.run';
+    const POLLER_API_KEY = 'wf_super_secret_key_2026_xyz';
 
     function logDebug(msg) {
         const time = new Date().toLocaleTimeString('de-DE');
@@ -319,9 +321,9 @@
                 if (!startRes.ok) throw new Error(`Der Worker konnte nicht gestartet werden (HTTP ${startRes.status}).`);
 
                 let elapsedSeconds = 0; 
-                const timeoutMax = 1800; // 30 Minuten
+                const timeoutMax = 600; // 10 Minuten
                 
-                setStatusIconText('⏳', `Artikel wird verarbeitet... (0 Sekunden)`, `Geschätzte Dauer: ca. 3 - 4 Minuten`, '#f1fa8c', true);
+                setStatusIconText('⏳', `Artikel wird verarbeitet... (0 Sekunden)`, `Geschätzte Dauer: ca. 1 - 2 Minuten`, '#f1fa8c', true);
                 const startTime = Date.now();
                 
                 let earlyPollWakeup = false;
@@ -334,17 +336,15 @@
                     logDebug(`${label}: Server-Abfrage...`);
                     lastPollTime = Date.now();
                     try {
-                        const pollRes = await fetch(PROXY_URL, {
-                            method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeaders },
-                            body: JSON.stringify({ action: 'poll', jobId: jobId })
+                        const pollRes = await fetch(`${POLLER_URL}?jobId=${encodeURIComponent(jobId)}`, {
+                            method: 'GET', headers: { 'x-api-key': POLLER_API_KEY }
                         });
                         if (pollRes.ok) {
-                            const rawText = await pollRes.text();
-                            const statusMatch = rawText.match(/<status>([\s\S]*?)<\/status>/i);
-                            const jobStatus = statusMatch ? statusMatch[1].trim() : 'pending';
+                            const data = await pollRes.json();
+                            const jobStatus = data.status || 'pending';
                             logDebug(`${label}: Status = ${jobStatus}`);
                             if (jobStatus !== 'pending') {
-                                cachedPollResponse = rawText;
+                                cachedPollResponse = data;
                                 earlyPollWakeup = true;
                                 return;
                             }
@@ -357,9 +357,9 @@
                 function onVisibilityChange() {
                     if (document.visibilityState !== 'visible' || !pollIntervalActive) return;
                     elapsedSeconds = Math.round((Date.now() - startTime) / 1000);
-                    // Erst ab 90s und nur wenn >30s seit letztem Abruf
-                    if (elapsedSeconds < 90) return;
-                    if (Date.now() - lastPollTime < 30000) { logDebug('Tab sichtbar, aber letzter Abruf <30s her. Übersprungen.'); return; }
+                    // Erst ab 30s und nur wenn >5s seit letztem Abruf
+                    if (elapsedSeconds < 30) return;
+                    if (Date.now() - lastPollTime < 5000) { logDebug('Tab sichtbar, aber letzter Abruf <5s her. Übersprungen.'); return; }
                     doManualPoll('Tab-Rückkehr');
                 }
                 document.addEventListener('visibilitychange', onVisibilityChange);
@@ -368,7 +368,7 @@
                     if (!pollIntervalActive) return;
                     elapsedSeconds = Math.round((Date.now() - startTime) / 1000);
                     const timeStr = formatDurationFriendly(elapsedSeconds);
-                    setStatusIconText('⏳', `Artikel wird verarbeitet... (${timeStr})`, `Geschätzte Dauer: ca. 3 - 4 Minuten`, '#f1fa8c', false);
+                    setStatusIconText('⏳', `Artikel wird verarbeitet... (${timeStr})`, `Geschätzte Dauer: ca. 1 - 2 Minuten`, '#f1fa8c', false);
 
                     // Manuellen Button auch beim Timer-Update erhalten
                     if (manualPollBtn) statusEl.appendChild(manualPollBtn);
@@ -391,65 +391,39 @@
                 
                 (async function pollLoop() {
                     try {
+                        // Erste 30 Sekunden warten (keine Anfragen)
+                        for (let i = 0; i < 30; i++) {
+                            if (!pollIntervalActive) return;
+                            if (earlyPollWakeup) { earlyPollWakeup = false; break; }
+                            await sleep(1000);
+                        }
+
                         while (pollIntervalActive) {
                             let currentElapsed = Math.round((Date.now() - startTime) / 1000);
                             if (currentElapsed >= timeoutMax) break;
 
-                            let nextTarget;
-                            // 0-90s: kein Abruf (spart Kosten)
-                            // 90-180s: alle 15s abrufen
-                            // ab 180s: kein automatischer Abruf mehr (nur manuell/visibilitychange)
-                            if (currentElapsed < 90) { nextTarget = 90; }
-                            else if (currentElapsed < 180) { nextTarget = currentElapsed + 15; }
-                            else {
-                                // Ab 3 Min: manuellen Abfrage-Button zeigen + alle 60s automatisch
-                                if (!manualPollBtn) {
-                                    manualPollBtn = document.createElement('span');
-                                    manualPollBtn.innerHTML = '🔄 Jetzt Status abfragen';
-                                    Object.assign(manualPollBtn.style, { cursor: 'pointer', color: '#8be9fd', fontSize: '12px', textDecoration: 'underline', marginTop: '4px', display: 'inline-block' });
-                                    manualPollBtn.onclick = () => doManualPoll('Manuelle Abfrage');
-                                    statusEl.appendChild(manualPollBtn);
-                                    logDebug('Manueller Abfrage-Link angezeigt (nach 3 Min).');
-                                }
-                                nextTarget = currentElapsed + 60;
-                            }
-
-                            let sleepSecs = nextTarget - currentElapsed;
-                            if (sleepSecs > 0) {
-                                for(let i=0; i < sleepSecs; i++) {
-                                    if (!pollIntervalActive) return;
-                                    if (earlyPollWakeup) { earlyPollWakeup = false; logDebug('Sleep unterbrochen: sofortige Abfrage nach Tab-Rückkehr.'); break; }
-                                    await sleep(1000);
-                                }
-                            }
-
                             if (!pollIntervalActive) break;
 
                             // Gecachte Antwort von Tab-Rückkehr verwenden, falls vorhanden
-                            let rawText;
+                            let data;
                             if (cachedPollResponse) {
                                 logDebug('Verwende gecachte Antwort von Tab-Rückkehr.');
-                                rawText = cachedPollResponse;
+                                data = cachedPollResponse;
                                 cachedPollResponse = null;
                             } else {
                                 logDebug(`Frage Status ab...`);
                                 lastPollTime = Date.now();
-                                const pollRes = await fetch(PROXY_URL, {
-                                    method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeaders },
-                                    body: JSON.stringify({ action: 'poll', jobId: jobId })
-                                });
-                                if (!pollRes.ok) continue;
-                                rawText = await pollRes.text();
+                                try {
+                                    const pollRes = await fetch(`${POLLER_URL}?jobId=${encodeURIComponent(jobId)}`, {
+                                        method: 'GET', headers: { 'x-api-key': POLLER_API_KEY }
+                                    });
+                                    if (!pollRes.ok) { await sleep(1000); continue; }
+                                    data = await pollRes.json();
+                                } catch(e) { logDebug(`Poll-Fehler: ${e.message}`); await sleep(1000); continue; }
                             }
-                            const MAX_RESPONSE_LENGTH = 500000;
-                            if (rawText.length > MAX_RESPONSE_LENGTH) {
-                                logDebug(`Antwort zu groß (${rawText.length} Zeichen), wird verworfen.`);
-                                continue;
-                            }
-                            const statusMatch = rawText.match(/<status>([\s\S]*?)<\/status>/i);
-                            const jobStatus = statusMatch ? statusMatch[1].trim() : 'pending';
+                            const jobStatus = data.status || 'pending';
 
-                            if (jobStatus === 'pending') continue; 
+                            if (jobStatus === 'pending') { await sleep(1000); continue; }
 
                             pollIntervalActive = false; clearInterval(timerInterval); unlockEditor();
                             document.removeEventListener('visibilitychange', onVisibilityChange);
@@ -457,23 +431,20 @@
                             logDebug(`Job abgeschlossen: ${jobStatus}.`);
 
                             if (jobStatus === 'error') {
-                                const errorMatch = rawText.match(/<fixes>([\s\S]*?)<\/fixes>/i) || rawText.match(/<error>([\s\S]*?)<\/error>/i);
-                                const errMsg = errorMatch ? errorMatch[1].trim() : 'Unbekannter Fehler im KI-Agenten.';
+                                const errMsg = data.fixes || data.error || 'Unbekannter Fehler im KI-Agenten.';
                                 logDebug(`Fehlerdetails vom Server: ${errMsg}`);
 
                                 launcherTab.querySelector('span').innerText = '❌ KI-Fehler';
                                 setStatusIconText('❌', 'Leider ist ein Fehler aufgetreten.', 'Bitte versuchen Sie es erneut.', '#ff5555', true);
                                 addMessage('<b>Fehlerdetails:</b> Bei der Verarbeitung ist ein Fehler aufgetreten. Details im Debug-Log.', 'error');
                                 btnCheck.style.display = 'block'; btnCheck.disabled = false;
-                                return; 
+                                return;
                             }
 
                             if (jobStatus === 'success') {
                                 launcherTab.querySelector('span').innerText = '✅ KI Fertig';
-                                const contentMatch = rawText.match(/<content>([\s\S]*?)<\/content>/i);
-                                let newContent = contentMatch ? contentMatch[1].trim() : null;
-                                const fixesMatch = rawText.match(/<fixes>([\s\S]*?)<\/fixes>/i);
-                                const fixesText = fixesMatch ? fixesMatch[1] : '';
+                                let newContent = data.content || null;
+                                const fixesText = data.fixes || '';
                                 
                                 const korrektorMatch = fixesText.match(/<korrektor>([\s\S]*?)<\/korrektor>/i);
                                 const verlinkerMatch = fixesText.match(/<verlinker>([\s\S]*?)<\/verlinker>/i);
@@ -519,9 +490,10 @@
 
                                 if (verlinkerText) {
                                     const verlBox = document.createElement('div'); Object.assign(verlBox.style, { backgroundColor: '#2d2d30', padding: '12px', borderRadius: '6px', border: '1px solid #3a3a3c' });
-                                    const vTitle = document.createElement('div'); vTitle.innerHTML = '<span style="color:#50fa7b; font-weight:bold; font-size:14px;">🔗 Verlinkungen & Hinweise</span><hr style="border:0; border-top:1px solid #444; margin:8px 0;">';
-                                    verlBox.appendChild(vTitle);
                                     const lines = verlinkerText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+                                    const linkCount = lines.filter(l => l.toLowerCase().startsWith('link')).length;
+                                    const vTitle = document.createElement('div'); vTitle.innerHTML = `<span style="color:#50fa7b; font-weight:bold; font-size:14px;">🔗 ${linkCount === 1 ? 'Verlinkung' : 'Verlinkungen'}</span><hr style="border:0; border-top:1px solid #444; margin:8px 0;">`;
+                                    verlBox.appendChild(vTitle);
                                     let currentGroup = null;
                                     lines.forEach(line => {
                                         let cleanLine = line.replace(/^[-*•#\d.]+\s*/, '');
