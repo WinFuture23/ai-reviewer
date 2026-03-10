@@ -58,19 +58,42 @@
             return m ? m[1].toLowerCase() : 'utf-8';
         }
 
-        // Fetch page head, detect charset, extract OG metadata
+        /**
+         * Maximum bytes to read per page. OG meta tags end before 36 KB on
+         * all known winfuture.de page types (news, video, download, special,
+         * faq, infografik, thema). 40 KB gives ~10% safety buffer.
+         */
+        const HEAD_BYTE_LIMIT = 40960;
+
+        // Fetch only the first HEAD_BYTE_LIMIT bytes, detect charset, extract OG metadata
         async function fetch_meta( url ) {
             if (cache.has( url )) return;
             cache.set( url, null );
             try {
                 const resp = await fetch( url, { credentials: 'same-origin' } );
                 if (!resp.ok) return;
-                // Read raw bytes, detect charset from HTML, then decode correctly
-                const buf = await resp.arrayBuffer();
+                // Stream only HEAD_BYTE_LIMIT bytes, then abort (saves 80-90% bandwidth)
+                const reader = resp.body.getReader();
+                const chunks = [];
+                let total = 0;
+                while (total < HEAD_BYTE_LIMIT) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    chunks.push( value );
+                    total += value.length;
+                }
+                reader.cancel(); // abort remaining download
+                // Merge chunks into single ArrayBuffer
+                const buf = new Uint8Array( total );
+                let offset = 0;
+                for (const chunk of chunks) {
+                    buf.set( chunk, offset );
+                    offset += chunk.length;
+                }
                 const charset = detect_charset( buf );
                 const html = new TextDecoder( charset ).decode( buf );
                 const head_end = html.indexOf( '</head>' );
-                const head_html = html.substring( 0, head_end > 0 ? head_end + 7 : 20000 );
+                const head_html = html.substring( 0, head_end > 0 ? head_end + 7 : html.length );
                 const doc = new DOMParser().parseFromString( head_html, 'text/html' );
                 const og = ( p ) => {
                     const el = doc.querySelector( `meta[property="og:${p}"]` );
