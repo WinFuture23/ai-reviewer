@@ -707,16 +707,12 @@
                                             clearTimeout(previewShowTimer);
                                             const cached = previewCache.get(url);
                                             logDebug(`Hover: ${url} → Cache: ${cached ? 'bereit' : cached === null ? 'lädt noch' : 'nicht vorhanden'}`);
-                                            const mx = e.clientX, my = e.clientY;
-                                            previewShowTimer = setTimeout(() => showPreviewCard(url, mx, my), 300);
+                                            a._lastMx = e.clientX; a._lastMy = e.clientY;
+                                            previewShowTimer = setTimeout(() => showPreviewCard(url, a._lastMx, a._lastMy), 300);
                                         });
                                         a.addEventListener('mousemove', (e) => {
-                                            // Position aktualisieren solange Karte noch nicht sichtbar
-                                            if (previewCard && previewCard.style.opacity === '0') {
-                                                clearTimeout(previewShowTimer);
-                                                const mx = e.clientX, my = e.clientY;
-                                                previewShowTimer = setTimeout(() => showPreviewCard(url, mx, my), 300);
-                                            }
+                                            // Nur letzte Cursor-Position merken (Timer läuft weiter)
+                                            a._lastMx = e.clientX; a._lastMy = e.clientY;
                                         });
                                         a.addEventListener('mouseleave', () => {
                                             clearTimeout(previewShowTimer);
