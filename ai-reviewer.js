@@ -129,14 +129,14 @@
             const c = ensure_card();
             c._url = url;
             const img_html = data.image
-                ? `<img src="${esc( data.image )}" style="width:180px; min-width:180px; height:180px; object-fit:cover; border-radius:8px; background:#2a2a2c; align-self:center;" onerror="this.style.display='none'">`
+                ? `<img src="${esc( data.image )}" style="width:200px; min-width:200px; height:auto; object-fit:contain; border-radius:8px; background:#2a2a2c; align-self:center;" onerror="this.style.display='none'">`
                 : '';
             const desc_html = data.description
                 ? `<div style="font-size:12px; color:#bbb; line-height:1.45; margin-top:6px; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden;">${esc( data.description )}</div>`
                 : '';
-            c.innerHTML = `<div style="display:flex; gap:14px; padding:14px 16px; align-items:stretch;">`
+            c.innerHTML = `<div style="display:flex; gap:14px; padding:14px 16px; align-items:center;">`
                 + img_html
-                + `<div style="flex:1; min-width:0; display:flex; flex-direction:column; justify-content:center;">`
+                + `<div style="flex:1; min-width:0; display:flex; flex-direction:column;">`
                 + `<div style="font-size:14px; font-weight:600; color:#f0f0f0; line-height:1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; text-wrap:balance;">${esc( data.title )}</div>`
                 + desc_html
                 + `<div style="font-size:10px; color:#666; margin-top:6px;">↗ Artikel öffnen</div>`
