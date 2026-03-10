@@ -3,12 +3,185 @@
     if (window.wfv4_ai_reviewer_loaded) return;
     window.wfv4_ai_reviewer_loaded = true;
 
-    // CSS-Animation für Spin-Icon
+    // CSS-Animationen
     if (!document.getElementById('ai-reviewer-styles')) {
         const style = document.createElement('style'); style.id = 'ai-reviewer-styles';
         style.textContent = '@keyframes ai-reviewer-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }';
         document.head.appendChild(style);
     }
+
+    /**
+     * wfv4_link_preview — Reusable link preview tooltip card.
+     *
+     * Fetches OG metadata (title, description, image) for internal links
+     * and displays a hover card with article summary.
+     *
+     * Usage:
+     *   wfv4_link_preview.attach( container, selector, url_extractor )
+     *   - container:     parent DOM element containing hoverable elements
+     *   - selector:      CSS selector for hoverable elements
+     *   - url_extractor: function( element ) => URL string
+     *
+     * Standalone (e.g. in global JS):
+     *   wfv4_link_preview.attach( document.body, 'a[href*="winfuture.de/news"]', a => a.href );
+     *
+     * @author mesios
+     * @version 1 2026-03-10
+     */
+    const wfv4_link_preview = (() => {
+        const cache = new Map();
+        let card = null;
+        let hide_timer = null;
+        let show_timer = null;
+
+        // Fetch page head, extract OG metadata
+        async function fetch_meta( url ) {
+            if (cache.has( url )) return;
+            cache.set( url, null );
+            try {
+                const resp = await fetch( url, { credentials: 'same-origin' } );
+                if (!resp.ok) return;
+                // response.text() respects Content-Type charset (fixes Umlauts)
+                const html = await resp.text();
+                const head_end = html.indexOf( '</head>' );
+                const head_html = html.substring( 0, head_end > 0 ? head_end + 7 : 20000 );
+                const doc = new DOMParser().parseFromString( head_html, 'text/html' );
+                const og = ( p ) => {
+                    const el = doc.querySelector( `meta[property="og:${p}"]` );
+                    return el ? el.getAttribute( 'content' ) : null;
+                };
+                const meta = ( n ) => {
+                    const el = doc.querySelector( `meta[name="${n}"]` );
+                    return el ? el.getAttribute( 'content' ) : null;
+                };
+                const title = og( 'title' ) || doc.querySelector( 'title' )?.textContent?.trim() || null;
+                const description = og( 'description' ) || meta( 'description' ) || null;
+                const image = og( 'image' ) || null;
+                if (title) {
+                    cache.set( url, { title, description, image, url } );
+                }
+            } catch( e ) { /* silent — no card shown on error */ }
+        }
+
+        // HTML-escape a string (XSS prevention, Sicherheitsrichtlinie §14/§24)
+        function esc( str ) {
+            if (!str) return '';
+            const d = document.createElement( 'div' );
+            d.appendChild( document.createTextNode( str ) );
+            return d.innerHTML;
+        }
+
+        // Create singleton card element (lazy)
+        function ensure_card() {
+            if (card) return card;
+            card = document.createElement( 'div' );
+            card.className = 'wfv4-link-preview';
+            Object.assign( card.style, {
+                position: 'fixed', zIndex: '1000000', width: '420px', maxWidth: 'calc(100vw - 24px)',
+                backgroundColor: '#1e1e1e', border: '1px solid #555', borderRadius: '10px',
+                boxShadow: '0 8px 28px rgba(0,0,0,0.55)', overflow: 'hidden',
+                opacity: '0', transform: 'translateY(6px)',
+                transition: 'opacity 0.18s ease, transform 0.18s ease, border-color 0.15s ease',
+                pointerEvents: 'auto', fontFamily: 'system-ui, -apple-system, sans-serif',
+                cursor: 'pointer', display: 'none'
+            });
+            card.addEventListener( 'mouseenter', () => { clearTimeout( hide_timer ); card.style.borderColor = '#66d9ef'; } );
+            card.addEventListener( 'mouseleave', () => { card.style.borderColor = '#555'; hide(); } );
+            card.addEventListener( 'click', () => {
+                if (card._url) { window.open( card._url, '_blank', 'noopener' ); hide(); }
+            });
+            document.body.appendChild( card );
+            return card;
+        }
+
+        // Show preview card at given position
+        function show( url, x, y ) {
+            const data = cache.get( url );
+            if (!data) return;
+            const c = ensure_card();
+            c._url = url;
+            const img_html = data.image
+                ? `<img src="${esc( data.image )}" style="width:120px; min-width:120px; height:auto; min-height:80px; max-height:120px; object-fit:cover; border-radius:6px; background:#2a2a2c;" onerror="this.style.display='none'">`
+                : '';
+            const desc_html = data.description
+                ? `<div style="font-size:12px; color:#bbb; line-height:1.4; margin-top:5px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;">${esc( data.description )}</div>`
+                : '';
+            c.innerHTML = `<div style="display:flex; gap:12px; padding:12px 14px; align-items:flex-start;">`
+                + img_html
+                + `<div style="flex:1; min-width:0;">`
+                + `<div style="font-size:14px; font-weight:600; color:#f0f0f0; line-height:1.35; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;">${esc( data.title )}</div>`
+                + desc_html
+                + `<div style="font-size:10px; color:#666; margin-top:5px;">↗ Artikel öffnen</div>`
+                + `</div></div>`;
+
+            c.style.opacity = '0';
+            c.style.display = 'block';
+            requestAnimationFrame( () => {
+                const cw = c.offsetWidth, ch = c.offsetHeight;
+                const vw = window.innerWidth, vh = window.innerHeight;
+                let left = x + 14, top = y + 14;
+                if (left + cw > vw - 12) left = x - cw - 14;
+                if (top + ch > vh - 12) top = y - ch - 14;
+                if (left < 8) left = 8;
+                if (top < 8) top = 8;
+                c.style.left = left + 'px';
+                c.style.top = top + 'px';
+                c.style.opacity = '1';
+                c.style.transform = 'translateY(0)';
+            });
+        }
+
+        // Hide preview card with fade-out
+        function hide() {
+            clearTimeout( show_timer );
+            if (!card) return;
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(6px)';
+            hide_timer = setTimeout( () => { if (card) card.style.display = 'none'; }, 200 );
+        }
+
+        // Attach preview to all matching elements in container
+        function attach( container, selector, url_extractor ) {
+            const elements = container.querySelectorAll( selector );
+            const urls = new Set();
+            elements.forEach( el => { const u = url_extractor( el ); if (u) urls.add( u ); } );
+
+            // Prefetch all (max 4 parallel)
+            (async () => {
+                const arr = [...urls];
+                for (let i = 0; i < arr.length; i += 4) {
+                    await Promise.all( arr.slice( i, i + 4 ).map( u => fetch_meta( u ) ) );
+                }
+            })();
+
+            // Hover events on each element
+            elements.forEach( el => {
+                const url = url_extractor( el );
+                if (!url) return;
+                el.addEventListener( 'mouseenter', ( e ) => {
+                    clearTimeout( hide_timer );
+                    clearTimeout( show_timer );
+                    el._mx = e.clientX;
+                    el._my = e.clientY;
+                    show_timer = setTimeout( () => show( url, el._mx, el._my ), 250 );
+                });
+                el.addEventListener( 'mousemove', ( e ) => { el._mx = e.clientX; el._my = e.clientY; } );
+                el.addEventListener( 'mouseleave', () => {
+                    clearTimeout( show_timer );
+                    hide_timer = setTimeout( () => hide(), 200 );
+                });
+            });
+        }
+
+        // Remove card from DOM and clear timers
+        function destroy() {
+            if (card) { card.remove(); card = null; }
+            clearTimeout( hide_timer );
+            clearTimeout( show_timer );
+        }
+
+        return { attach, destroy, cache };
+    })();
 
     let terminalContainer = null;
     let launcherTab = null;
@@ -124,7 +297,9 @@
         Object.assign(closeDiffBtn.style, { backgroundColor: '#ff5555', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px' });
         function closeDiff() { overlay.remove(); document.body.style.overflow = ''; document.removeEventListener('keydown', escHandler); }
         closeDiffBtn.onclick = closeDiff; headerBar.appendChild(closeDiffBtn);
-        const iframe = document.createElement('iframe'); Object.assign(iframe.style, { flexGrow: '1', width: '100%', backgroundColor: '#fff', border: 'none', borderRadius: '6px' });
+        const iframe = document.createElement('iframe');
+        iframe.sandbox = 'allow-same-origin'; // Sicherheitsrichtlinie §20: minimal permissions
+        Object.assign(iframe.style, { flexGrow: '1', width: '100%', backgroundColor: '#fff', border: 'none', borderRadius: '6px' });
         iframe.srcdoc = htmlData;
         overlay.appendChild(headerBar); overlay.appendChild(iframe); document.body.appendChild(overlay);
         document.body.style.overflow = 'hidden';
@@ -208,7 +383,7 @@
         const closeHeaderBtn = document.createElement('span'); closeHeaderBtn.innerHTML = '▼ Verbergen';
         Object.assign(closeHeaderBtn.style, { cursor: 'pointer', fontWeight: 'bold', color: '#ffb86c', transition: 'color 0.2s' });
         closeHeaderBtn.onmouseover = () => closeHeaderBtn.style.color = '#ff9900'; closeHeaderBtn.onmouseout = () => closeHeaderBtn.style.color = '#ffb86c';
-        closeHeaderBtn.onclick = () => { terminalContainer.style.display = 'none'; launcherTab.style.display = 'flex'; document.querySelectorAll('.ai-reviewer-preview').forEach(el => el.remove()); };
+        closeHeaderBtn.onclick = () => { terminalContainer.style.display = 'none'; launcherTab.style.display = 'flex'; wfv4_link_preview.destroy(); };
 
         headerRight.appendChild(debugBtn); headerRight.appendChild(closeHeaderBtn);
         header.appendChild(headerRight);
@@ -330,7 +505,7 @@
                 if (!startRes.ok) throw new Error(`Der Worker konnte nicht gestartet werden (HTTP ${startRes.status}).`);
 
                 let elapsedSeconds = 0; 
-                const timeoutMax = 600; // 10 Minuten
+                const TIMEOUT_MAX = 600; // 10 Minuten
                 
                 setStatusIconText('⏳', `Artikel wird verarbeitet... (0 Sekunden)`, `Geschätzte Dauer: ca. 1 - 2 Minuten`, '#f1fa8c', true);
                 const startTime = Date.now();
@@ -407,7 +582,7 @@
                     }
                     if (manualPollBtn) statusEl.appendChild(manualPollBtn);
 
-                    if (elapsedSeconds >= timeoutMax) {
+                    if (elapsedSeconds >= TIMEOUT_MAX) {
                         // Vor Abbruch: letzte Server-Abfrage
                         (async () => {
                             await doManualPoll('Timeout-Abfrage');
@@ -417,7 +592,7 @@
                             document.removeEventListener('visibilitychange', onVisibilityChange);
                             launcherTab.querySelector('span').innerText = '🤖 KI-Korrektor';
                             setStatusIconText('❌', 'Leider ist ein Fehler aufgetreten.', 'Bitte versuchen Sie es erneut.', '#ff5555', true);
-                            addMessage(`Das Polling wurde nach ${formatDurationFriendly(timeoutMax)} abgebrochen.`, 'error');
+                            addMessage(`Das Polling wurde nach ${formatDurationFriendly(TIMEOUT_MAX)} abgebrochen.`, 'error');
                             btnCheck.style.display = 'block'; btnCheck.disabled = false;
                         })();
                     }
@@ -430,7 +605,7 @@
 
                         while (pollIntervalActive) {
                             let currentElapsed = Math.round((Date.now() - startTime) / 1000);
-                            if (currentElapsed >= timeoutMax) break;
+                            if (currentElapsed >= TIMEOUT_MAX) break;
 
                             // Gecachte Antwort von Tab-Rückkehr verwenden, falls vorhanden
                             let data;
@@ -607,143 +782,8 @@
                                     });
                                     resultsArea.appendChild(verlBox);
 
-                                    // --- Link-Vorschau: Prefetch & Hover-Karte ---
-                                    const previewCache = new Map();
-                                    const previewGroups = verlBox.querySelectorAll('[data-preview-url]');
-                                    const previewUrls = new Set();
-                                    previewGroups.forEach(g => previewUrls.add(g.dataset.previewUrl));
-                                    logDebug(`Link-Vorschau: ${previewUrls.size} URLs gefunden`);
-
-                                    // Prefetch: Seite laden, OG-Tags extrahieren
-                                    async function prefetchMeta(url) {
-                                        if (previewCache.has(url)) return;
-                                        previewCache.set(url, null); // Markierung: Laden läuft
-                                        try {
-                                            logDebug(`Vorschau laden: ${url}`);
-                                            const resp = await fetch(url, { credentials: 'same-origin' });
-                                            if (!resp.ok) { logDebug(`Vorschau fehlgeschlagen (${resp.status}): ${url}`); return; }
-                                            // Streaming-Ansatz: nur <head> laden
-                                            let html = '';
-                                            if (resp.body && typeof resp.body.getReader === 'function') {
-                                                const reader = resp.body.getReader();
-                                                const decoder = new TextDecoder();
-                                                while (true) {
-                                                    const { done, value } = await reader.read();
-                                                    if (value) html += decoder.decode(value, { stream: true });
-                                                    if (html.includes('</head>') || html.length > 20000 || done) { reader.cancel(); break; }
-                                                }
-                                            } else {
-                                                // Fallback: ganzen Text laden
-                                                html = await resp.text();
-                                            }
-                                            const doc = new DOMParser().parseFromString('<meta charset="utf-8">' + html, 'text/html');
-                                            const og = (p) => { const el = doc.querySelector(`meta[property="og:${p}"]`); return el ? el.getAttribute('content') : null; };
-                                            const metaTag = (n) => { const el = doc.querySelector(`meta[name="${n}"]`); return el ? el.getAttribute('content') : null; };
-                                            const title = og('title') || doc.querySelector('title')?.textContent?.trim() || null;
-                                            const description = og('description') || metaTag('description') || null;
-                                            const image = og('image') || null;
-                                            logDebug(`Vorschau extrahiert: ${url} → title=${title ? 'ja' : 'nein'}, img=${image ? 'ja' : 'nein'}`);
-                                            if (title) previewCache.set(url, { title, description, image });
-                                        } catch(e) { logDebug(`Vorschau Fehler: ${url} → ${e.message}`); }
-                                    }
-
-                                    // Alle URLs parallel prefetchen (max 4 gleichzeitig)
-                                    (async () => {
-                                        const urls = [...previewUrls];
-                                        for (let i = 0; i < urls.length; i += 4) {
-                                            await Promise.all(urls.slice(i, i + 4).map(u => prefetchMeta(u)));
-                                        }
-                                        logDebug(`Link-Vorschau: ${[...previewCache.values()].filter(v => v).length}/${urls.length} erfolgreich geladen`);
-                                    })();
-
-                                    // Hover-Karte: Singleton-Element
-                                    let previewCard = null;
-                                    let previewHideTimer = null;
-                                    let previewShowTimer = null;
-
-                                    function createPreviewCard() {
-                                        if (previewCard) return previewCard;
-                                        previewCard = document.createElement('div');
-                                        previewCard.className = 'ai-reviewer-preview';
-                                        Object.assign(previewCard.style, {
-                                            position: 'fixed', zIndex: '1000000', width: '340px',
-                                            backgroundColor: '#1e1e1e', border: '1px solid #555', borderRadius: '8px',
-                                            boxShadow: '0 8px 24px rgba(0,0,0,0.6)', overflow: 'hidden',
-                                            opacity: '0', transform: 'translateY(6px)', transition: 'opacity 0.18s ease, transform 0.18s ease, border-color 0.15s ease',
-                                            pointerEvents: 'auto', fontFamily: 'system-ui, -apple-system, sans-serif',
-                                            cursor: 'pointer', display: 'none'
-                                        });
-                                        previewCard.addEventListener('mouseenter', () => { clearTimeout(previewHideTimer); previewCard.style.borderColor = '#66d9ef'; });
-                                        previewCard.addEventListener('mouseleave', () => { previewCard.style.borderColor = '#555'; hidePreviewCard(); });
-                                        previewCard.addEventListener('click', () => { if (previewCard._url) { window.open(previewCard._url, '_blank', 'noopener'); hidePreviewCard(); } });
-                                        document.body.appendChild(previewCard);
-                                        return previewCard;
-                                    }
-
-                                    function showPreviewCard(url, x, y) {
-                                        const data = previewCache.get(url);
-                                        logDebug(`showPreviewCard aufgerufen: ${url}, data=${!!data}, x=${x}, y=${y}`);
-                                        if (!data) return;
-                                        const card = createPreviewCard();
-                                        card._url = url;
-                                        const imgHtml = data.image ? `<img src="${escapeHTML(data.image)}" style="width:72px; min-width:72px; height:72px; object-fit:cover; border-radius:6px; background:#2a2a2c;" onerror="this.style.display='none'">` : '';
-                                        const descHtml = data.description ? `<div style="font-size:11px; color:#aaa; line-height:1.35; margin-top:4px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${escapeHTML(data.description)}</div>` : '';
-                                        card.innerHTML = `<div style="display:flex; gap:10px; padding:10px 12px; align-items:flex-start;">`
-                                            + imgHtml
-                                            + `<div style="flex:1; min-width:0;">`
-                                            + `<div style="font-size:13px; font-weight:600; color:#f0f0f0; line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${escapeHTML(data.title)}</div>`
-                                            + descHtml
-                                            + `<div style="font-size:10px; color:#666; margin-top:4px;">↗ Artikel öffnen</div>`
-                                            + `</div></div>`;
-
-                                        // Positionierung: an Cursor, aber im Viewport halten
-                                        card.style.opacity = '0';
-                                        card.style.display = 'block';
-                                        requestAnimationFrame(() => {
-                                            const cw = card.offsetWidth, ch = card.offsetHeight;
-                                            const vw = window.innerWidth, vh = window.innerHeight;
-                                            let left = x + 12, top = y + 12;
-                                            // Rechts raus? → links vom Cursor
-                                            if (left + cw > vw - 8) left = x - cw - 12;
-                                            // Unten raus? → über dem Cursor
-                                            if (top + ch > vh - 8) top = y - ch - 12;
-                                            // Oben/links raus? → mindestens 8px Rand
-                                            if (left < 8) left = 8;
-                                            if (top < 8) top = 8;
-                                            card.style.left = left + 'px';
-                                            card.style.top = top + 'px';
-                                            card.style.opacity = '1';
-                                            card.style.transform = 'translateY(0)';
-                                        });
-                                    }
-
-                                    function hidePreviewCard() {
-                                        clearTimeout(previewShowTimer);
-                                        if (!previewCard) { logDebug('hidePreviewCard: keine Karte'); return; }
-                                        logDebug('hidePreviewCard: ausblenden');
-                                        previewCard.style.opacity = '0';
-                                        previewCard.style.transform = 'translateY(6px)';
-                                        previewHideTimer = setTimeout(() => { if (previewCard) previewCard.style.display = 'none'; }, 200);
-                                    }
-
-                                    // Event-Listener auf alle Link-Gruppen (ganzer Block)
-                                    previewGroups.forEach(group => {
-                                        const url = group.dataset.previewUrl;
-                                        group.addEventListener('mouseenter', (e) => {
-                                            clearTimeout(previewHideTimer);
-                                            clearTimeout(previewShowTimer);
-                                            group._lastMx = e.clientX; group._lastMy = e.clientY;
-                                            previewShowTimer = setTimeout(() => showPreviewCard(url, group._lastMx, group._lastMy), 300);
-                                        });
-                                        group.addEventListener('mousemove', (e) => {
-                                            group._lastMx = e.clientX; group._lastMy = e.clientY;
-                                        });
-                                        group.addEventListener('mouseleave', () => {
-                                            clearTimeout(previewShowTimer);
-                                            previewHideTimer = setTimeout(() => hidePreviewCard(), 200);
-                                        });
-                                    });
-                                    // --- Ende Link-Vorschau ---
+                                    // --- Link-Vorschau via wfv4_link_preview ---
+                                    wfv4_link_preview.attach(verlBox, '[data-preview-url]', el => el.dataset.previewUrl);
                                 }
 
                                 // Auto-Resize: Höhe an Inhalt anpassen
