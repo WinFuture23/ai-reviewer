@@ -586,30 +586,39 @@
                                     const previewLinks = verlBox.querySelectorAll('a[href]');
                                     const previewUrls = new Set();
                                     previewLinks.forEach(a => { if (a.href.startsWith('http')) previewUrls.add(a.href); });
+                                    logDebug(`Link-Vorschau: ${previewUrls.size} URLs gefunden, ${previewLinks.length} Links`);
 
-                                    // Prefetch: <head>-Bereich laden, OG-Tags extrahieren
+                                    // Prefetch: Seite laden, OG-Tags extrahieren
                                     async function prefetchMeta(url) {
                                         if (previewCache.has(url)) return;
                                         previewCache.set(url, null); // Markierung: Laden läuft
                                         try {
+                                            logDebug(`Vorschau laden: ${url}`);
                                             const resp = await fetch(url, { credentials: 'same-origin' });
-                                            if (!resp.ok || !resp.body) return;
-                                            const reader = resp.body.getReader();
-                                            const decoder = new TextDecoder();
+                                            if (!resp.ok) { logDebug(`Vorschau fehlgeschlagen (${resp.status}): ${url}`); return; }
+                                            // Streaming-Ansatz: nur <head> laden
                                             let html = '';
-                                            while (true) {
-                                                const { done, value } = await reader.read();
-                                                if (value) html += decoder.decode(value, { stream: true });
-                                                if (html.includes('</head>') || html.length > 20000 || done) { reader.cancel(); break; }
+                                            if (resp.body && typeof resp.body.getReader === 'function') {
+                                                const reader = resp.body.getReader();
+                                                const decoder = new TextDecoder();
+                                                while (true) {
+                                                    const { done, value } = await reader.read();
+                                                    if (value) html += decoder.decode(value, { stream: true });
+                                                    if (html.includes('</head>') || html.length > 20000 || done) { reader.cancel(); break; }
+                                                }
+                                            } else {
+                                                // Fallback: ganzen Text laden
+                                                html = await resp.text();
                                             }
                                             const doc = new DOMParser().parseFromString(html, 'text/html');
-                                            const og = (p) => { const el = doc.querySelector(`meta[property="og:${p}"]`); return el ? el.content : null; };
-                                            const meta = (n) => { const el = doc.querySelector(`meta[name="${n}"]`); return el ? el.content : null; };
-                                            const title = og('title') || doc.querySelector('title')?.textContent || null;
-                                            const description = og('description') || meta('description') || null;
+                                            const og = (p) => { const el = doc.querySelector(`meta[property="og:${p}"]`); return el ? el.getAttribute('content') : null; };
+                                            const metaTag = (n) => { const el = doc.querySelector(`meta[name="${n}"]`); return el ? el.getAttribute('content') : null; };
+                                            const title = og('title') || doc.querySelector('title')?.textContent?.trim() || null;
+                                            const description = og('description') || metaTag('description') || null;
                                             const image = og('image') || null;
+                                            logDebug(`Vorschau extrahiert: ${url} → title=${title ? 'ja' : 'nein'}, img=${image ? 'ja' : 'nein'}`);
                                             if (title) previewCache.set(url, { title, description, image });
-                                        } catch(e) { /* Fehler ignorieren, keine Karte anzeigen */ }
+                                        } catch(e) { logDebug(`Vorschau Fehler: ${url} → ${e.message}`); }
                                     }
 
                                     // Alle URLs parallel prefetchen (max 4 gleichzeitig)
@@ -618,6 +627,7 @@
                                         for (let i = 0; i < urls.length; i += 4) {
                                             await Promise.all(urls.slice(i, i + 4).map(u => prefetchMeta(u)));
                                         }
+                                        logDebug(`Link-Vorschau: ${[...previewCache.values()].filter(v => v).length}/${urls.length} erfolgreich geladen`);
                                     })();
 
                                     // Hover-Karte: Singleton-Element
@@ -695,6 +705,8 @@
                                         a.addEventListener('mouseenter', (e) => {
                                             clearTimeout(previewHideTimer);
                                             clearTimeout(previewShowTimer);
+                                            const cached = previewCache.get(url);
+                                            logDebug(`Hover: ${url} → Cache: ${cached ? 'bereit' : cached === null ? 'lädt noch' : 'nicht vorhanden'}`);
                                             const mx = e.clientX, my = e.clientY;
                                             previewShowTimer = setTimeout(() => showPreviewCard(url, mx, my), 300);
                                         });
