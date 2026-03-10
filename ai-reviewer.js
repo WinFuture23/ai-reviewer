@@ -640,15 +640,15 @@
                                         previewCard = document.createElement('div');
                                         previewCard.className = 'ai-reviewer-preview';
                                         Object.assign(previewCard.style, {
-                                            position: 'fixed', zIndex: '100001', width: '280px',
-                                            backgroundColor: '#1e1e1e', border: '1px solid #444', borderRadius: '8px',
-                                            boxShadow: '0 8px 24px rgba(0,0,0,0.5)', overflow: 'hidden',
+                                            position: 'fixed', zIndex: '1000000', width: '280px',
+                                            backgroundColor: '#1e1e1e', border: '1px solid #555', borderRadius: '8px',
+                                            boxShadow: '0 8px 24px rgba(0,0,0,0.6)', overflow: 'hidden',
                                             opacity: '0', transform: 'translateY(6px)', transition: 'opacity 0.18s ease, transform 0.18s ease, border-color 0.15s ease',
                                             pointerEvents: 'auto', fontFamily: 'system-ui, -apple-system, sans-serif',
-                                            cursor: 'pointer'
+                                            cursor: 'pointer', display: 'none'
                                         });
                                         previewCard.addEventListener('mouseenter', () => { clearTimeout(previewHideTimer); previewCard.style.borderColor = '#66d9ef'; });
-                                        previewCard.addEventListener('mouseleave', () => { previewCard.style.borderColor = '#444'; hidePreviewCard(); });
+                                        previewCard.addEventListener('mouseleave', () => { previewCard.style.borderColor = '#555'; hidePreviewCard(); });
                                         previewCard.addEventListener('click', () => { if (previewCard._url) { window.open(previewCard._url, '_blank', 'noopener'); hidePreviewCard(); } });
                                         document.body.appendChild(previewCard);
                                         return previewCard;
@@ -673,7 +673,6 @@
                                         // Positionierung: an Cursor, aber im Viewport halten
                                         card.style.opacity = '0';
                                         card.style.display = 'block';
-                                        document.body.appendChild(card);
                                         requestAnimationFrame(() => {
                                             const cw = card.offsetWidth, ch = card.offsetHeight;
                                             const vw = window.innerWidth, vh = window.innerHeight;
