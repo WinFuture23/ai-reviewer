@@ -328,10 +328,19 @@
                 setStatusIconText('⏳', `Artikel wird verarbeitet... (0 Sekunden)`, `Geschätzte Dauer: ca. 1 - 2 Minuten`, '#f1fa8c', true);
                 const startTime = Date.now();
                 
-                let earlyPollWakeup = false;
                 let cachedPollResponse = null;
                 let lastPollTime = 0;
                 let manualPollBtn = null;
+
+                // Sofort auflösbare Sleep-Funktion (überwindet Browser-Throttling)
+                let wakeupResolve = null;
+                function wakeup() { if (wakeupResolve) { wakeupResolve(); wakeupResolve = null; } }
+                function interruptibleSleep(ms) {
+                    return new Promise(resolve => {
+                        wakeupResolve = resolve;
+                        setTimeout(resolve, ms);
+                    });
+                }
 
                 // Manuelle Abfrage: Server-Anfrage und Ergebnis an pollLoop übergeben
                 async function doManualPoll(label) {
@@ -347,19 +356,16 @@
                             logDebug(`${label}: Status = ${jobStatus}`);
                             if (jobStatus !== 'pending') {
                                 cachedPollResponse = data;
-                                earlyPollWakeup = true;
-                                return;
                             }
                         }
                     } catch(e) { logDebug(`${label}: Fehlgeschlagen (${e.message})`); }
-                    earlyPollWakeup = true;
+                    wakeup(); // pollLoop sofort aufwecken
                 }
 
                 // visibilitychange: feuert zuverlässig wenn Tab wieder aktiv wird
                 function onVisibilityChange() {
                     if (document.visibilityState !== 'visible' || !pollIntervalActive) return;
                     elapsedSeconds = Math.round((Date.now() - startTime) / 1000);
-                    // Erst ab 30s und nur wenn >5s seit letztem Abruf
                     if (elapsedSeconds < 30) return;
                     if (Date.now() - lastPollTime < 5000) { logDebug('Tab sichtbar, aber letzter Abruf <5s her. Übersprungen.'); return; }
                     doManualPoll('Tab-Rückkehr');
@@ -372,7 +378,13 @@
                     const timeStr = formatDurationFriendly(elapsedSeconds);
                     setStatusIconText('⏳', `Artikel wird verarbeitet... (${timeStr})`, `Geschätzte Dauer: ca. 1 - 2 Minuten`, '#f1fa8c', false);
 
-                    // Manuellen Button auch beim Timer-Update erhalten
+                    // Nach 2 Minuten: manuellen Abfrage-Button anzeigen
+                    if (!manualPollBtn && elapsedSeconds >= 120) {
+                        manualPollBtn = document.createElement('div');
+                        manualPollBtn.style.cssText = 'margin-top: 8px; cursor: pointer; color: #8be9fd; font-size: 12px;';
+                        manualPollBtn.innerHTML = '🔄 Jetzt Status abfragen';
+                        manualPollBtn.addEventListener('click', () => doManualPoll('Manuell'));
+                    }
                     if (manualPollBtn) statusEl.appendChild(manualPollBtn);
 
                     if (elapsedSeconds >= timeoutMax) {
@@ -394,11 +406,7 @@
                 (async function pollLoop() {
                     try {
                         // Erste 30 Sekunden warten (keine Anfragen)
-                        for (let i = 0; i < 30; i++) {
-                            if (!pollIntervalActive) return;
-                            if (earlyPollWakeup) { earlyPollWakeup = false; break; }
-                            await sleep(1000);
-                        }
+                        if (pollIntervalActive) await interruptibleSleep(30000);
 
                         while (pollIntervalActive) {
                             let currentElapsed = Math.round((Date.now() - startTime) / 1000);
@@ -417,20 +425,17 @@
                                     const pollRes = await fetch(`${POLLER_URL}?jobId=${encodeURIComponent(jobId)}`, {
                                         method: 'GET', headers: { 'x-api-key': POLLER_API_KEY }
                                     });
-                                    if (!pollRes.ok) { await sleep(2000); continue; }
+                                    if (!pollRes.ok) { await interruptibleSleep(2000); continue; }
                                     data = await pollRes.json();
-                                } catch(e) { logDebug(`Poll-Fehler: ${e.message}`); await sleep(2000); continue; }
+                                } catch(e) { logDebug(`Poll-Fehler: ${e.message}`); await interruptibleSleep(2000); continue; }
                             }
                             const jobStatus = data.status || 'pending';
 
                             if (jobStatus === 'pending') {
                                 // 30s-90s: alle 15s | 90s-300s: alle 2s | 300s+: alle 30s
                                 const waitSec = currentElapsed < 90 ? 15 : currentElapsed < 300 ? 2 : 30;
-                                for (let i = 0; i < waitSec; i++) {
-                                    if (!pollIntervalActive) return;
-                                    if (earlyPollWakeup) { earlyPollWakeup = false; break; }
-                                    await sleep(1000);
-                                }
+                                if (!pollIntervalActive) return;
+                                await interruptibleSleep(waitSec * 1000);
                                 continue;
                             }
 
