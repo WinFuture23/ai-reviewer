@@ -201,7 +201,7 @@
         const closeHeaderBtn = document.createElement('span'); closeHeaderBtn.innerHTML = '▼ Verbergen';
         Object.assign(closeHeaderBtn.style, { cursor: 'pointer', fontWeight: 'bold', color: '#ffb86c', transition: 'color 0.2s' });
         closeHeaderBtn.onmouseover = () => closeHeaderBtn.style.color = '#ff9900'; closeHeaderBtn.onmouseout = () => closeHeaderBtn.style.color = '#ffb86c';
-        closeHeaderBtn.onclick = () => { terminalContainer.style.display = 'none'; launcherTab.style.display = 'flex'; };
+        closeHeaderBtn.onclick = () => { terminalContainer.style.display = 'none'; launcherTab.style.display = 'flex'; document.querySelectorAll('.ai-reviewer-preview').forEach(el => el.remove()); };
 
         headerRight.appendChild(debugBtn); headerRight.appendChild(closeHeaderBtn);
         header.appendChild(headerRight);
@@ -580,6 +580,138 @@
                                         }
                                     });
                                     resultsArea.appendChild(verlBox);
+
+                                    // --- Link-Vorschau: Prefetch & Hover-Karte ---
+                                    const previewCache = new Map();
+                                    const previewLinks = verlBox.querySelectorAll('a[href]');
+                                    const previewUrls = new Set();
+                                    previewLinks.forEach(a => { if (a.href.startsWith('http')) previewUrls.add(a.href); });
+
+                                    // Prefetch: <head>-Bereich laden, OG-Tags extrahieren
+                                    async function prefetchMeta(url) {
+                                        if (previewCache.has(url)) return;
+                                        previewCache.set(url, null); // Markierung: Laden läuft
+                                        try {
+                                            const resp = await fetch(url, { credentials: 'same-origin' });
+                                            if (!resp.ok || !resp.body) return;
+                                            const reader = resp.body.getReader();
+                                            const decoder = new TextDecoder();
+                                            let html = '';
+                                            while (true) {
+                                                const { done, value } = await reader.read();
+                                                if (value) html += decoder.decode(value, { stream: true });
+                                                if (html.includes('</head>') || html.length > 20000 || done) { reader.cancel(); break; }
+                                            }
+                                            const doc = new DOMParser().parseFromString(html, 'text/html');
+                                            const og = (p) => { const el = doc.querySelector(`meta[property="og:${p}"]`); return el ? el.content : null; };
+                                            const meta = (n) => { const el = doc.querySelector(`meta[name="${n}"]`); return el ? el.content : null; };
+                                            const title = og('title') || doc.querySelector('title')?.textContent || null;
+                                            const description = og('description') || meta('description') || null;
+                                            const image = og('image') || null;
+                                            if (title) previewCache.set(url, { title, description, image });
+                                        } catch(e) { /* Fehler ignorieren, keine Karte anzeigen */ }
+                                    }
+
+                                    // Alle URLs parallel prefetchen (max 4 gleichzeitig)
+                                    (async () => {
+                                        const urls = [...previewUrls];
+                                        for (let i = 0; i < urls.length; i += 4) {
+                                            await Promise.all(urls.slice(i, i + 4).map(u => prefetchMeta(u)));
+                                        }
+                                    })();
+
+                                    // Hover-Karte: Singleton-Element
+                                    let previewCard = null;
+                                    let previewHideTimer = null;
+                                    let previewShowTimer = null;
+
+                                    function createPreviewCard() {
+                                        if (previewCard) return previewCard;
+                                        previewCard = document.createElement('div');
+                                        previewCard.className = 'ai-reviewer-preview';
+                                        Object.assign(previewCard.style, {
+                                            position: 'fixed', zIndex: '100001', width: '280px',
+                                            backgroundColor: '#1e1e1e', border: '1px solid #444', borderRadius: '8px',
+                                            boxShadow: '0 8px 24px rgba(0,0,0,0.5)', overflow: 'hidden',
+                                            opacity: '0', transform: 'translateY(6px)', transition: 'opacity 0.18s ease, transform 0.18s ease, border-color 0.15s ease',
+                                            pointerEvents: 'auto', fontFamily: 'system-ui, -apple-system, sans-serif',
+                                            cursor: 'pointer'
+                                        });
+                                        previewCard.addEventListener('mouseenter', () => { clearTimeout(previewHideTimer); previewCard.style.borderColor = '#66d9ef'; });
+                                        previewCard.addEventListener('mouseleave', () => { previewCard.style.borderColor = '#444'; hidePreviewCard(); });
+                                        previewCard.addEventListener('click', () => { if (previewCard._url) { window.open(previewCard._url, '_blank', 'noopener'); hidePreviewCard(); } });
+                                        document.body.appendChild(previewCard);
+                                        return previewCard;
+                                    }
+
+                                    function showPreviewCard(url, x, y) {
+                                        const data = previewCache.get(url);
+                                        if (!data) return;
+                                        const card = createPreviewCard();
+                                        card._url = url;
+                                        let imgHtml = '';
+                                        if (data.image) {
+                                            imgHtml = `<div style="width:100%; height:140px; background:#2a2a2c; overflow:hidden;"><img src="${escapeHTML(data.image)}" style="width:100%; height:100%; object-fit:cover; display:block;" onerror="this.parentNode.style.display='none'"></div>`;
+                                        }
+                                        const descHtml = data.description ? `<div style="font-size:11px; color:#aaa; line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${escapeHTML(data.description)}</div>` : '';
+                                        card.innerHTML = `${imgHtml}<div style="padding:10px 12px;">`
+                                            + `<div style="font-size:13px; font-weight:600; color:#f0f0f0; line-height:1.3; margin-bottom:${descHtml ? '6px' : '0'}; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${escapeHTML(data.title)}</div>`
+                                            + `${descHtml}`
+                                            + `<div style="font-size:10px; color:#666; margin-top:6px;">↗ Artikel öffnen</div></div>`;
+
+                                        // Positionierung: an Cursor, aber im Viewport halten
+                                        card.style.opacity = '0';
+                                        card.style.display = 'block';
+                                        document.body.appendChild(card);
+                                        requestAnimationFrame(() => {
+                                            const cw = card.offsetWidth, ch = card.offsetHeight;
+                                            const vw = window.innerWidth, vh = window.innerHeight;
+                                            let left = x + 12, top = y + 12;
+                                            // Rechts raus? → links vom Cursor
+                                            if (left + cw > vw - 8) left = x - cw - 12;
+                                            // Unten raus? → über dem Cursor
+                                            if (top + ch > vh - 8) top = y - ch - 12;
+                                            // Oben/links raus? → mindestens 8px Rand
+                                            if (left < 8) left = 8;
+                                            if (top < 8) top = 8;
+                                            card.style.left = left + 'px';
+                                            card.style.top = top + 'px';
+                                            card.style.opacity = '1';
+                                            card.style.transform = 'translateY(0)';
+                                        });
+                                    }
+
+                                    function hidePreviewCard() {
+                                        clearTimeout(previewShowTimer);
+                                        if (!previewCard) return;
+                                        previewCard.style.opacity = '0';
+                                        previewCard.style.transform = 'translateY(6px)';
+                                        previewHideTimer = setTimeout(() => { if (previewCard) previewCard.style.display = 'none'; }, 200);
+                                    }
+
+                                    // Event-Listener auf alle Link-Elemente in der verlBox
+                                    previewLinks.forEach(a => {
+                                        const url = a.href;
+                                        a.addEventListener('mouseenter', (e) => {
+                                            clearTimeout(previewHideTimer);
+                                            clearTimeout(previewShowTimer);
+                                            const mx = e.clientX, my = e.clientY;
+                                            previewShowTimer = setTimeout(() => showPreviewCard(url, mx, my), 300);
+                                        });
+                                        a.addEventListener('mousemove', (e) => {
+                                            // Position aktualisieren solange Karte noch nicht sichtbar
+                                            if (previewCard && previewCard.style.opacity === '0') {
+                                                clearTimeout(previewShowTimer);
+                                                const mx = e.clientX, my = e.clientY;
+                                                previewShowTimer = setTimeout(() => showPreviewCard(url, mx, my), 300);
+                                            }
+                                        });
+                                        a.addEventListener('mouseleave', () => {
+                                            clearTimeout(previewShowTimer);
+                                            previewHideTimer = setTimeout(() => hidePreviewCard(), 200);
+                                        });
+                                    });
+                                    // --- Ende Link-Vorschau ---
                                 }
 
                                 // Auto-Resize: Höhe an Inhalt anpassen
