@@ -3,6 +3,13 @@
     if (window.wfv4_ai_reviewer_loaded) return;
     window.wfv4_ai_reviewer_loaded = true;
 
+    // CSS-Animation für Spin-Icon
+    if (!document.getElementById('ai-reviewer-styles')) {
+        const style = document.createElement('style'); style.id = 'ai-reviewer-styles';
+        style.textContent = '@keyframes ai-reviewer-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }';
+        document.head.appendChild(style);
+    }
+
     let terminalContainer = null;
     let launcherTab = null;
     let pollIntervalActive = false;
@@ -381,9 +388,22 @@
                     // Nach 2 Minuten: manuellen Abfrage-Button anzeigen
                     if (!manualPollBtn && elapsedSeconds >= 120) {
                         manualPollBtn = document.createElement('div');
-                        manualPollBtn.style.cssText = 'margin-top: 8px; cursor: pointer; color: #8be9fd; font-size: 12px;';
-                        manualPollBtn.innerHTML = '🔄 Jetzt Status abfragen';
-                        manualPollBtn.addEventListener('click', () => doManualPoll('Manuell'));
+                        manualPollBtn.style.cssText = 'margin-top: 8px; cursor: pointer; color: #8be9fd; font-size: 12px; display: flex; align-items: center; gap: 6px;';
+                        const pollIcon = document.createElement('span'); pollIcon.textContent = '🔄'; pollIcon.style.cssText = 'display: inline-block; transition: transform 0.3s;';
+                        const pollLabel = document.createElement('span'); pollLabel.textContent = 'Jetzt Status abfragen';
+                        const pollStatus = document.createElement('span'); pollStatus.style.cssText = 'color: #aaa; font-size: 11px;';
+                        manualPollBtn.appendChild(pollIcon); manualPollBtn.appendChild(pollLabel); manualPollBtn.appendChild(pollStatus);
+                        manualPollBtn.addEventListener('click', async () => {
+                            pollIcon.style.animation = 'ai-reviewer-spin 1s linear infinite';
+                            pollLabel.textContent = 'Frage ab...';
+                            pollStatus.textContent = '';
+                            await doManualPoll('Manuell');
+                            pollIcon.style.animation = '';
+                            pollLabel.textContent = 'Jetzt Status abfragen';
+                            if (cachedPollResponse) { pollStatus.textContent = '✅ Ergebnis erhalten!'; pollStatus.style.color = '#50fa7b'; }
+                            else { pollStatus.textContent = '— wird noch bearbeitet'; pollStatus.style.color = '#aaa'; }
+                            setTimeout(() => { pollStatus.textContent = ''; }, 4000);
+                        });
                     }
                     if (manualPollBtn) statusEl.appendChild(manualPollBtn);
 
@@ -502,12 +522,17 @@
                                     resultsArea.appendChild(korrBox);
                                 }
 
-                                if (verlinkerText) {
+                                {
                                     const verlBox = document.createElement('div'); Object.assign(verlBox.style, { backgroundColor: '#2d2d30', padding: '12px', borderRadius: '6px', border: '1px solid #3a3a3c' });
-                                    const lines = verlinkerText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+                                    const lines = verlinkerText ? verlinkerText.split('\n').map(l => l.trim()).filter(l => l.length > 0) : [];
                                     const linkCount = lines.filter(l => l.toLowerCase().startsWith('link')).length;
                                     const vTitle = document.createElement('div'); vTitle.innerHTML = `<span style="color:#50fa7b; font-weight:bold; font-size:14px;">🔗 ${linkCount === 1 ? 'Verlinkung' : 'Verlinkungen'}</span><hr style="border:0; border-top:1px solid #444; margin:8px 0;">`;
                                     verlBox.appendChild(vTitle);
+                                    if (lines.length === 0) {
+                                        const noLinks = document.createElement('div'); Object.assign(noLinks.style, { borderLeft: '3px solid #ffb86c', backgroundColor: '#1e1e1e', padding: '10px 12px', margin: '8px 0', borderRadius: '0 4px 4px 0' });
+                                        noLinks.innerHTML = '<span style="color:#ffb86c;">►</span> <span style="color:#f8f8f2;">Keine passenden Verlinkungen gefunden.</span>';
+                                        verlBox.appendChild(noLinks);
+                                    }
                                     let currentGroup = null;
                                     lines.forEach(line => {
                                         let cleanLine = line.replace(/^[-*•#\d.]+\s*/, '');
@@ -521,6 +546,7 @@
                                             const linkText = linkTextMatch ? linkTextMatch[1] : null;
 
                                             currentGroup = document.createElement('div'); Object.assign(currentGroup.style, { borderLeft: '3px solid #007acc', backgroundColor: '#1e1e1e', padding: '10px 12px', margin: '8px 0', borderRadius: '0 4px 4px 0', position: 'relative', transition: 'opacity 0.3s, max-height 0.3s, margin 0.3s, padding 0.3s', overflow: 'hidden' });
+                                            if (linkUrl) currentGroup.dataset.previewUrl = linkUrl;
                                             currentGroup.innerHTML = `<div>► <span style="color:#f8f8f2; font-weight:bold;">${safeLine}</span></div>`;
 
                                             // X-Button zum Entfernen des Links
@@ -583,10 +609,10 @@
 
                                     // --- Link-Vorschau: Prefetch & Hover-Karte ---
                                     const previewCache = new Map();
-                                    const previewLinks = verlBox.querySelectorAll('a[href]');
+                                    const previewGroups = verlBox.querySelectorAll('[data-preview-url]');
                                     const previewUrls = new Set();
-                                    previewLinks.forEach(a => { if (a.href.startsWith('http')) previewUrls.add(a.href); });
-                                    logDebug(`Link-Vorschau: ${previewUrls.size} URLs gefunden, ${previewLinks.length} Links`);
+                                    previewGroups.forEach(g => previewUrls.add(g.dataset.previewUrl));
+                                    logDebug(`Link-Vorschau: ${previewUrls.size} URLs gefunden`);
 
                                     // Prefetch: Seite laden, OG-Tags extrahieren
                                     async function prefetchMeta(url) {
@@ -610,7 +636,7 @@
                                                 // Fallback: ganzen Text laden
                                                 html = await resp.text();
                                             }
-                                            const doc = new DOMParser().parseFromString(html, 'text/html');
+                                            const doc = new DOMParser().parseFromString('<meta charset="utf-8">' + html, 'text/html');
                                             const og = (p) => { const el = doc.querySelector(`meta[property="og:${p}"]`); return el ? el.getAttribute('content') : null; };
                                             const metaTag = (n) => { const el = doc.querySelector(`meta[name="${n}"]`); return el ? el.getAttribute('content') : null; };
                                             const title = og('title') || doc.querySelector('title')?.textContent?.trim() || null;
@@ -640,7 +666,7 @@
                                         previewCard = document.createElement('div');
                                         previewCard.className = 'ai-reviewer-preview';
                                         Object.assign(previewCard.style, {
-                                            position: 'fixed', zIndex: '1000000', width: '280px',
+                                            position: 'fixed', zIndex: '1000000', width: '340px',
                                             backgroundColor: '#1e1e1e', border: '1px solid #555', borderRadius: '8px',
                                             boxShadow: '0 8px 24px rgba(0,0,0,0.6)', overflow: 'hidden',
                                             opacity: '0', transform: 'translateY(6px)', transition: 'opacity 0.18s ease, transform 0.18s ease, border-color 0.15s ease',
@@ -660,15 +686,15 @@
                                         if (!data) return;
                                         const card = createPreviewCard();
                                         card._url = url;
-                                        let imgHtml = '';
-                                        if (data.image) {
-                                            imgHtml = `<div style="width:100%; height:140px; background:#2a2a2c; overflow:hidden;"><img src="${escapeHTML(data.image)}" style="width:100%; height:100%; object-fit:cover; display:block;" onerror="this.parentNode.style.display='none'"></div>`;
-                                        }
-                                        const descHtml = data.description ? `<div style="font-size:11px; color:#aaa; line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${escapeHTML(data.description)}</div>` : '';
-                                        card.innerHTML = `${imgHtml}<div style="padding:10px 12px;">`
-                                            + `<div style="font-size:13px; font-weight:600; color:#f0f0f0; line-height:1.3; margin-bottom:${descHtml ? '6px' : '0'}; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${escapeHTML(data.title)}</div>`
-                                            + `${descHtml}`
-                                            + `<div style="font-size:10px; color:#666; margin-top:6px;">↗ Artikel öffnen</div></div>`;
+                                        const imgHtml = data.image ? `<img src="${escapeHTML(data.image)}" style="width:72px; min-width:72px; height:72px; object-fit:cover; border-radius:6px; background:#2a2a2c;" onerror="this.style.display='none'">` : '';
+                                        const descHtml = data.description ? `<div style="font-size:11px; color:#aaa; line-height:1.35; margin-top:4px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${escapeHTML(data.description)}</div>` : '';
+                                        card.innerHTML = `<div style="display:flex; gap:10px; padding:10px 12px; align-items:flex-start;">`
+                                            + imgHtml
+                                            + `<div style="flex:1; min-width:0;">`
+                                            + `<div style="font-size:13px; font-weight:600; color:#f0f0f0; line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${escapeHTML(data.title)}</div>`
+                                            + descHtml
+                                            + `<div style="font-size:10px; color:#666; margin-top:4px;">↗ Artikel öffnen</div>`
+                                            + `</div></div>`;
 
                                         // Positionierung: an Cursor, aber im Viewport halten
                                         card.style.opacity = '0';
@@ -700,23 +726,19 @@
                                         previewHideTimer = setTimeout(() => { if (previewCard) previewCard.style.display = 'none'; }, 200);
                                     }
 
-                                    // Event-Listener auf alle Link-Elemente in der verlBox
-                                    previewLinks.forEach(a => {
-                                        const url = a.href;
-                                        a.addEventListener('mouseenter', (e) => {
+                                    // Event-Listener auf alle Link-Gruppen (ganzer Block)
+                                    previewGroups.forEach(group => {
+                                        const url = group.dataset.previewUrl;
+                                        group.addEventListener('mouseenter', (e) => {
                                             clearTimeout(previewHideTimer);
                                             clearTimeout(previewShowTimer);
-                                            const cached = previewCache.get(url);
-                                            logDebug(`Hover: ${url} → Cache: ${cached ? 'bereit' : cached === null ? 'lädt noch' : 'nicht vorhanden'}`);
-                                            a._lastMx = e.clientX; a._lastMy = e.clientY;
-                                            previewShowTimer = setTimeout(() => showPreviewCard(url, a._lastMx, a._lastMy), 300);
+                                            group._lastMx = e.clientX; group._lastMy = e.clientY;
+                                            previewShowTimer = setTimeout(() => showPreviewCard(url, group._lastMx, group._lastMy), 300);
                                         });
-                                        a.addEventListener('mousemove', (e) => {
-                                            // Nur letzte Cursor-Position merken (Timer läuft weiter)
-                                            a._lastMx = e.clientX; a._lastMy = e.clientY;
+                                        group.addEventListener('mousemove', (e) => {
+                                            group._lastMx = e.clientX; group._lastMy = e.clientY;
                                         });
-                                        a.addEventListener('mouseleave', () => {
-                                            logDebug('mouseleave: Timer gestoppt');
+                                        group.addEventListener('mouseleave', () => {
                                             clearTimeout(previewShowTimer);
                                             previewHideTimer = setTimeout(() => hidePreviewCard(), 200);
                                         });
