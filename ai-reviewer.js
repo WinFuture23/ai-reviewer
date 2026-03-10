@@ -181,13 +181,26 @@
         Object.assign(header.style, { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 15px', backgroundColor: '#333333', borderBottom: '1px solid #222', color: '#ccc', fontSize: '12px', userSelect: 'none' });
         header.innerHTML = '<span>🤖 KI-Korrektor & Verlinker</span>';
         
+        const headerRight = document.createElement('div'); Object.assign(headerRight.style, { display: 'flex', gap: '15px', alignItems: 'center' });
+
+        const debugBtn = document.createElement('span'); debugBtn.innerHTML = 'Debug';
+        Object.assign(debugBtn.style, { cursor: 'pointer', color: '#6272a4', fontSize: '11px', transition: 'color 0.2s' });
+        debugBtn.onmouseover = () => debugBtn.style.color = '#8be9fd'; debugBtn.onmouseout = () => debugBtn.style.color = '#6272a4';
+        debugBtn.onclick = () => {
+            const meta = `URL: ${location.href}\nJobID: ${debugLog.find(l => l.includes('JobID:'))?.match(/JobID:\s*(\S+)/)?.[1] || 'n/a'}\n\n`;
+            navigator.clipboard.writeText(meta + debugLog.join('\n')).then(() => {
+                const old = debugBtn.innerHTML; debugBtn.innerHTML = 'Kopiert!'; setTimeout(() => debugBtn.innerHTML = old, 2000);
+            });
+        };
+
         // MINIMIEREN STATT LÖSCHEN
         const closeHeaderBtn = document.createElement('span'); closeHeaderBtn.innerHTML = '▼ Verbergen';
         Object.assign(closeHeaderBtn.style, { cursor: 'pointer', fontWeight: 'bold', color: '#ffb86c', transition: 'color 0.2s' });
         closeHeaderBtn.onmouseover = () => closeHeaderBtn.style.color = '#ff9900'; closeHeaderBtn.onmouseout = () => closeHeaderBtn.style.color = '#ffb86c';
         closeHeaderBtn.onclick = () => { terminalContainer.style.display = 'none'; launcherTab.style.display = 'flex'; };
 
-        header.appendChild(closeHeaderBtn);
+        headerRight.appendChild(debugBtn); headerRight.appendChild(closeHeaderBtn);
+        header.appendChild(headerRight);
 
         // Content Area
         const contentArea = document.createElement('div');
@@ -311,61 +324,68 @@
                 setStatusIconText('⏳', `Artikel wird verarbeitet... (0 Sekunden)`, `Geschätzte Dauer: ca. 3 - 4 Minuten`, '#f1fa8c', true);
                 const startTime = Date.now();
                 
-                let lastTimerTick = 0;
                 let earlyPollWakeup = false;
                 let cachedPollResponse = null;
+                let lastPollTime = 0;
+                let manualPollBtn = null;
+
+                // Manuelle Abfrage: Server-Anfrage und Ergebnis an pollLoop übergeben
+                async function doManualPoll(label) {
+                    logDebug(`${label}: Server-Abfrage...`);
+                    lastPollTime = Date.now();
+                    try {
+                        const pollRes = await fetch(PROXY_URL, {
+                            method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeaders },
+                            body: JSON.stringify({ action: 'poll', jobId: jobId })
+                        });
+                        if (pollRes.ok) {
+                            const rawText = await pollRes.text();
+                            const statusMatch = rawText.match(/<status>([\s\S]*?)<\/status>/i);
+                            const jobStatus = statusMatch ? statusMatch[1].trim() : 'pending';
+                            logDebug(`${label}: Status = ${jobStatus}`);
+                            if (jobStatus !== 'pending') {
+                                cachedPollResponse = rawText;
+                                earlyPollWakeup = true;
+                                return;
+                            }
+                        }
+                    } catch(e) { logDebug(`${label}: Fehlgeschlagen (${e.message})`); }
+                    earlyPollWakeup = true;
+                }
+
+                // visibilitychange: feuert zuverlässig wenn Tab wieder aktiv wird
+                function onVisibilityChange() {
+                    if (document.visibilityState !== 'visible' || !pollIntervalActive) return;
+                    elapsedSeconds = Math.round((Date.now() - startTime) / 1000);
+                    // Erst ab 90s und nur wenn >30s seit letztem Abruf
+                    if (elapsedSeconds < 90) return;
+                    if (Date.now() - lastPollTime < 30000) { logDebug('Tab sichtbar, aber letzter Abruf <30s her. Übersprungen.'); return; }
+                    doManualPoll('Tab-Rückkehr');
+                }
+                document.addEventListener('visibilitychange', onVisibilityChange);
 
                 timerInterval = setInterval(() => {
                     if (!pollIntervalActive) return;
-                    const nowElapsed = Math.round((Date.now() - startTime) / 1000);
-                    const jumped = nowElapsed - lastTimerTick;
-                    lastTimerTick = nowElapsed;
-                    elapsedSeconds = nowElapsed;
-
-                    // Bei Zeitsprung > 60s (Tab war im Hintergrund): sofort Server abfragen
-                    if (jumped > 60) {
-                        logDebug(`Tab-Rückkehr erkannt (Sprung: ${jumped}s). Sofortige Server-Abfrage...`);
-                        (async () => {
-                            try {
-                                const pollRes = await fetch(PROXY_URL, {
-                                    method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeaders },
-                                    body: JSON.stringify({ action: 'poll', jobId: jobId })
-                                });
-                                if (pollRes.ok) {
-                                    const rawText = await pollRes.text();
-                                    const statusMatch = rawText.match(/<status>([\s\S]*?)<\/status>/i);
-                                    const jobStatus = statusMatch ? statusMatch[1].trim() : 'pending';
-                                    if (jobStatus !== 'pending') {
-                                        logDebug(`Ergebnis nach Tab-Rückkehr erhalten: ${jobStatus}. Übergebe an pollLoop.`);
-                                        cachedPollResponse = rawText;
-                                        earlyPollWakeup = true;
-                                        return;
-                                    }
-                                }
-                            } catch(e) { logDebug(`Tab-Rückkehr-Abfrage fehlgeschlagen: ${e.message}`); }
-                            // Kein Ergebnis: pollLoop aufwecken für eigenen Versuch
-                            earlyPollWakeup = true;
-                            // Kein Ergebnis und Timeout überschritten? Dann abbrechen.
-                            if (elapsedSeconds >= timeoutMax) {
-                                pollIntervalActive = false; clearInterval(timerInterval); unlockEditor();
-                                launcherTab.querySelector('span').innerText = '🤖 KI-Korrektor';
-                                setStatusIconText('❌', 'Leider ist ein Fehler aufgetreten.', 'Bitte versuchen Sie es erneut.', '#ff5555', true);
-                                addMessage(`Das Polling wurde nach ${formatDurationFriendly(timeoutMax)} abgebrochen.`, 'error');
-                                btnCheck.style.display = 'block'; btnCheck.disabled = false;
-                            }
-                        })();
-                        return; // Timer-Tick beenden, async übernimmt
-                    }
-
+                    elapsedSeconds = Math.round((Date.now() - startTime) / 1000);
                     const timeStr = formatDurationFriendly(elapsedSeconds);
                     setStatusIconText('⏳', `Artikel wird verarbeitet... (${timeStr})`, `Geschätzte Dauer: ca. 3 - 4 Minuten`, '#f1fa8c', false);
 
+                    // Manuellen Button auch beim Timer-Update erhalten
+                    if (manualPollBtn) statusEl.appendChild(manualPollBtn);
+
                     if (elapsedSeconds >= timeoutMax) {
-                        pollIntervalActive = false; clearInterval(timerInterval); unlockEditor();
-                        launcherTab.querySelector('span').innerText = '🤖 KI-Korrektor';
-                        setStatusIconText('❌', 'Leider ist ein Fehler aufgetreten.', 'Bitte versuchen Sie es erneut.', '#ff5555', true);
-                        addMessage(`Das Polling wurde nach ${formatDurationFriendly(timeoutMax)} abgebrochen.`, 'error');
-                        btnCheck.style.display = 'block'; btnCheck.disabled = false;
+                        // Vor Abbruch: letzte Server-Abfrage
+                        (async () => {
+                            await doManualPoll('Timeout-Abfrage');
+                            if (cachedPollResponse) return; // pollLoop verarbeitet
+                            // Wirklich kein Ergebnis
+                            pollIntervalActive = false; clearInterval(timerInterval); unlockEditor();
+                            document.removeEventListener('visibilitychange', onVisibilityChange);
+                            launcherTab.querySelector('span').innerText = '🤖 KI-Korrektor';
+                            setStatusIconText('❌', 'Leider ist ein Fehler aufgetreten.', 'Bitte versuchen Sie es erneut.', '#ff5555', true);
+                            addMessage(`Das Polling wurde nach ${formatDurationFriendly(timeoutMax)} abgebrochen.`, 'error');
+                            btnCheck.style.display = 'block'; btnCheck.disabled = false;
+                        })();
                     }
                 }, 1000);
                 
@@ -376,10 +396,23 @@
                             if (currentElapsed >= timeoutMax) break;
 
                             let nextTarget;
-                            if (currentElapsed < 120) { nextTarget = 120; } 
-                            else if (currentElapsed < 150) { nextTarget = currentElapsed + 30; } 
-                            else if (currentElapsed < 240) { nextTarget = currentElapsed + 10; } 
-                            else { nextTarget = currentElapsed + 60; }
+                            // 0-90s: kein Abruf (spart Kosten)
+                            // 90-180s: alle 15s abrufen
+                            // ab 180s: kein automatischer Abruf mehr (nur manuell/visibilitychange)
+                            if (currentElapsed < 90) { nextTarget = 90; }
+                            else if (currentElapsed < 180) { nextTarget = currentElapsed + 15; }
+                            else {
+                                // Ab 3 Min: manuellen Abfrage-Button zeigen + alle 60s automatisch
+                                if (!manualPollBtn) {
+                                    manualPollBtn = document.createElement('span');
+                                    manualPollBtn.innerHTML = '🔄 Jetzt Status abfragen';
+                                    Object.assign(manualPollBtn.style, { cursor: 'pointer', color: '#8be9fd', fontSize: '12px', textDecoration: 'underline', marginTop: '4px', display: 'inline-block' });
+                                    manualPollBtn.onclick = () => doManualPoll('Manuelle Abfrage');
+                                    statusEl.appendChild(manualPollBtn);
+                                    logDebug('Manueller Abfrage-Link angezeigt (nach 3 Min).');
+                                }
+                                nextTarget = currentElapsed + 60;
+                            }
 
                             let sleepSecs = nextTarget - currentElapsed;
                             if (sleepSecs > 0) {
@@ -400,6 +433,7 @@
                                 cachedPollResponse = null;
                             } else {
                                 logDebug(`Frage Status ab...`);
+                                lastPollTime = Date.now();
                                 const pollRes = await fetch(PROXY_URL, {
                                     method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeaders },
                                     body: JSON.stringify({ action: 'poll', jobId: jobId })
@@ -417,7 +451,8 @@
 
                             if (jobStatus === 'pending') continue; 
 
-                            pollIntervalActive = false; clearInterval(timerInterval); unlockEditor(); 
+                            pollIntervalActive = false; clearInterval(timerInterval); unlockEditor();
+                            document.removeEventListener('visibilitychange', onVisibilityChange);
                             const finalDurationStr = formatDurationFriendly(Math.round((Date.now() - startTime) / 1000));
                             logDebug(`Job abgeschlossen: ${jobStatus}.`);
 
@@ -528,6 +563,7 @@
                     } catch (pollErr) {
                         if (pollIntervalActive) {
                             pollIntervalActive = false; clearInterval(timerInterval); unlockEditor();
+                            document.removeEventListener('visibilitychange', onVisibilityChange);
                             logDebug(`Polling-Fehler: ${pollErr.message}`);
                             launcherTab.querySelector('span').innerText = '🤖 KI-Korrektor';
                             btnCheck.style.display = 'block'; btnCheck.disabled = false;
@@ -538,6 +574,7 @@
                 })();
             } catch (error) {
                 pollIntervalActive = false; clearInterval(timerInterval); unlockEditor();
+                if (typeof onVisibilityChange === 'function') document.removeEventListener('visibilitychange', onVisibilityChange);
                 logDebug(`Allgemeiner Fehler: ${error.message}`);
                 launcherTab.querySelector('span').innerText = '🤖 KI-Korrektor';
                 btnCheck.style.display = 'block'; btnCheck.disabled = false;
