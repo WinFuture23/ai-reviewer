@@ -688,12 +688,18 @@
                     }
 
                     if (elapsed_seconds >= TIMEOUT_MAX) {
-                        // Vor Abbruch: letzte Server-Abfrage
+                        // Prevent multiple timeout handlers from firing
+                        clearInterval(timer_interval);
                         (async () => {
                             await do_manual_poll('Timeout-Abfrage');
-                            if (cached_poll_response) return; // poll_loop verarbeitet
-                            poll_active = false; clearInterval(timer_interval); unlock_editor();
+                            if (cached_poll_response) {
+                                // Result arrived — poll_loop will process it (wakeup already called)
+                                return;
+                            }
+                            // Truly no result — give up
+                            poll_active = false; unlock_editor();
                             document.removeEventListener('visibilitychange', on_visibility_change);
+                            wakeup(); // unblock poll_loop so it exits
                             launcher_tab.querySelector('span').innerText = '🤖 KI-Korrektor';
                             set_status('❌', 'Leider ist ein Fehler aufgetreten.', 'Bitte versuchen Sie es erneut.', '#ff5555', true);
                             manual_poll_area.style.display = 'none';
@@ -710,9 +716,10 @@
                         // Initial grace period — backend needs time to start processing
                         if (poll_active) await interruptible_sleep(30000);
 
-                        while (poll_active) {
+                        // Loop exits when poll_active=false AND no cached result pending.
+                        // TIMEOUT_MAX is enforced by the timer_interval handler, not here.
+                        while (poll_active || cached_poll_response) {
                             let current_elapsed = Math.round((Date.now() - start_time) / 1000);
-                            if (current_elapsed >= TIMEOUT_MAX) break;
 
                             // Use cached response from tab-return or manual poll if available
                             let data;
@@ -734,10 +741,10 @@
                             const job_status = data.status || 'pending';
 
                             if (job_status === 'pending') {
+                                if (!poll_active) break; // timeout handler killed the loop
                                 // Adaptive wait: slow at start, fast mid-range, slow after 5 min
                                 const wait_sec = current_elapsed < 90 ? 15 : current_elapsed < 300 ? 2 : 30;
                                 next_poll_time = Date.now() + wait_sec * 1000;
-                                if (!poll_active) return;
                                 await interruptible_sleep(wait_sec * 1000);
                                 continue;
                             }
