@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>AI-Reviewer Testseite</title>
+    <style>
+        body { font-family: sans-serif; max-width: 900px; margin: 40px auto; padding: 20px; background: #f5f5f5; }
+        h1 { color: #333; }
+        textarea { width: 100%; height: 300px; font-family: monospace; font-size: 14px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+        .info { background: #e8f4fd; border: 1px solid #b3d9f2; padding: 15px; border-radius: 6px; margin: 15px 0; font-size: 13px; }
+        .warn { background: #fff3cd; border: 1px solid #ffc107; padding: 15px; border-radius: 6px; margin: 15px 0; font-size: 13px; }
+        code { background: #eee; padding: 2px 6px; border-radius: 3px; }
+        button { background: #007acc; color: #fff; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 14px; margin-top: 10px; }
+        button:hover { background: #005f9e; }
+    </style>
+</head>
+<body>
+    <h1>AI-Reviewer Testseite</h1>
+
+    <div class="warn">
+        <strong>Token-Hinweis:</strong> Das Auth-Token ist 90 Minuten gueltig.
+        Klicke auf <strong>"Token erneuern"</strong>, falls es abgelaufen ist.
+    </div>
+
+    <h2>Secret</h2>
+    <div class="info">
+        Gib das HMAC-Secret ein (identisch mit <code>AI_REVIEWER_SECRET</code> in Val.town).
+        Das Secret wird nur lokal im Browser verwendet und nicht uebertragen.
+    </div>
+    <input type="password" id="secret-input" placeholder="HMAC-Secret hier eingeben..." style="width: 100%; padding: 8px; font-family: monospace; font-size: 14px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+
+    <button onclick="refreshToken()" style="margin-top: 10px;">Token erneuern</button>
+    <span id="token-status" style="margin-left: 10px; font-size: 13px; color: #666;"></span>
+
+    <div class="info">
+        <strong>So funktioniert der Test:</strong><br>
+        1. HMAC-Secret oben eingeben und "Token erneuern" klicken<br>
+        2. Text in das Feld unten eingeben (oder den Beispieltext lassen)<br>
+        3. Unten rechts auf den blauen Tab "KI-Korrektor" klicken<br>
+        4. "Artikel ueberpruefen" klicken<br>
+        5. Debug-Log beobachten (im Widget: "Debug kopieren")
+    </div>
+
+    <h2>Editor (simuliert <code>news_text</code>)</h2>
+    <textarea id="news_text">Dies ist ein Testartikel fuer den AI-Reviewer.
+
+Microsoft hat heute ein neues Update fuer Windows 11 veroeffentlicht. Das Update bringt einige Verbesserungen mit sich, darunter eine bessere Perfomance und neue Sicherheitsfunktionen.
+
+Die neue Version traegt die Buildnummer 26100.1234 und ist ab sofort ueber Windows Update verfuegbar. Nutzer koennen das Update manuell herunterladen oder auf die automatische Verteilung warten.
+
+Laut Microsoft werden mit dem Update auch einige bekannte Fehler behoben, die in der vorherigen Version aufgetreten sind.</textarea>
+
+    <script>
+    // Token-Erneuerung: Berechnet HMAC-SHA256 lokal mit dem Secret
+    // NUR FUER TESTS! In Produktion macht das der PHP-Server.
+    async function generateHMAC(secret, message) {
+        const encoder = new TextEncoder();
+        const keyData = encoder.encode(secret);
+        const msgData = encoder.encode(message);
+        const key = await crypto.subtle.importKey('raw', keyData, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+        const signature = await crypto.subtle.sign('HMAC', key, msgData);
+        return Array.from(new Uint8Array(signature)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function refreshToken() {
+        const secretInput = document.getElementById('secret-input');
+        const secret = secretInput ? secretInput.value.trim() : '';
+        if (!secret) {
+            document.getElementById('token-status').textContent = 'Bitte zuerst das Secret eingeben.';
+            document.getElementById('token-status').style.color = '#c00';
+            return;
+        }
+        const ts = Math.floor(Date.now() / 1000);
+        const token = await generateHMAC(secret, String(ts));
+        window.wfv4_ai_reviewer_auth = { token: token, ts: ts };
+        document.getElementById('token-status').textContent = 'Neues Token generiert (' + new Date().toLocaleTimeString('de-DE') + ') - gueltig fuer 90 Min.';
+        document.getElementById('token-status').style.color = '#666';
+        console.log('Auth-Token erneuert:', window.wfv4_ai_reviewer_auth);
+    }
+    </script>
+
+    <!-- AI Reviewer laden (lokal) -->
+    <script src="../ai-reviewer.js"></script>
+</body>
+</html>
