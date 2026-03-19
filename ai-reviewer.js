@@ -7,7 +7,7 @@
  * tokens injected by the PHP integration class (wfv4_ai_reviewer::render).
  *
  * @author  mesios
- * @version 2 2026-03-10
+ * @version 3 2026-03-19
  * @see     docs/winfuture-integration.php
  */
 (function() {
@@ -240,8 +240,9 @@
     let poll_active = false;        // True while a job is being polled
     let cached_diff = { left: null, right: null, html: null }; // Diffchecker cache
     let debug_log = [];             // Debug messages (copyable via header button)
-    let backup_content = null;      // Editor text before AI modification (for undo)
+    let backup_data = null;         // All field values before AI modification (for undo)
     let btn_check = null;           // "Artikel überprüfen" button reference
+    let content_info = null;        // Detected content type { type, id, config }
 
     // --- CONFIGURATION ---
     // Diffchecker API accounts (Base64 to avoid plain-text in source)
@@ -253,6 +254,191 @@
     const PROXY_URL = 'https://mesios--43bb6c1c197111f18d1642dde27851f2.web.val.run';
     const POLLER_URL = 'https://mesios--f12a09281c8f11f1845142dde27851f2.web.val.run';
     const POLLER_API_KEY = 'wf_super_secret_key_2026_xyz';
+
+    // --- CONTENT TYPE CONFIGURATION ---
+    // Each content type maps to the DOM element IDs used on its editor page.
+    // ace_var: name of the window-level Ace editor instance (convention: {textarea_id}_editor)
+    // Submit functions per content type (form submission after save)
+    const SUBMIT_FUNCTIONS = {
+        6: 'wfv4_news_submit',  // News: global function
+        8: 'dl_submit_check',   // Downloads: form onsubmit
+        5: 'video_edit_form_submit', // Videos: form onsubmit
+        1: 'faqcheck'           // FAQ: form onsubmit
+    };
+
+    // Form IDs per content type (for non-News types that use form.submit())
+    const FORM_IDS = {
+        8: 'dlc-edit',
+        5: 'video_edit_form',
+        1: 'faq_edit_form'
+    };
+
+    const CONTENT_TYPES = {
+        6: { // News
+            name: 'news',
+            fields: {
+                headline: { id: 'subject', type: 'input', ace_var: 'news_title_editor' },
+                teaser:   { id: 'news_text_teaser', type: 'textarea', ace_var: 'news_text_teaser_editor' },
+                content:  { id: 'news_text', type: 'textarea', ace_var: 'news_text_editor' }
+            }
+        },
+        8: { // Downloads
+            name: 'download',
+            fields: {
+                headline:      { id: 'subject', type: 'input', ace_var: 'dl_title_editor' },
+                software_name: { id: 'program_name', type: 'input' },
+                content:       { id: 'download_text', type: 'textarea', ace_var: 'dl_text_editor' }
+            }
+        },
+        5: { // Videos
+            name: 'video',
+            fields: {
+                headline: { id: 'subject', type: 'input', ace_var: 'video_title_editor' },
+                content:  { id: 'video_description', type: 'textarea', ace_var: 'video_text_editor' }
+            }
+        },
+        1: { // FAQ
+            name: 'faq',
+            fields: {
+                headline: { id: 'question', type: 'input', ace_var: 'faq_title_editor' },
+                content:  { id: 'text', type: 'textarea', ace_var: 'faq_text_editor' }
+            }
+        }
+        // TODO: tags — Element-ID noch unbekannt, spaeter hier ergaenzen
+        // TODO: screenshot_content, screenshot_all — spaeter ergaenzen
+    };
+
+    /**
+     * Detect current content type and ID from window.wfv4_content.
+     * Falls back to News (type 6) if the global is missing but #news_text exists.
+     * @return {object|null} { type, id, config } or null
+     */
+    function detect_content_info() {
+        const wfv4 = window.wfv4_content;
+
+        // Sicherheitsrichtlinie §19: Ungueltige Werte abweisen, nicht korrigieren
+        if( wfv4 && typeof wfv4.type !== 'undefined' ) {
+            const type_id = parseInt( wfv4.type, 10 );
+            const cid = parseInt( wfv4.id, 10 );
+
+            if( isNaN( type_id ) || isNaN( cid ) || cid < 0 ) {
+                log_debug( 'Fehler: wfv4_content enthaelt ungueltige Werte.' );
+                return null;
+            }
+
+            const config = CONTENT_TYPES[type_id];
+
+            if( config ) {
+                log_debug( `Content-Type erkannt: ${config.name} (Typ ${type_id}, ID ${cid}).` );
+                return { type: type_id, id: cid, config: config };
+            }
+            log_debug( 'Warnung: Unbekannter Content-Type.' );
+        }
+
+        // Fallback: auto-detect based on known DOM elements
+        if( document.getElementById( 'news_text' ) ) {
+            log_debug( 'Fallback: news_text gefunden, verwende News-Konfiguration.' );
+            return { type: 6, id: 0, config: CONTENT_TYPES[6] };
+        }
+
+        log_debug( 'Fehler: Content-Type konnte nicht ermittelt werden.' );
+        return null;
+    }
+
+    /**
+     * Read a field value from ACE editor (preferred) or DOM element (fallback).
+     * @param {object} field_cfg field config from CONTENT_TYPES
+     * @return {string}
+     */
+    function read_field_value( field_cfg ) {
+        if( field_cfg.ace_var ) {
+            const editor = window[field_cfg.ace_var];
+
+            if( editor && typeof editor.getValue === 'function' ) {
+                return editor.getValue();
+            }
+        }
+        const el = document.getElementById( field_cfg.id );
+        return el ? el.value : '';
+    }
+
+    /**
+     * Write a value to ACE editor (preferred) or DOM element (fallback).
+     * Sets wfv4_news_changed flag on success.
+     * @param {object} field_cfg field config from CONTENT_TYPES
+     * @param {string} value the new value
+     * @return {boolean} true if written successfully
+     */
+    function write_field_value( field_cfg, value ) {
+        if( field_cfg.ace_var ) {
+            const editor = window[field_cfg.ace_var];
+
+            if( editor && typeof editor.setValue === 'function' ) {
+                editor.setValue( value, -1 );
+                window.wfv4_news_changed = true;
+                return true;
+            }
+        }
+        const el = document.getElementById( field_cfg.id );
+
+        if( el ) {
+            el.value = value;
+            window.wfv4_news_changed = true;
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Read missing special links from the #missing_specials UL element.
+     * Each LI contains an <a> (name) and an <input> (URL).
+     * @return {Array<{name: string, url: string}>}
+     */
+    function read_missing_specials() {
+        const ul = document.getElementById( 'missing_specials' );
+
+        if( !ul ) return [];
+        const items = [];
+        const lis = ul.querySelectorAll( 'li' );
+
+        lis.forEach( function( li ) {
+            const a = li.querySelector( 'a' );
+            const input = li.querySelector( 'input' );
+
+            if( a && input ) {
+                items.push( { name: a.textContent.trim(), url: input.value.trim() } );
+            }
+        });
+        return items;
+    }
+
+    /**
+     * Gather all article data for the current content type.
+     * Returns an object with content_type, content_id, and all field values.
+     * @param {object} ci content_info from detect_content_info()
+     * @return {object}
+     */
+    function gather_article_data( ci ) {
+        const data = {
+            content_type: ci.type,
+            content_id: ci.id
+        };
+
+        for( const key in ci.config.fields ) {
+            const value = read_field_value( ci.config.fields[key] );
+
+            if( value ) {
+                data[key] = value;
+            }
+        }
+
+        const specials = read_missing_specials();
+
+        if( specials.length > 0 ) {
+            data.missing_specials = specials;
+        }
+        return data;
+    }
 
     // --- UTILITY FUNCTIONS ---
 
@@ -298,56 +484,92 @@
         return t; 
     }
 
-    /** Lock the Ace editor (or textarea fallback) with a semi-transparent overlay. */
+    /** Lock all editor fields for the current content type with overlays. */
     function lock_editor() {
-        if (window.news_text_editor && typeof window.news_text_editor.setReadOnly === 'function') {
-            window.news_text_editor.setReadOnly(true);
-            const ace_container = window.news_text_editor.container; 
-            if (ace_container) {
-                ace_container.style.transition = 'opacity 0.3s ease';
-                ace_container.style.opacity = '0.5'; 
-                let overlay = document.getElementById('ai-reviewer-ace-overlay');
-                if (!overlay) {
-                    overlay = document.createElement('div');
-                    overlay.id = 'ai-reviewer-ace-overlay';
-                    Object.assign(overlay.style, {
-                        position: 'absolute', top: '0', left: '0', width: '100%', height: '100%',
-                        zIndex: '9999', cursor: 'not-allowed', backgroundColor: 'rgba(255, 255, 255, 0.1)'
-                    });
-                    ace_container.appendChild(overlay);
+        if( !content_info ) return;
+        const fields = content_info.config.fields;
+
+        for( const key in fields ) {
+            const field = fields[key];
+            let ace_locked = false;
+
+            if( field.ace_var ) {
+                const editor = window[field.ace_var];
+
+                if( editor && typeof editor.setReadOnly === 'function' ) {
+                    ace_locked = true;
+                    editor.setReadOnly( true );
+                    const container = editor.container;
+
+                    if( container ) {
+                        container.style.transition = 'opacity 0.3s ease';
+                        container.style.opacity = '0.5';
+                        const overlay_id = 'ai-reviewer-overlay-' + field.id;
+
+                        if( !document.getElementById( overlay_id ) ) {
+                            const overlay = document.createElement( 'div' );
+                            overlay.id = overlay_id;
+                            Object.assign( overlay.style, {
+                                position: 'absolute', top: '0', left: '0', width: '100%', height: '100%',
+                                zIndex: '9999', cursor: 'not-allowed', backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                            });
+                            container.appendChild( overlay );
+                        }
+                    }
                 }
             }
-        } else {
-            const fallback_el = document.getElementById('news_text');
-            if (fallback_el) {
-                fallback_el.disabled = true;
-                fallback_el.style.transition = 'opacity 0.3s ease';
-                fallback_el.style.opacity = '0.5';
-                fallback_el.style.cursor = 'not-allowed';
+
+            if( !ace_locked ) {
+                const el = document.getElementById( field.id );
+
+                if( el ) {
+                    el.disabled = true;
+                    el.style.transition = 'opacity 0.3s ease';
+                    el.style.opacity = '0.5';
+                    el.style.cursor = 'not-allowed';
+                }
             }
         }
-        log_debug('Editor gesperrt (Overlay aktiv).');
+        log_debug( 'Editor-Felder gesperrt.' );
     }
 
-    /** Remove editor lock and restore normal editing. */
+    /** Unlock all editor fields for the current content type. */
     function unlock_editor() {
-        if (window.news_text_editor && typeof window.news_text_editor.setReadOnly === 'function') {
-            window.news_text_editor.setReadOnly(false);
-            const ace_container = window.news_text_editor.container;
-            if (ace_container) {
-                ace_container.style.opacity = '1';
-                let overlay = document.getElementById('ai-reviewer-ace-overlay');
-                if (overlay) overlay.remove();
+        if( !content_info ) return;
+        const fields = content_info.config.fields;
+
+        for( const key in fields ) {
+            const field = fields[key];
+            let ace_unlocked = false;
+
+            if( field.ace_var ) {
+                const editor = window[field.ace_var];
+
+                if( editor && typeof editor.setReadOnly === 'function' ) {
+                    ace_unlocked = true;
+                    editor.setReadOnly( false );
+                    const container = editor.container;
+
+                    if( container ) {
+                        container.style.opacity = '1';
+                        const overlay = document.getElementById( 'ai-reviewer-overlay-' + field.id );
+
+                        if( overlay ) overlay.remove();
+                    }
+                }
             }
-        } else {
-            const fallback_el = document.getElementById('news_text');
-            if (fallback_el) {
-                fallback_el.disabled = false;
-                fallback_el.style.opacity = '1';
-                fallback_el.style.cursor = 'auto';
+
+            if( !ace_unlocked ) {
+                const el = document.getElementById( field.id );
+
+                if( el ) {
+                    el.disabled = false;
+                    el.style.opacity = '1';
+                    el.style.cursor = '';
+                }
             }
         }
-        log_debug('Editor freigegeben.');
+        log_debug( 'Editor-Felder freigegeben.' );
     }
 
     /** Show a full-screen overlay with the Diffchecker HTML comparison in a sandboxed iframe. */
@@ -482,7 +704,25 @@
         btn_close_bottom.className = 'css_button green';
         Object.assign(btn_close_bottom.style, ACTION_BTN_STYLE, { backgroundColor: '#008800', color: '#fff', borderColor: '#7dc07d #003300 #003300 #7dc07d' });
         btn_close_bottom.onmouseover = () => btn_close_bottom.style.backgroundColor = '#006600'; btn_close_bottom.onmouseout = () => btn_close_bottom.style.backgroundColor = '#008800';
-        btn_close_bottom.onclick = () => { wfv4_news_submit(); terminal_container.style.display = 'none'; };
+        btn_close_bottom.onclick = () => {
+            // Content-type-specific form submission
+            if( content_info ) {
+                const type_id = content_info.type;
+                const submit_fn = SUBMIT_FUNCTIONS[type_id];
+                const form_id = FORM_IDS[type_id];
+
+                if( type_id === 6 && typeof window[submit_fn] === 'function' ) {
+                    // News: call global submit function directly
+                    window[submit_fn]();
+                } else if( form_id ) {
+                    // Downloads, Videos, FAQ: submit the form (requestSubmit triggers onsubmit handlers)
+                    const form = document.getElementById( form_id );
+
+                    if( form ) form.requestSubmit();
+                }
+            }
+            terminal_container.style.display = 'none';
+        };
 
         footer.appendChild(btn_check); footer.appendChild(btn_diff); footer.appendChild(btn_undo); footer.appendChild(btn_close_bottom);
         terminal_container.appendChild(header); terminal_container.appendChild(content_area); terminal_container.appendChild(footer); 
@@ -508,8 +748,8 @@
         btn_diff.onclick = async () => {
             const old_btn_text = btn_diff.innerHTML; btn_diff.innerHTML = '⏳ Lade...'; btn_diff.disabled = true;
             try {
-                let current_editor_text = window.news_text_editor ? window.news_text_editor.getValue() : (document.getElementById('news_text') ? document.getElementById('news_text').value : '');
-                const original_text = backup_content || '';
+                let current_editor_text = content_info ? read_field_value( content_info.config.fields.content ) : '';
+                const original_text = (backup_data && backup_data.content) || '';
                 
                 if (cached_diff.html && cached_diff.left === original_text && cached_diff.right === current_editor_text) { 
                     show_diff_overlay(cached_diff.html); return; 
@@ -528,7 +768,9 @@
                 cached_diff = { left: original_text, right: current_editor_text, html: html_data }; 
                 show_diff_overlay(html_data);
             } catch (err) { 
-                add_message(`<b>Hinweis:</b> Konnte DiffChecker API nicht laden (${escape_html(err.message)}).`, 'warning');
+                // Sicherheitsrichtlinie §12: Details nur ins Debug-Log, nicht an den User
+                log_debug( `DiffChecker-Fehler: ${err.message}` );
+                add_message( '<b>Hinweis:</b> Konnte DiffChecker API nicht laden.', 'warning' );
             } finally { 
                 btn_diff.innerHTML = old_btn_text; btn_diff.disabled = false; 
             }
@@ -536,9 +778,12 @@
 
         /** Restore original editor content from backup. */
         btn_undo.onclick = () => {
-            if (window.news_text_editor && typeof window.news_text_editor.setValue === 'function') window.news_text_editor.setValue(backup_content, -1);
-            else if (document.getElementById('news_text')) document.getElementById('news_text').value = backup_content;
-            add_message('<b>Hinweis:</b> Originaltext wurde wiederhergestellt.', 'warning'); log_debug('Originaltext wiederhergestellt.');
+            if( backup_data && content_info ) {
+                for( const key in backup_data ) {
+                    if( content_info.config.fields[key] ) write_field_value( content_info.config.fields[key], backup_data[key] );
+                }
+            }
+            add_message( '<b>Hinweis:</b> Originaltext wurde wiederhergestellt.', 'warning' ); log_debug( 'Originaltext wiederhergestellt.' );
         };
 
         // --- HAUPT-POLLING LOGIK ---
@@ -551,25 +796,47 @@
             launcher_tab.querySelector('span').innerText = '⏳ KI arbeitet...';
 
             try {
-                set_status('⏳', 'Lese Editor-Inhalt aus...', null, '#8be9fd');
-                let content = window.news_text_editor ? window.news_text_editor.getValue() : (document.getElementById('news_text') ? document.getElementById('news_text').value : '');
-                if (!content || !content.trim()) throw new Error('Der Editor ist leer. Abbruch.');
-                backup_content = content;
+                set_status( '⏳', 'Erkenne Content-Type...', null, '#8be9fd' );
+                content_info = detect_content_info();
+
+                if( !content_info ) throw new Error( 'Content-Type konnte nicht ermittelt werden. Abbruch.' );
+
+                set_status( '⏳', 'Lese Editor-Inhalte aus...', null, '#8be9fd' );
+                const article_data = gather_article_data( content_info );
+
+                if( !article_data.content || !article_data.content.trim() ) throw new Error( 'Der Editor ist leer. Abbruch.' );
+
+                // Backup all field values for undo
+                backup_data = {};
+
+                for( const key in content_info.config.fields ) {
+                    backup_data[key] = read_field_value( content_info.config.fields[key] );
+                }
 
                 lock_editor();
 
-                const job_id = 'wf_job_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+                const job_id = 'wf_job_' + Date.now() + '_' + Math.floor( Math.random() * 10000 );
                 const reviewer_auth = window.wfv4_ai_reviewer_auth || {};
-                const auth_headers = reviewer_auth.token ? { 'X-Auth-Token': reviewer_auth.token, 'X-Auth-Ts': String(reviewer_auth.ts) } : {};
-                if (!reviewer_auth.token) log_debug('Warnung: Kein Auth-Token gefunden (window.wfv4_ai_reviewer_auth fehlt).');
+                const auth_headers = reviewer_auth.token ? {
+                    'X-Auth-Token': reviewer_auth.token,
+                    'X-Auth-Ts': String( reviewer_auth.ts ),
+                    'X-Auth-Ct': String( content_info.type ),
+                    'X-Auth-Cid': String( content_info.id )
+                } : {};
 
-                log_debug(`Sende Artikel an Proxy. JobID: ${job_id}`);
-                const start_res = await fetch(PROXY_URL, {
+                if( !reviewer_auth.token ) log_debug( 'Warnung: Kein Auth-Token gefunden (window.wfv4_ai_reviewer_auth fehlt).' );
+
+                log_debug( `Sende Artikel an Proxy. Content-Type: ${content_info.config.name}, ID: ${content_info.id}. JobID: ${job_id}` );
+                const start_res = await fetch( PROXY_URL, {
                     method: 'POST', headers: { 'Content-Type': 'application/json', ...auth_headers },
-                    body: JSON.stringify({ action: 'start', text: content, jobId: job_id })
+                    body: JSON.stringify( { action: 'start', jobId: job_id, ...article_data } )
                 });
 
-                if (!start_res.ok) throw new Error(`Der Worker konnte nicht gestartet werden (HTTP ${start_res.status}).`);
+                if( !start_res.ok ) {
+                    // Sicherheitsrichtlinie §12: keine Details an den Client
+                    log_debug( `Start-Request fehlgeschlagen: HTTP ${start_res.status}` );
+                    throw new Error( 'Der Worker konnte nicht gestartet werden.' );
+                }
 
                 let elapsed_seconds = 0; 
                 const TIMEOUT_MAX = 600; // 10 Minuten
@@ -780,16 +1047,22 @@
                                 if (korrektor_text) korrektor_text = korrektor_text.replace(/\. (Rechtschreibung|Grammatik|Die Rechtschreibung|Zur Rechtschreibung|Es wurden keine signifikanten)/gi, '.\n$1').replace(/\. (Die Shortcode|Shortcodes)/gi, '.\n$1');
                                 if (!new_content) throw new Error('Erfolg gemeldet, aber kein Text gespeichert.');
 
-                                new_content = clean_ai_content(new_content);
-                                set_status('⏳', 'Schreibe Text in Editor...', null, '#8be9fd');
+                                new_content = clean_ai_content( new_content );
+                                set_status( '⏳', 'Schreibe Korrekturen in Editor...', null, '#8be9fd' );
 
-                                // Korrigierten Text in den Editor (Ace oder Textarea) zurückschreiben
-                                if (window.news_text_editor && typeof window.news_text_editor.setValue === 'function') {
-                                    window.news_text_editor.setValue(new_content, -1); window.wfv4_news_changed = true;
-                                } else {
-                                    const fallback_el = document.getElementById('news_text');
-                                    if (fallback_el) { fallback_el.value = new_content; window.wfv4_news_changed = true; } 
-                                    else throw new Error('Editor zum Zurückschreiben wurde nicht gefunden.');
+                                // Write corrected content back to the content field
+                                if( !write_field_value( content_info.config.fields.content, new_content ) ) {
+                                    throw new Error( 'Editor zum Zurückschreiben wurde nicht gefunden.' );
+                                }
+
+                                // Write corrected headline back if provided
+                                if( data.headline && content_info.config.fields.headline ) {
+                                    write_field_value( content_info.config.fields.headline, data.headline );
+                                }
+
+                                // Write corrected teaser back if provided
+                                if( data.teaser && content_info.config.fields.teaser ) {
+                                    write_field_value( content_info.config.fields.teaser, data.teaser );
                                 }
 
                                 set_status('✅', `Erfolgreich aktualisiert! (Dauer: ${final_duration_str})`, null, '#50fa7b');
@@ -850,28 +1123,17 @@
                                                 const group_ref = current_group;
                                                 remove_btn.onclick = () => {
                                                     // Link aus dem Editor-Text entfernen (Linktext behalten)
-                                                    let editor_content = '';
-                                                    if (window.news_text_editor && typeof window.news_text_editor.getValue === 'function') {
-                                                        editor_content = window.news_text_editor.getValue();
-                                                    } else {
-                                                        const el = document.getElementById('news_text');
-                                                        if (el) editor_content = el.value;
-                                                    }
+                                                    let editor_content = content_info ? read_field_value( content_info.config.fields.content ) : '';
                                                     // <a href="URL">text</a> → text (verschiedene Schreibweisen)
-                                                    const escaped_url = link_url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                                                    const link_regex = new RegExp(`<a\\s[^>]*href=["']${escaped_url}["'][^>]*>(.*?)<\\/a>`, 'gi');
-                                                    const new_content = editor_content.replace(link_regex, '$1');
-                                                    if (new_content !== editor_content) {
-                                                        if (window.news_text_editor && typeof window.news_text_editor.setValue === 'function') {
-                                                            window.news_text_editor.setValue(new_content, -1);
-                                                        } else {
-                                                            const el = document.getElementById('news_text');
-                                                            if (el) el.value = new_content;
-                                                        }
-                                                        window.wfv4_news_changed = true;
-                                                        log_debug(`Link entfernt: ${link_url}`);
+                                                    const escaped_url = link_url.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' );
+                                                    const link_regex = new RegExp( `<a\\s[^>]*href=["']${escaped_url}["'][^>]*>(.*?)<\\/a>`, 'gi' );
+                                                    const new_content = editor_content.replace( link_regex, '$1' );
+
+                                                    if( new_content !== editor_content ) {
+                                                        if( content_info ) write_field_value( content_info.config.fields.content, new_content );
+                                                        log_debug( `Link entfernt: ${link_url}` );
                                                     } else {
-                                                        log_debug(`Link nicht im Text gefunden: ${link_url}`);
+                                                        log_debug( `Link nicht im Text gefunden: ${link_url}` );
                                                     }
                                                     // Box ausblenden mit Animation
                                                     group_ref.style.maxHeight = group_ref.scrollHeight + 'px';
