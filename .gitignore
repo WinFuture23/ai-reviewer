@@ -1,6 +1,7 @@
 # Sensible Dateien (enthalten Secrets/Webhook-URLs)
 docs/SETUP.md
-docs/townie-prompt.md
+docs/townie-prompt-proxy.md
+docs/townie-prompt-poller-db.md
 docs/test.html
 
 # Umgebung

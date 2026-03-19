@@ -6,20 +6,22 @@ Browser-Widget für Redakteure, das Artikel automatisch auf Rechtschreibung, Gra
 
 ```
 Browser-Widget (ai-reviewer.js)
-    ↓ HMAC-authentifiziert
-Val.town Proxy
-    ↓
-Make.com Webhooks (Worker + Poller)
-    ↓
-KI-Agenten (Korrektor + Verlinker)
+    ├─ Start-Request (HMAC-authentifiziert)
+    │       ↓
+    │   Val.town Proxy → Make.com Worker → KI-Agenten
+    │                                          ↓
+    │                                    Val.town Poller-DB (SQLite)
+    │                                          ↑
+    └─ Poll-Request (API-Key) ────────────────┘
 ```
 
 | Komponente | Beschreibung |
 |---|---|
 | `ai-reviewer.js` | Frontend-Widget, wird per GitHub Pages ausgeliefert |
 | `docs/winfuture-integration.php` | PHP-Klasse zur Auth-Token-Generierung |
-| Val.town Proxy | Sicherheits-Proxy, leitet Requests an Make.com weiter |
-| Make.com | Orchestriert die KI-Agenten |
+| Val.town Proxy | Sicherheits-Proxy, leitet Start-Requests an Make.com weiter |
+| Val.town Poller-DB | SQLite-basierte API, speichert und liefert Job-Ergebnisse |
+| Make.com Worker | Orchestriert die KI-Agenten, schreibt Ergebnis in Poller-DB |
 
 ## Einbindung
 
@@ -60,12 +62,18 @@ Umgebungsvariablen auf [val.town](https://www.val.town/settings/environment-vari
 
 | Variable | Beschreibung |
 |---|---|
-| `AI_REVIEWER_SECRET` | Shared HMAC-Secret |
+| `AI_REVIEWER_SECRET` | Shared HMAC-Secret (für den Proxy) |
 | `MAKE_WORKER_URL` | Make.com Webhook-URL für den Worker |
-| `MAKE_POLLER_URL` | Make.com Webhook-URL für den Poller |
+| `MAKE_WORKER_APIKEY` | API-Key für Make.com (wird als `x-make-apikey` Header mitgesendet) |
 | `SKIP_ORIGIN_CHECK` | `true` nur für Tests, danach löschen |
 
-### 3. PHP-Klasse einbinden
+### 3. Val.town Poller-DB einrichten
+
+| Variable | Beschreibung |
+|---|---|
+| `WINFUTURE_API_KEY` | API-Key für Lese-/Schreibzugriff auf die Job-Datenbank |
+
+### 4. PHP-Klasse einbinden
 
 Die Datei `docs/winfuture-integration.php` enthält die Klasse `wfv4_ai_reviewer`.
 Im Editor-Template (nur für eingeloggte Redakteure):
@@ -89,3 +97,5 @@ wfv4_ai_reviewer::render( WFV4_AI_REVIEWER_SECRET );
 | `docs/Programmierstil.md` | WinFuture Coding-Richtlinien |
 | `docs/Sicherheitsrichtlinie.md` | WinFuture Sicherheitsrichtlinien |
 | `docs/winfuture-integration.php` | PHP-Klasse für die CMS-Integration |
+| `docs/townie-prompt-proxy.md` | Townie-Prompt für den Val.town Proxy |
+| `docs/townie-prompt-poller-db.md` | Townie-Prompt für die Val.town Poller-DB |
