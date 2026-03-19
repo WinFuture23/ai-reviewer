@@ -2,9 +2,9 @@
  * wfv4_ai_reviewer — AI-powered article review widget for WinFuture.de.
  *
  * Sends the current editor content to a Make.com backend (via Val.town proxy),
- * polls for the result, and displays corrections and link suggestions in a
- * terminal-style overlay. Auth is handled via HMAC-SHA256 tokens injected by
- * the PHP integration class (wfv4_ai_reviewer::render).
+ * polls for the result (via Val.town Poller-DB), and displays corrections and
+ * link suggestions in a terminal-style overlay. Auth is handled via HMAC-SHA256
+ * tokens injected by the PHP integration class (wfv4_ai_reviewer::render).
  *
  * @author  mesios
  * @version 2 2026-03-10
