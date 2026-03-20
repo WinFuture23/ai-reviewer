@@ -11,6 +11,13 @@
  * @see     docs/winfuture-integration.php
  */
 (function() {
+    // Allowed user IDs (wfv4uid cookie)
+    const ALLOWED_USERS = [1, 124363];
+
+    // Check user access before anything else
+    const uid_match = document.cookie.match( /(?:^|;\s*)wfv4uid=(\d+)/ );
+    if( !uid_match || !ALLOWED_USERS.includes( Number( uid_match[1] ) ) ) return;
+
     // Guard: prevent double initialisation when script is included twice
     if (window.wfv4_ai_reviewer_loaded) return;
     window.wfv4_ai_reviewer_loaded = true;
