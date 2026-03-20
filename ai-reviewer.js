@@ -795,6 +795,8 @@
             poll_active = true;
             launcher_tab.querySelector('span').innerText = '⏳ KI arbeitet...';
 
+            let manual_poll_area = null;
+
             try {
                 set_status( '⏳', 'Erkenne Content-Type...', null, '#8be9fd' );
                 content_info = detect_content_info();
@@ -847,7 +849,7 @@
                 let cached_poll_response = null;
                 let last_poll_time = 0;
                 let next_poll_time = Date.now() + 30000; // first poll after 30s grace
-                let manual_poll_area = null;  // persistent container below status
+                manual_poll_area = null;  // persistent container below status
                 let poll_result_el = null;    // shows last poll result (highlighted)
 
                 // Promise-based sleep that can be resolved early via wakeup().
@@ -905,32 +907,6 @@
                 poll_result_el.style.cssText = 'display: none; margin-bottom: 6px; padding: 4px 8px; border-radius: 4px; font-weight: bold;';
                 manual_poll_area.appendChild(poll_result_el);
 
-                // Manual poll button row
-                const poll_btn_row = document.createElement('div');
-                poll_btn_row.style.cssText = 'cursor: pointer; color: #8be9fd; display: inline-flex; align-items: center; gap: 6px; display: none;';
-                const poll_icon = document.createElement('span'); poll_icon.textContent = '🔄'; poll_icon.style.cssText = 'display: inline-block; transition: transform 0.3s;';
-                const poll_label = document.createElement('span'); poll_label.textContent = 'Jetzt Status abfragen';
-                poll_btn_row.appendChild(poll_icon); poll_btn_row.appendChild(poll_label);
-                poll_btn_row.addEventListener('click', async () => {
-                    poll_icon.style.animation = 'ai-reviewer-spin 1s linear infinite';
-                    poll_label.textContent = 'Frage ab...';
-                    await do_manual_poll('Manuell');
-                    poll_icon.style.animation = '';
-                    poll_label.textContent = 'Jetzt Status abfragen';
-                    // Update next_poll_time so countdown resets
-                    const ce = Math.round((Date.now() - start_time) / 1000);
-                    const wait_sec = ce < 90 ? 15 : ce < 300 ? 2 : 30;
-                    next_poll_time = Date.now() + wait_sec * 1000;
-                    // Show result with highlight
-                    if (cached_poll_response) {
-                        poll_result_el.textContent = '✅ Ergebnis erhalten!';
-                        poll_result_el.style.cssText = 'display: block; margin-bottom: 6px; padding: 4px 8px; border-radius: 4px; font-weight: bold; background: #1a3a1a; color: #50fa7b; border: 1px solid #2d5a2d;';
-                    } else {
-                        poll_result_el.textContent = '⏳ Wird noch bearbeitet...';
-                        poll_result_el.style.cssText = 'display: block; margin-bottom: 6px; padding: 4px 8px; border-radius: 4px; font-weight: bold; background: #3a3000; color: #f1fa8c; border: 1px solid #5a4a00;';
-                    }
-                });
-                manual_poll_area.appendChild(poll_btn_row);
                 // Insert right after status_el so set_status() never destroys it
                 status_el.after(manual_poll_area);
 
@@ -949,11 +925,6 @@
                             ? `Nächste automatische Abfrage in ${secs_to_next}s`
                             : 'Abfrage läuft...';
                     }
-                    // Show manual button after 2 minutes
-                    if (elapsed_seconds >= 120) {
-                        poll_btn_row.style.display = 'inline-flex';
-                    }
-
                     if (elapsed_seconds >= TIMEOUT_MAX) {
                         // Prevent multiple timeout handlers from firing
                         clearInterval(timer_interval);
@@ -1001,16 +972,16 @@
                                     const poll_res = await fetch(`${POLLER_URL}?jobId=${encodeURIComponent(job_id)}`, {
                                         method: 'GET', headers: { 'x-api-key': POLLER_API_KEY }
                                     });
-                                    if (!poll_res.ok) { next_poll_time = Date.now() + 2000; await interruptible_sleep(2000); continue; }
+                                    if (!poll_res.ok) { next_poll_time = Date.now() + 3000; await interruptible_sleep(3000); continue; }
                                     data = await poll_res.json();
-                                } catch(e) { log_debug(`Poll-Fehler: ${e.message}`); next_poll_time = Date.now() + 2000; await interruptible_sleep(2000); continue; }
+                                } catch(e) { log_debug(`Poll-Fehler: ${e.message}`); next_poll_time = Date.now() + 3000; await interruptible_sleep(3000); continue; }
                             }
                             const job_status = data.status || 'pending';
 
                             if (job_status === 'pending') {
                                 if (!poll_active) break; // timeout handler killed the loop
                                 // Adaptive wait: slow at start, fast mid-range, slow after 5 min
-                                const wait_sec = current_elapsed < 90 ? 15 : current_elapsed < 300 ? 2 : 30;
+                                const wait_sec = current_elapsed < 90 ? 15 : current_elapsed < 300 ? 3 : 30;
                                 next_poll_time = Date.now() + wait_sec * 1000;
                                 await interruptible_sleep(wait_sec * 1000);
                                 continue;
