@@ -597,7 +597,7 @@
 
         const scroll_wrap = document.createElement('div');
         const is_single = sections.length === 1;
-        Object.assign(scroll_wrap.style, { flexGrow: '1', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0' });
+        Object.assign(scroll_wrap.style, { flexGrow: '1', overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: '4px' });
 
         for( let i = 0; i < sections.length; i++ ) {
             const iframe = document.createElement('iframe');
@@ -607,10 +607,20 @@
             if( is_single ) {
                 iframe.style.flexGrow = '1';
                 iframe.style.height = '100%';
+            } else if( i === 0 ) {
+                // Teaser: auto-size to content height after load
+                iframe.style.height = '0';
+                iframe.onload = function() {
+                    try {
+                        const doc = iframe.contentDocument || iframe.contentWindow.document;
+                        const h = doc.documentElement.scrollHeight || doc.body.scrollHeight;
+                        iframe.style.height = Math.min( h + 4, Math.round( window.innerHeight * 0.35 ) ) + 'px';
+                    } catch(e) { iframe.style.height = '20vh'; }
+                };
             } else {
-                // Teaser (first) gets 25%, Content (second) gets 75%
-                iframe.style.flexGrow = i === 0 ? '1' : '3';
-                iframe.style.minHeight = i === 0 ? '15vh' : '40vh';
+                // Content: fill remaining space
+                iframe.style.flexGrow = '1';
+                iframe.style.minHeight = '40vh';
             }
 
             iframe.srcdoc = sections[i].html;
