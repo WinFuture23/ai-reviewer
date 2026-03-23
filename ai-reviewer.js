@@ -596,21 +596,24 @@
         overlay.appendChild(header_bar);
 
         const scroll_wrap = document.createElement('div');
-        Object.assign(scroll_wrap.style, { flexGrow: '1', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px' });
+        const is_single = sections.length === 1;
+        Object.assign(scroll_wrap.style, { flexGrow: '1', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0' });
 
-        for( const section of sections ) {
-            const section_label = document.createElement('div');
-            section_label.textContent = section.label;
-            Object.assign(section_label.style, { color: '#8be9fd', fontFamily: 'sans-serif', fontWeight: 'bold', fontSize: '14px', marginBottom: '4px' });
-            scroll_wrap.appendChild(section_label);
-
+        for( let i = 0; i < sections.length; i++ ) {
             const iframe = document.createElement('iframe');
             iframe.sandbox = 'allow-same-origin'; // Sicherheitsrichtlinie §20: minimal permissions
-            const is_single = sections.length === 1;
             Object.assign(iframe.style, { width: '100%', backgroundColor: '#fff', border: 'none', borderRadius: '6px', flexShrink: '0' });
-            iframe.style.height = is_single ? '100%' : '40vh';
-            if( is_single ) iframe.style.flexGrow = '1';
-            iframe.srcdoc = section.html;
+
+            if( is_single ) {
+                iframe.style.flexGrow = '1';
+                iframe.style.height = '100%';
+            } else {
+                // Teaser (first) gets 25%, Content (second) gets 75%
+                iframe.style.flexGrow = i === 0 ? '1' : '3';
+                iframe.style.minHeight = i === 0 ? '15vh' : '40vh';
+            }
+
+            iframe.srcdoc = sections[i].html;
             scroll_wrap.appendChild(iframe);
         }
 
