@@ -898,7 +898,7 @@
                 }
 
                 let elapsed_seconds = 0; 
-                const TIMEOUT_MAX = 600; // 10 Minuten
+                const TIMEOUT_MAX = 900; // 15 Minuten
                 
                 set_status('⏳', `Artikel wird verarbeitet... (0 Sekunden)`, `Geschätzte Dauer: ca. 2 - 3 Minuten`, '#f1fa8c', true);
                 const start_time = Date.now();
@@ -946,6 +946,7 @@
                     elapsed_seconds = Math.round((Date.now() - start_time) / 1000);
                     if (elapsed_seconds < 30) return;
                     if (Date.now() - last_poll_time < 5000) { log_debug('Tab sichtbar, aber letzter Abruf <5s her. Übersprungen.'); return; }
+                    next_poll_time = Date.now(); // poll_loop soll nach Aufwachen sofort abfragen
                     do_manual_poll('Tab-Rückkehr');
                 }
                 document.addEventListener('visibilitychange', on_visibility_change);
