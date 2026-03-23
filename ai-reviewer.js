@@ -245,7 +245,7 @@
     let terminal_container = null;  // Main overlay DOM element
     let launcher_tab = null;        // Bottom-right launcher tab
     let poll_active = false;        // True while a job is being polled
-    let cached_diff = { left: null, right: null, html: null }; // Diffchecker cache
+    let cached_diff = { content: null, teaser: null }; // Diffchecker cache per field
     let debug_log = [];             // Debug messages (copyable via header button)
     let backup_data = null;         // All field values before AI modification (for undo)
     let btn_check = null;           // "Artikel überprüfen" button reference
@@ -580,7 +580,11 @@
     }
 
     /** Show a full-screen overlay with the Diffchecker HTML comparison in a sandboxed iframe. */
-    function show_diff_overlay(html_data) {
+    /**
+     * Show diff overlay with one or more sections.
+     * @param {Array<{label: string, html: string}>} sections
+     */
+    function show_diff_overlay(sections) {
         const overlay = document.createElement('div');
         Object.assign(overlay.style, { position: 'fixed', top: '0', left: '0', width: '100vw', height: '100vh', backgroundColor: 'rgba(0,0,0,0.85)', zIndex: '9999999', display: 'flex', flexDirection: 'column', padding: '20px', boxSizing: 'border-box' });
         const header_bar = document.createElement('div'); Object.assign(header_bar.style, { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', color: '#fff', fontFamily: 'sans-serif' });
@@ -589,11 +593,28 @@
         Object.assign(close_diff_btn.style, { backgroundColor: '#ff5555', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px' });
         function close_diff() { overlay.remove(); document.body.style.overflow = ''; document.removeEventListener('keydown', esc_handler); }
         close_diff_btn.onclick = close_diff; header_bar.appendChild(close_diff_btn);
-        const iframe = document.createElement('iframe');
-        iframe.sandbox = 'allow-same-origin'; // Sicherheitsrichtlinie §20: minimal permissions
-        Object.assign(iframe.style, { flexGrow: '1', width: '100%', backgroundColor: '#fff', border: 'none', borderRadius: '6px' });
-        iframe.srcdoc = html_data;
-        overlay.appendChild(header_bar); overlay.appendChild(iframe); document.body.appendChild(overlay);
+        overlay.appendChild(header_bar);
+
+        const scroll_wrap = document.createElement('div');
+        Object.assign(scroll_wrap.style, { flexGrow: '1', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px' });
+
+        for( const section of sections ) {
+            const section_label = document.createElement('div');
+            section_label.textContent = section.label;
+            Object.assign(section_label.style, { color: '#8be9fd', fontFamily: 'sans-serif', fontWeight: 'bold', fontSize: '14px', marginBottom: '4px' });
+            scroll_wrap.appendChild(section_label);
+
+            const iframe = document.createElement('iframe');
+            iframe.sandbox = 'allow-same-origin'; // Sicherheitsrichtlinie §20: minimal permissions
+            const is_single = sections.length === 1;
+            Object.assign(iframe.style, { width: '100%', backgroundColor: '#fff', border: 'none', borderRadius: '6px', flexShrink: '0' });
+            iframe.style.height = is_single ? '100%' : '40vh';
+            if( is_single ) iframe.style.flexGrow = '1';
+            iframe.srcdoc = section.html;
+            scroll_wrap.appendChild(iframe);
+        }
+
+        overlay.appendChild(scroll_wrap); document.body.appendChild(overlay);
         document.body.style.overflow = 'hidden';
         const esc_handler = (e) => { if (e.key === 'Escape') close_diff(); };
         document.addEventListener('keydown', esc_handler);
@@ -751,35 +772,51 @@
         set_status('🟢', 'Bereit.', null, '#50fa7b');
 
         // --- DIFFCHECKER BUTTON ---
-        /** Fetch word-level diff from Diffchecker API and display in sandboxed iframe overlay. */
+        /** Fetch word-level diff for content (and teaser if present) via Diffchecker API. */
+        async function fetch_diff(field_key) {
+            const current_text = content_info ? read_field_value( content_info.config.fields[field_key] ) : '';
+            const original_text = (backup_data && backup_data[field_key]) || '';
+
+            // Return cached result if inputs unchanged
+            if( cached_diff[field_key] && cached_diff[field_key].left === original_text && cached_diff[field_key].right === current_text ) {
+                return cached_diff[field_key].html;
+            }
+
+            const random_email = DIFF_ACCOUNTS[Math.floor(Math.random() * DIFF_ACCOUNTS.length)];
+            const res = await fetch(`https://api.diffchecker.com/public/text?output_type=html&email=${encodeURIComponent(random_email)}`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ left: original_text, right: current_text, diff_level: 'word' })
+            });
+
+            if( !res.ok ) throw new Error( `HTTP ${res.status}` );
+            const html = await res.text();
+            cached_diff[field_key] = { left: original_text, right: current_text, html: html };
+            return html;
+        }
+
         btn_diff.onclick = async () => {
             const old_btn_text = btn_diff.innerHTML; btn_diff.innerHTML = '⏳ Lade...'; btn_diff.disabled = true;
             try {
-                let current_editor_text = content_info ? read_field_value( content_info.config.fields.content ) : '';
-                const original_text = (backup_data && backup_data.content) || '';
-                
-                if (cached_diff.html && cached_diff.left === original_text && cached_diff.right === current_editor_text) { 
-                    show_diff_overlay(cached_diff.html); return; 
+                const has_teaser = content_info && content_info.config.fields.teaser;
+                const sections = [];
+
+                if( has_teaser ) {
+                    log_debug( 'Rufe Diffchecker API auf (Teaser + Content)...' );
+                    const teaser_html = await fetch_diff( 'teaser' );
+                    sections.push( { label: 'Teaser', html: teaser_html } );
+                } else {
+                    log_debug( 'Rufe Diffchecker API auf (Content)...' );
                 }
-                
-                const random_email = DIFF_ACCOUNTS[Math.floor(Math.random() * DIFF_ACCOUNTS.length)];
-                log_debug(`Rufe Diffchecker API auf (Account: ${random_email})...`);
-                
-                const res = await fetch(`https://api.diffchecker.com/public/text?output_type=html&email=${encodeURIComponent(random_email)}`, { 
-                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ left: original_text, right: current_editor_text, diff_level: 'word' }) 
-                });
-                
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                const html_data = await res.text();
-                
-                cached_diff = { left: original_text, right: current_editor_text, html: html_data }; 
-                show_diff_overlay(html_data);
-            } catch (err) { 
+
+                const content_html = await fetch_diff( 'content' );
+                sections.push( { label: 'Content', html: content_html } );
+
+                show_diff_overlay( sections );
+            } catch (err) {
                 // Sicherheitsrichtlinie §12: Details nur ins Debug-Log, nicht an den User
                 log_debug( `DiffChecker-Fehler: ${err.message}` );
                 add_message( '<b>Hinweis:</b> Konnte DiffChecker API nicht laden.', 'warning' );
-            } finally { 
-                btn_diff.innerHTML = old_btn_text; btn_diff.disabled = false; 
+            } finally {
+                btn_diff.innerHTML = old_btn_text; btn_diff.disabled = false;
             }
         };
 
@@ -795,7 +832,7 @@
 
         // --- HAUPT-POLLING LOGIK ---
         btn_check.addEventListener('click', async () => {
-            btn_check.disabled = true; btn_check.style.display = 'none'; results_area.innerHTML = ''; debug_log = []; cached_diff = { left: null, right: null, html: null }; 
+            btn_check.disabled = true; btn_check.style.display = 'none'; results_area.innerHTML = ''; debug_log = []; cached_diff = { content: null, teaser: null }; 
 
             log_debug('Starte Überprüfungsprozess...');
             let timer_interval;
