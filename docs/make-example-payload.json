@@ -1,0 +1,26 @@
+{
+    "action": "start",
+    "jobId": "wf_job_1742400000000_1234",
+
+    "content_type": 6,
+    "content_id": 157585,
+
+    "headline": "Microsoft veroeffentlicht neues Windows-11-Update",
+
+    "teaser": "Microsoft hat heute ein wichtiges Update fuer Windows 11 bereitgestellt...",
+
+    "software_name": "Mozilla Firefox",
+
+    "content": "<p>Microsoft hat heute ein neues Update fuer Windows 11 veroeffentlicht...</p>",
+
+    "missing_specials": [
+        {
+            "name": "Kuenstliche Intelligenz",
+            "url": "https://winfuture.de/special/kuenstliche-intelligenz/"
+        },
+        {
+            "name": "OpenAI",
+            "url": "https://winfuture.de/special/openai/"
+        }
+    ]
+}

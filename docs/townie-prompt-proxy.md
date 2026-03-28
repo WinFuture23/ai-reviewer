@@ -24,23 +24,33 @@ Der Val empfaengt POST-Requests mit JSON-Body. Jeder Request hat:
 
 ### Headers:
 - `Content-Type: application/json`
-- `X-Auth-Token` - HMAC-SHA256-Hash (hex) des Timestamps, berechnet mit dem shared secret
+- `X-Auth-Token` - HMAC-SHA256-Hash (hex), berechnet ueber `"{timestamp}|{content_type}|{content_id}"` mit dem shared secret
 - `X-Auth-Ts` - Unix-Timestamp (Sekunden) als String
+- `X-Auth-Ct` - Content-Type-ID als String (z.B. `"6"` fuer News)
+- `X-Auth-Cid` - Content-ID als String (z.B. `"157585"`)
 
 ### Body (JSON):
 - `action` - Immer `"start"`
-- `text` (String, der Artikeltext)
 - `jobId` (String)
+- `content_type` (Integer, Pflicht — erlaubt: 1, 5, 6, 8)
+- `content_id` (Integer, Pflicht — >= 0)
+- `headline` (String, Pflicht)
+- `content` (String, Pflicht — der Artikeltext)
+- `teaser` (String, optional — nur bei News)
+- `software_name` (String, optional — nur bei Downloads)
+- `missing_specials` (Array, optional — fehlende Special-Verlinkungen)
 
 ## Validierungs-Logik
 
 Bei jedem Request:
 
-1. Pruefe ob `X-Auth-Token` und `X-Auth-Ts` Header vorhanden sind. Wenn nicht: 403 mit `{"error": "Missing authentication"}`.
+1. Pruefe ob alle vier Auth-Header vorhanden sind: `X-Auth-Token`, `X-Auth-Ts`, `X-Auth-Ct`, `X-Auth-Cid`. Wenn einer fehlt: 403 mit `{"error": "Missing authentication"}`.
 
 2. Pruefe ob der Timestamp nicht aelter als 5400 Sekunden (90 Minuten) ist. Vergleiche `X-Auth-Ts` mit der aktuellen Serverzeit (Absolutwert der Differenz). Wenn abgelaufen: 403 mit `{"error": "Token expired"}`.
 
-3. Berechne den erwarteten Token: `HMAC-SHA256(secret, timestamp)` wobei `secret` die Umgebungsvariable `AI_REVIEWER_SECRET` ist und `timestamp` der Wert aus `X-Auth-Ts`. Verwende die Web Crypto API (`crypto.subtle.importKey` und `crypto.subtle.sign` mit HMAC/SHA-256). Der Token muss als Hex-String verglichen werden. Wenn er nicht uebereinstimmt: 403 mit `{"error": "Invalid token"}`.
+3. Berechne den erwarteten Token: `HMAC-SHA256(secret, "{timestamp}|{content_type}|{content_id}")` wobei `secret` die Umgebungsvariable `AI_REVIEWER_SECRET` ist, und `timestamp`, `content_type`, `content_id` die Werte aus den Headern `X-Auth-Ts`, `X-Auth-Ct`, `X-Auth-Cid`. Die drei Teile werden mit dem Pipe-Zeichen `|` verbunden. Verwende die Web Crypto API (`crypto.subtle.importKey` und `crypto.subtle.sign` mit HMAC/SHA-256). Der Token muss als Hex-String verglichen werden. Wenn er nicht uebereinstimmt: 403 mit `{"error": "Invalid token"}`.
+
+3b. Nach der HMAC-Validierung: Pruefe ob `X-Auth-Ct` und `X-Auth-Cid` mit den Werten `content_type` und `content_id` im JSON-Body uebereinstimmen. Wenn nicht: 403 mit `{"error": "Token mismatch"}`. Dies verhindert, dass ein gueltiger Token mit einem manipulierten Body verwendet wird.
 
 4. Pruefe ob der `Origin`-Header auf `.winfuture.de` endet (case-insensitive). Wenn kein Origin-Header vorhanden ist oder er nicht passt: 403 mit `{"error": "Origin not allowed"}`. WICHTIG: Fuer Testzwecke soll der Origin-Check uebersprungen werden, wenn die Umgebungsvariable `SKIP_ORIGIN_CHECK` auf `"true"` gesetzt ist.
 
@@ -51,7 +61,7 @@ Nach erfolgreicher Validierung, wenn `action` gleich `"start"`:
 - Mache einen POST-Request an die URL aus `MAKE_WORKER_URL`
 - Content-Type: `application/json`
 - Header: `x-make-apikey` mit dem Wert aus `MAKE_WORKER_APIKEY`
-- Body: `{"text": "<der text aus dem request>", "jobId": "<die jobId aus dem request>"}`
+- Body: Alle validierten Felder aus dem Request-Body AUSSER `action` weiterleiten (d.h. `jobId`, `content_type`, `content_id`, `headline`, `content`, und ggf. `teaser`, `software_name`, `missing_specials`)
 - Gib die Antwort von Make.com direkt zurueck (Status-Code und Body durchreichen)
 - Bei unbekannter `action`: 400 mit `{"error": "Invalid action"}`
 
@@ -60,7 +70,7 @@ Nach erfolgreicher Validierung, wenn `action` gleich `"start"`:
 Der Val muss CORS-Headers setzen:
 - `Access-Control-Allow-Origin: *` (wird spaeter auf die Domain eingeschraenkt)
 - `Access-Control-Allow-Methods: POST, OPTIONS`
-- `Access-Control-Allow-Headers: Content-Type, X-Auth-Token, X-Auth-Ts`
+- `Access-Control-Allow-Headers: Content-Type, X-Auth-Token, X-Auth-Ts, X-Auth-Ct, X-Auth-Cid`
 
 Bei OPTIONS-Requests (Preflight): Sofort mit 204 und den CORS-Headers antworten.
 
