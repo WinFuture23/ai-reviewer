@@ -1045,7 +1045,7 @@
                                 continue;
                             }
 
-                            poll_active = false; clearInterval(timer_interval); unlock_editor();
+                            poll_active = false; cached_poll_response = null; clearInterval(timer_interval); unlock_editor();
                             document.removeEventListener('visibilitychange', on_visibility_change);
                             manual_poll_area.style.display = 'none';
                             const final_duration_str = format_duration_friendly(Math.round((Date.now() - start_time) / 1000));

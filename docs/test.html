@@ -42,6 +42,7 @@
     </div>
 
     <h2>Editor (simuliert <code>news_text</code>)</h2>
+    <input type="text" id="subject" value="Microsoft veroeffentlicht neues Windows-11-Update" style="width: 100%; padding: 8px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; margin-bottom: 10px;" placeholder="Headline">
     <textarea id="news_text">Dies ist ein Testartikel fuer den AI-Reviewer.
 
 Microsoft hat heute ein neues Update fuer Windows 11 veroeffentlicht. Das Update bringt einige Verbesserungen mit sich, darunter eine bessere Perfomance und neue Sicherheitsfunktionen.
@@ -51,8 +52,12 @@ Die neue Version traegt die Buildnummer 26100.1234 und ist ab sofort ueber Windo
 Laut Microsoft werden mit dem Update auch einige bekannte Fehler behoben, die in der vorherigen Version aufgetreten sind.</textarea>
 
     <script>
+    // Simuliert window.wfv4_content (in Produktion vom CMS gesetzt)
+    window.wfv4_content = { type: 6, id: 12345 };
+
     // Token-Erneuerung: Berechnet HMAC-SHA256 lokal mit dem Secret
     // NUR FUER TESTS! In Produktion macht das der PHP-Server.
+    // HMAC payload: "{timestamp}|{content_type}|{content_id}"
     async function generateHMAC(secret, message) {
         const encoder = new TextEncoder();
         const keyData = encoder.encode(secret);
@@ -70,8 +75,11 @@ Laut Microsoft werden mit dem Update auch einige bekannte Fehler behoben, die in
             document.getElementById('token-status').style.color = '#c00';
             return;
         }
+        const ct = window.wfv4_content.type;
+        const cid = window.wfv4_content.id;
         const ts = Math.floor(Date.now() / 1000);
-        const token = await generateHMAC(secret, String(ts));
+        // HMAC ueber "timestamp|content_type|content_id" (identisch mit PHP)
+        const token = await generateHMAC(secret, ts + '|' + ct + '|' + cid);
         window.wfv4_ai_reviewer_auth = { token: token, ts: ts };
         document.getElementById('token-status').textContent = 'Neues Token generiert (' + new Date().toLocaleTimeString('de-DE') + ') - gueltig fuer 90 Min.';
         document.getElementById('token-status').style.color = '#666';

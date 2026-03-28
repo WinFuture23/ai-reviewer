@@ -23,14 +23,25 @@ Browser-Widget (ai-reviewer.js)
 | Val.town Poller-DB | SQLite-basierte API, speichert und liefert Job-Ergebnisse |
 | Make.com Worker | Orchestriert die KI-Agenten, schreibt Ergebnis in Poller-DB |
 
+## Unterstützte Content-Types
+
+| ID | Typ | Felder |
+|---|---|---|
+| 6 | News | Headline, Teaser, Content |
+| 8 | Download | Headline, Software-Name, Content |
+| 5 | Video | Headline, Content |
+| 1 | FAQ | Headline, Content |
+
+Erkennung via `window.wfv4_content = { type: 6, id: 157585 }` (vom CMS gesetzt).
+
 ## Einbindung
 
 ```php
-wfv4_ai_reviewer::render( $secret );
+wfv4_ai_reviewer::render( $secret, $content_type, $content_id );
 ```
 
 Gibt zwei Script-Tags aus:
-1. Inline-Script mit zeitlich begrenztem HMAC-Token (90 Min gültig)
+1. Inline-Script mit HMAC-Token gebunden an Content-Type und Content-ID (90 Min gültig)
 2. Script-Tag, das das Widget von GitHub Pages lädt
 
 ## Deployment
@@ -79,14 +90,15 @@ Die Datei `docs/winfuture-integration.php` enthält die Klasse `wfv4_ai_reviewer
 Im Editor-Template (nur für eingeloggte Redakteure):
 
 ```php
-wfv4_ai_reviewer::render( WFV4_AI_REVIEWER_SECRET );
+wfv4_ai_reviewer::render( WFV4_AI_REVIEWER_SECRET, $content_type, $content_id );
 ```
 
 ## Technische Details
 
 - Erstellt DOM-Elemente mit Prefix `ai-reviewer-`
-- Window-Variablen: `wfv4_ai_reviewer_loaded`, `wfv4_ai_reviewer_auth`
-- Liest `window.news_text_editor` (Ace Editor) oder `#news_text` (Fallback)
+- Window-Variablen: `wfv4_ai_reviewer_loaded`, `wfv4_ai_reviewer_auth`, `wfv4_content`
+- Erkennt Content-Type über `window.wfv4_content` und liest Felder aus ACE-Editoren
+- HMAC-Token gebunden an Timestamp, Content-Type und Content-ID
 - Setzt `window.wfv4_news_changed = true` nach Aktualisierung
 - Keine jQuery-Abhängigkeit, keine externen CSS-Dateien
 
@@ -99,3 +111,7 @@ wfv4_ai_reviewer::render( WFV4_AI_REVIEWER_SECRET );
 | `docs/winfuture-integration.php` | PHP-Klasse für die CMS-Integration |
 | `docs/townie-prompt-proxy.md` | Townie-Prompt für den Val.town Proxy |
 | `docs/townie-prompt-poller-db.md` | Townie-Prompt für die Val.town Poller-DB |
+| `docs/townie-update-proxy.md` | Townie-Prompt für Proxy-Erweiterungen (v3) |
+| `docs/townie-update-poller-db.md` | Townie-Prompt für Poller-DB-Erweiterungen (v3) |
+| `docs/make-payload-felder.md` | Feldübersicht für Make.com Payload |
+| `docs/make-example-payload.json` | Beispiel-JSON für Make.com |
