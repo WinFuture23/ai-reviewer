@@ -1151,19 +1151,26 @@
                                                 remove_btn.onmouseover = () => remove_btn.style.opacity = '1'; remove_btn.onmouseout = () => remove_btn.style.opacity = '0.6';
                                                 const group_ref = current_group;
                                                 remove_btn.onclick = () => {
-                                                    // Link aus dem Editor-Text entfernen (Linktext behalten)
-                                                    let editor_content = content_info ? read_field_value( content_info.config.fields.content ) : '';
-                                                    // <a href="URL">text</a> → text (verschiedene Schreibweisen)
+                                                    // Link aus allen Editor-Feldern entfernen (Linktext behalten)
                                                     const escaped_url = link_url.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' );
                                                     const link_regex = new RegExp( `<a\\s[^>]*href=["']${escaped_url}["'][^>]*>(.*?)<\\/a>`, 'gi' );
-                                                    const new_content = editor_content.replace( link_regex, '$1' );
+                                                    let removed = false;
 
-                                                    if( new_content !== editor_content ) {
-                                                        if( content_info ) write_field_value( content_info.config.fields.content, new_content );
-                                                        log_debug( `Link entfernt: ${link_url}` );
-                                                    } else {
-                                                        log_debug( `Link nicht im Text gefunden: ${link_url}` );
+                                                    if( content_info ) {
+                                                        for( const key in content_info.config.fields ) {
+                                                            const field_val = read_field_value( content_info.config.fields[key] );
+                                                            const cleaned = field_val.replace( link_regex, '$1' );
+
+                                                            if( cleaned !== field_val ) {
+                                                                write_field_value( content_info.config.fields[key], cleaned );
+                                                                cached_diff[key] = null;
+                                                                removed = true;
+                                                                log_debug( `Link entfernt aus ${key}: ${link_url}` );
+                                                            }
+                                                        }
                                                     }
+
+                                                    if( !removed ) log_debug( `Link nicht im Text gefunden: ${link_url}` );
                                                     // Box ausblenden mit Animation
                                                     group_ref.style.maxHeight = group_ref.scrollHeight + 'px';
                                                     requestAnimationFrame(() => { group_ref.style.opacity = '0'; group_ref.style.maxHeight = '0'; group_ref.style.margin = '0'; group_ref.style.padding = '0'; });
