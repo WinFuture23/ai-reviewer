@@ -1195,8 +1195,9 @@
                                             if (link_url) {
                                                 const remove_btn = document.createElement('span');
                                                 remove_btn.innerHTML = '✕';
-                                                Object.assign(remove_btn.style, { position: 'absolute', top: '6px', right: '8px', cursor: 'pointer', color: '#ff5555', fontSize: '14px', fontWeight: 'bold', lineHeight: '1', opacity: '0.6', transition: 'opacity 0.2s' });
-                                                remove_btn.onmouseover = () => remove_btn.style.opacity = '1'; remove_btn.onmouseout = () => remove_btn.style.opacity = '0.6';
+                                                Object.assign(remove_btn.style, { position: 'absolute', top: '6px', right: '8px', cursor: 'pointer', backgroundColor: '#cc3333', color: '#fff', fontSize: '12px', fontWeight: 'bold', lineHeight: '1', width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', transition: 'background-color 0.2s' });
+                                                remove_btn.title = 'Link entfernen';
+                                                remove_btn.onmouseover = () => remove_btn.style.backgroundColor = '#ff4444'; remove_btn.onmouseout = () => remove_btn.style.backgroundColor = '#cc3333';
                                                 const group_ref = current_group;
                                                 remove_btn.onclick = () => {
                                                     // Link aus allen Editor-Feldern entfernen (Linktext behalten)
