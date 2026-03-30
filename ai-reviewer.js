@@ -1172,9 +1172,24 @@
                                             const link_url = url_match ? url_match[1] : null;
                                             const link_text = link_text_match ? link_text_match[1] : null;
 
+                                            // Content-Type-Tag anhand URL-Muster
+                                            let url_type_tag = '';
+                                            if (link_url) {
+                                                const u = link_url.toLowerCase();
+                                                const tag = u.includes('/news,') || u.includes('/news/') ? { label: 'News', bg: '#007acc' }
+                                                    : u.includes('/download') ? { label: 'Download', bg: '#8b5cf6' }
+                                                    : u.includes('/videos,') || u.includes('/video/') || u.includes('/videos/') ? { label: 'Video', bg: '#e74c3c' }
+                                                    : u.includes('/faq/') || u.includes('/faq,') ? { label: 'FAQ', bg: '#f59e0b' }
+                                                    : u.includes('/special/') ? { label: 'Special', bg: '#10b981' }
+                                                    : u.includes('/tests,') || u.includes('/tests/') || u.includes('/test/') ? { label: 'Test', bg: '#ec4899' }
+                                                    : null;
+                                                if (tag) url_type_tag = `<span style="display:inline-block; background:${tag.bg}; color:#fff; font-size:10px; font-weight:bold; padding:1px 6px; border-radius:3px; margin-right:5px; vertical-align:middle; letter-spacing:0.3px;">${tag.label}</span>`;
+                                            }
+
                                             current_group = document.createElement('div'); Object.assign(current_group.style, { borderLeft: '3px solid #007acc', backgroundColor: '#1e1e1e', padding: '10px 12px', margin: '8px 0', borderRadius: '0 4px 4px 0', position: 'relative', transition: 'opacity 0.3s, max-height 0.3s, margin 0.3s, padding 0.3s', overflow: 'hidden' });
                                             if (link_url) current_group.dataset.previewUrl = link_url;
-                                            current_group.innerHTML = `<div>► <span style="color:#f8f8f2; font-weight:bold;">${safe_line}</span></div>`;
+                                            const safe_line_with_tag = safe_line.replace(/(https?:\/\/[^\s&<]+)/, url_type_tag + '$1');
+                                            current_group.innerHTML = `<div>► <span style="color:#f8f8f2; font-weight:bold;">${safe_line_with_tag}</span></div>`;
 
                                             // X-Button zum Entfernen des Links
                                             if (link_url) {
