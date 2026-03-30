@@ -894,6 +894,28 @@
                 if( !start_res.ok ) {
                     // Sicherheitsrichtlinie §12: keine Details an den Client
                     log_debug( `Start-Request fehlgeschlagen: HTTP ${start_res.status}` );
+
+                    if( start_res.status === 403 ) {
+                        poll_active = false; unlock_editor();
+                        launcher_tab.querySelector('span').innerText = '🤖 KI-Korrektor';
+                        log_debug( 'Token abgelaufen oder ungueltig. Seite muss neu geladen werden.' );
+                        set_status( '🔑', 'Sitzung abgelaufen.', 'Seite wird neu geladen...', '#ffb86c', true );
+
+                        if( window.wfv4_news_changed ) {
+                            add_message( '<b>Sitzung abgelaufen.</b> Es gibt ungespeicherte Aenderungen.', 'warning' );
+                            const reload_btn = document.createElement('button');
+                            reload_btn.className = 'css_button'; reload_btn.innerHTML = '🔄 Seite jetzt neu laden';
+                            Object.assign( reload_btn.style, { marginTop: '8px', padding: '8px 16px', cursor: 'pointer', backgroundColor: '#ff9900', color: '#fff', border: 'none', borderRadius: '4px', fontWeight: 'bold', fontSize: '13px' } );
+                            reload_btn.onclick = () => location.reload();
+                            results_area.appendChild( reload_btn );
+                            btn_check.style.display = 'block'; btn_check.disabled = false;
+                            set_status( '🔑', 'Sitzung abgelaufen.', 'Bitte Seite neu laden.', '#ffb86c', true );
+                        } else {
+                            location.reload();
+                        }
+                        return;
+                    }
+
                     throw new Error( 'Der Worker konnte nicht gestartet werden.' );
                 }
 
