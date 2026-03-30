@@ -957,18 +957,27 @@
                             if (job_status !== 'pending') {
                                 cached_poll_response = data;
                             }
+                            // Visuelles Feedback im Countdown-Bereich
+                            if (countdown_el) {
+                                countdown_el.textContent = job_status === 'pending' ? 'Abfrage erfolgreich — wird noch verarbeitet...' : 'Abfrage erfolgreich — Ergebnis wird geladen...';
+                                countdown_el.style.color = '#50fa7b';
+                                setTimeout(() => { if (countdown_el) countdown_el.style.color = '#6272a4'; }, 2000);
+                            }
                         }
                     } catch(e) { log_debug(`${label}: Fehlgeschlagen (${e.message})`); }
                     wakeup(); // poll_loop sofort aufwecken
                 }
 
                 // Tab return handler: fires reliably when user switches back to this tab
+                let tab_return_until = 0; // boost: fast polling until this timestamp
                 function on_visibility_change() {
                     if (document.visibilityState !== 'visible' || !poll_active) return;
                     elapsed_seconds = Math.round((Date.now() - start_time) / 1000);
                     if (elapsed_seconds < 30) return;
                     if (Date.now() - last_poll_time < 5000) { log_debug('Tab sichtbar, aber letzter Abruf <5s her. Übersprungen.'); return; }
+                    tab_return_until = Date.now() + 60000; // 60s schnelles Polling nach Tab-Rückkehr
                     next_poll_time = Date.now(); // poll_loop soll nach Aufwachen sofort abfragen
+                    if (countdown_el) { countdown_el.textContent = 'Abfrage läuft...'; countdown_el.style.color = '#f1fa8c'; }
                     do_manual_poll('Tab-Rückkehr');
                 }
                 document.addEventListener('visibilitychange', on_visibility_change);
@@ -1061,7 +1070,9 @@
                             if (job_status === 'pending') {
                                 if (!poll_active) break; // timeout handler killed the loop
                                 // Adaptive wait: slow at start, fast mid-range, slow after 5 min
-                                const wait_sec = current_elapsed < 90 ? 15 : current_elapsed < 300 ? 3 : 30;
+                                // Nach Tab-Rückkehr: 4s Intervall für 60 Sekunden
+                                const in_tab_boost = Date.now() < tab_return_until;
+                                const wait_sec = in_tab_boost ? 4 : current_elapsed < 90 ? 15 : current_elapsed < 300 ? 3 : 30;
                                 next_poll_time = Date.now() + wait_sec * 1000;
                                 await interruptible_sleep(wait_sec * 1000);
                                 continue;
