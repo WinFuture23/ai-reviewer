@@ -1158,7 +1158,6 @@
                                     lines.forEach(line => {
                                         let clean_line = line.replace(/^[-*•#\d.]+\s*/, '');
                                         const line_lower = clean_line.toLowerCase();
-                                        const safe_line = escape_html(clean_line).replace(/(https?:\/\/[^\s&<]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" style="color: #66d9ef; text-decoration: underline;">$1</a>');
                                         if (line_lower.startsWith('link')) {
                                             // URL und Linktext aus der Zeile extrahieren
                                             const url_match = clean_line.match(/(https?:\/\/[^\s]+)/);
@@ -1180,10 +1179,13 @@
                                                 if (tag) url_type_tag = `<span style="display:inline-block; background:${tag.bg}; color:#fff; font-size:10px; font-weight:bold; padding:1px 6px; border-radius:3px; margin-right:5px; vertical-align:middle; letter-spacing:0.3px;">${tag.label}</span>`;
                                             }
 
+                                            // URL-Teil separat als <a>-Tag mit Type-Tag davor bauen (nicht doppelt ersetzen)
+                                            const escaped_line = escape_html(clean_line);
+                                            const safe_line_linked = link_url ? escaped_line.replace(escape_html(link_url), url_type_tag + `<a href="${escape_html(link_url)}" target="_blank" rel="noopener noreferrer" style="color: #66d9ef; text-decoration: underline;">${escape_html(link_url)}</a>`) : escaped_line;
+
                                             current_group = document.createElement('div'); Object.assign(current_group.style, { borderLeft: '3px solid #007acc', backgroundColor: '#1e1e1e', padding: '10px 12px', margin: '8px 0', borderRadius: '0 4px 4px 0', position: 'relative', transition: 'opacity 0.3s, max-height 0.3s, margin 0.3s, padding 0.3s', overflow: 'hidden' });
                                             if (link_url) current_group.dataset.previewUrl = link_url;
-                                            const safe_line_with_tag = safe_line.replace(/(https?:\/\/[^\s&<]+)/, url_type_tag + '$1');
-                                            current_group.innerHTML = `<div>► <span style="color:#f8f8f2; font-weight:bold;">${safe_line_with_tag}</span></div>`;
+                                            current_group.innerHTML = `<div>► <span style="color:#f8f8f2; font-weight:bold;">${safe_line_linked}</span></div>`;
 
                                             // X-Button zum Entfernen des Links
                                             if (link_url) {
@@ -1224,16 +1226,18 @@
 
                                             verl_box.appendChild(current_group);
                                         } else if (line_lower.startsWith('begründung') && current_group) {
-                                            const reason_div = document.createElement('div'); reason_div.innerHTML = `<span style="color:#cccccc;">${safe_line}</span>`; reason_div.style.marginTop = '6px';
+                                            const safe_text = escape_html(clean_line);
+                                            const reason_div = document.createElement('div'); reason_div.innerHTML = `<span style="color:#cccccc;">${safe_text}</span>`; reason_div.style.marginTop = '6px';
                                             current_group.appendChild(reason_div);
                                         } else {
                                             current_group = null;
+                                            const safe_text = escape_html(clean_line);
                                             const div = document.createElement('div'); Object.assign(div.style, { marginTop: '6px', paddingLeft: '5px' });
                                             if(line_lower.includes('keine') || line_lower.includes('nicht') || line_lower.includes('wurden')) {
                                                 Object.assign(div.style, { borderLeft: '3px solid #ffb86c', backgroundColor: '#1e1e1e', padding: '10px 12px', margin: '8px 0', borderRadius: '0 4px 4px 0' });
-                                                div.innerHTML = `<span style="color:#ffb86c;">►</span> <span style="color:#f8f8f2;">${safe_line}</span>`;
+                                                div.innerHTML = `<span style="color:#ffb86c;">►</span> <span style="color:#f8f8f2;">${safe_text}</span>`;
                                             } else {
-                                                div.innerHTML = `<span style="color:#6272a4;">►</span> <span style="color:#f8f8f2;">${safe_line}</span>`;
+                                                div.innerHTML = `<span style="color:#6272a4;">►</span> <span style="color:#f8f8f2;">${safe_text}</span>`;
                                             }
                                             verl_box.appendChild(div);
                                         }
