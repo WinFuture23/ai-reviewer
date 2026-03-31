@@ -1186,7 +1186,10 @@
 
                                             current_group = document.createElement('div'); Object.assign(current_group.style, { borderLeft: '3px solid #007acc', backgroundColor: '#1e1e1e', padding: '10px 12px 10px 12px', margin: '8px 0', borderRadius: '0 4px 4px 0', position: 'relative', transition: 'opacity 0.3s, max-height 0.3s, margin 0.3s, padding 0.3s', overflow: 'hidden', paddingRight: '38px' });
                                             if (link_url) current_group.dataset.previewUrl = link_url;
-                                            current_group.innerHTML = `<div style="margin-bottom:4px;">${url_type_tag}<span style="color:#f8f8f2; font-weight:bold;">${safe_link_text || escape_html(clean_line)}</span></div>${url_anchor ? `<div>${url_anchor}</div>` : ''}`;
+                                            const display_text = safe_link_text
+                                                ? `${url_type_tag}<span style="color:#f8f8f2; font-weight:bold;">\u201E${safe_link_text}\u201C</span> <span style="color:#6272a4; font-size:11px;">wird verlinkt auf</span>`
+                                                : `${url_type_tag}<span style="color:#f8f8f2; font-weight:bold;">${escape_html(clean_line)}</span>`;
+                                            current_group.innerHTML = `<div style="margin-bottom:4px;">${display_text}</div>${url_anchor ? `<div>${url_anchor}</div>` : ''}`;
 
                                             // X-Button zum Entfernen des Links
                                             if (link_url) {
