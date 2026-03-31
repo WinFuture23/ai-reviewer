@@ -589,7 +589,7 @@
         Object.assign(overlay.style, { position: 'fixed', top: '0', left: '0', width: '100vw', height: '100vh', backgroundColor: 'rgba(0,0,0,0.85)', zIndex: '9999999', display: 'flex', flexDirection: 'column', padding: '20px', boxSizing: 'border-box' });
         const header_bar = document.createElement('div'); Object.assign(header_bar.style, { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', color: '#fff', fontFamily: 'sans-serif' });
         header_bar.innerHTML = '<h2 style="margin:0;">🔍 Diff-Ansicht: Vorher vs. Nachher</h2>';
-        const close_diff_btn = document.createElement('button'); close_diff_btn.innerHTML = '✖ Ansicht schließen';
+        const close_diff_btn = document.createElement('button'); close_diff_btn.type = 'button'; close_diff_btn.innerHTML = '✖ Ansicht schließen';
         Object.assign(close_diff_btn.style, { backgroundColor: '#ff5555', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px' });
         function close_diff() { overlay.remove(); document.body.style.overflow = ''; document.removeEventListener('keydown', esc_handler); }
         close_diff_btn.onclick = close_diff; header_bar.appendChild(close_diff_btn);
@@ -727,21 +727,21 @@
         const footer = document.createElement('div');
         Object.assign(footer.style, { padding: '15px', backgroundColor: '#252526', display: 'flex', gap: '10px', justifyContent: 'center', alignItems: 'stretch', borderTop: '1px solid #333', width: '100%', boxSizing: 'border-box' });
 
-        btn_check = document.createElement('button'); btn_check.innerHTML = '🚀 Artikel überprüfen';
+        btn_check = document.createElement('button'); btn_check.type = 'button'; btn_check.innerHTML = '🚀 Artikel überprüfen';
         Object.assign(btn_check.style, { backgroundColor: '#007acc', color: '#ffffff', border: '1px solid #005f9e', padding: '10px 24px', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Consolas, "Courier New", monospace', fontWeight: 'bold', fontSize: '14px', transition: 'all 0.2s ease', outline: 'none', display: 'none' });
         btn_check.onmouseover = () => btn_check.style.backgroundColor = '#005f9e'; btn_check.onmouseout = () => btn_check.style.backgroundColor = '#007acc';
 
         const ACTION_BTN_STYLE = { padding: '10px 5px', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Consolas, "Courier New", monospace', fontWeight: 'bold', fontSize: '13px', outline: 'none', border: 'none', display: 'none', justifyContent: 'center', alignItems: 'center', gap: '6px', transition: 'all 0.2s ease', flex: '1', whiteSpace: 'nowrap' };
 
-        const btn_diff = document.createElement('button'); btn_diff.innerHTML = '🔍 Unterschiede anzeigen';
+        const btn_diff = document.createElement('button'); btn_diff.type = 'button'; btn_diff.innerHTML = '🔍 Unterschiede anzeigen';
         Object.assign(btn_diff.style, ACTION_BTN_STYLE, { backgroundColor: '#f1fa8c', color: '#282a36' });
         btn_diff.onmouseover = () => btn_diff.style.backgroundColor = '#e2eb70'; btn_diff.onmouseout = () => btn_diff.style.backgroundColor = '#f1fa8c';
 
-        const btn_undo = document.createElement('button'); btn_undo.innerHTML = '↺ Rückgängig machen';
+        const btn_undo = document.createElement('button'); btn_undo.type = 'button'; btn_undo.innerHTML = '↺ Rückgängig machen';
         Object.assign(btn_undo.style, ACTION_BTN_STYLE, { backgroundColor: '#d9534f', color: '#ffffff' });
         btn_undo.onmouseover = () => btn_undo.style.backgroundColor = '#c9302c'; btn_undo.onmouseout = () => btn_undo.style.backgroundColor = '#d9534f';
 
-        const btn_close_bottom = document.createElement('button'); btn_close_bottom.innerHTML = '💾 Speichern';
+        const btn_close_bottom = document.createElement('button'); btn_close_bottom.type = 'button'; btn_close_bottom.innerHTML = '💾 Speichern';
         btn_close_bottom.className = 'css_button green';
         Object.assign(btn_close_bottom.style, ACTION_BTN_STYLE, { backgroundColor: '#008800', color: '#fff', borderColor: '#7dc07d #003300 #003300 #7dc07d' });
         btn_close_bottom.onmouseover = () => btn_close_bottom.style.backgroundColor = '#006600'; btn_close_bottom.onmouseout = () => btn_close_bottom.style.backgroundColor = '#008800';
@@ -806,7 +806,8 @@
             return html;
         }
 
-        btn_diff.onclick = async () => {
+        btn_diff.onclick = async (e) => {
+            e.preventDefault(); e.stopPropagation();
             const old_btn_text = btn_diff.innerHTML; btn_diff.innerHTML = '⏳ Lade...'; btn_diff.disabled = true;
             try {
                 const has_teaser = content_info && content_info.config.fields.teaser;
