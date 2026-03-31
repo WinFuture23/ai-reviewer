@@ -897,22 +897,16 @@
 
                     if( start_res.status === 403 ) {
                         poll_active = false; unlock_editor();
-                        launcher_tab.querySelector('span').innerText = '🤖 KI-Korrektor';
+                        launcher_tab.querySelector('span').innerText = '🔑 Token abgelaufen';
                         log_debug( 'Token abgelaufen oder ungueltig. Seite muss neu geladen werden.' );
-                        set_status( '🔑', 'Sitzung abgelaufen.', 'Seite wird neu geladen...', '#ffb86c', true );
-
-                        if( window.wfv4_news_changed ) {
-                            add_message( '<b>Sitzung abgelaufen.</b> Es gibt ungespeicherte Aenderungen.', 'warning' );
-                            const reload_btn = document.createElement('button');
-                            reload_btn.className = 'css_button'; reload_btn.innerHTML = '🔄 Seite jetzt neu laden';
-                            Object.assign( reload_btn.style, { marginTop: '8px', padding: '8px 16px', cursor: 'pointer', backgroundColor: '#ff9900', color: '#fff', border: 'none', borderRadius: '4px', fontWeight: 'bold', fontSize: '13px' } );
-                            reload_btn.onclick = () => location.reload();
-                            results_area.appendChild( reload_btn );
-                            btn_check.style.display = 'block'; btn_check.disabled = false;
-                            set_status( '🔑', 'Sitzung abgelaufen.', 'Bitte Seite neu laden.', '#ffb86c', true );
-                        } else {
-                            location.reload();
-                        }
+                        set_status( '🔑', 'Sitzung abgelaufen.', 'Bitte Seite neu laden, um ein neues Token zu erhalten.', '#ffb86c', true );
+                        add_message( '<b>Das Sicherheits-Token ist abgelaufen.</b> Bitte laden Sie die Seite neu.', 'warning' );
+                        const reload_btn = document.createElement('button');
+                        reload_btn.className = 'css_button'; reload_btn.innerHTML = '🔄 Seite jetzt neu laden';
+                        Object.assign( reload_btn.style, { marginTop: '8px', padding: '8px 16px', cursor: 'pointer', backgroundColor: '#ff9900', color: '#fff', border: 'none', borderRadius: '4px', fontWeight: 'bold', fontSize: '13px' } );
+                        reload_btn.onclick = () => location.reload();
+                        results_area.appendChild( reload_btn );
+                        btn_check.style.display = 'block'; btn_check.disabled = false;
                         return;
                     }
 
