@@ -1179,13 +1179,14 @@
                                                 if (tag) url_type_tag = `<span style="display:inline-block; background:${tag.bg}; color:#fff; font-size:10px; font-weight:bold; padding:1px 6px; border-radius:3px; margin-right:5px; vertical-align:middle; letter-spacing:0.3px;">${tag.label}</span>`;
                                             }
 
-                                            // URL-Teil separat als <a>-Tag mit Type-Tag davor bauen (nicht doppelt ersetzen)
-                                            const escaped_line = escape_html(clean_line);
-                                            const safe_line_linked = link_url ? escaped_line.replace(escape_html(link_url), url_type_tag + `<a href="${escape_html(link_url)}" target="_blank" rel="noopener noreferrer" style="color: #66d9ef; text-decoration: underline;">${escape_html(link_url)}</a>`) : escaped_line;
+                                            // Strukturierte Darstellung: Type-Tag + Linktext (erste Zeile), URL (zweite Zeile)
+                                            const safe_link_text = link_text ? escape_html(link_text) : null;
+                                            const safe_url = link_url ? escape_html(link_url) : null;
+                                            const url_anchor = safe_url ? `<a href="${safe_url}" target="_blank" rel="noopener noreferrer" style="color: #66d9ef; text-decoration: underline; font-size: 12px; word-break: break-all;">${safe_url}</a>` : '';
 
-                                            current_group = document.createElement('div'); Object.assign(current_group.style, { borderLeft: '3px solid #007acc', backgroundColor: '#1e1e1e', padding: '10px 12px', margin: '8px 0', borderRadius: '0 4px 4px 0', position: 'relative', transition: 'opacity 0.3s, max-height 0.3s, margin 0.3s, padding 0.3s', overflow: 'hidden' });
+                                            current_group = document.createElement('div'); Object.assign(current_group.style, { borderLeft: '3px solid #007acc', backgroundColor: '#1e1e1e', padding: '10px 12px 10px 12px', margin: '8px 0', borderRadius: '0 4px 4px 0', position: 'relative', transition: 'opacity 0.3s, max-height 0.3s, margin 0.3s, padding 0.3s', overflow: 'hidden', paddingRight: '38px' });
                                             if (link_url) current_group.dataset.previewUrl = link_url;
-                                            current_group.innerHTML = `<div>► <span style="color:#f8f8f2; font-weight:bold;">${safe_line_linked}</span></div>`;
+                                            current_group.innerHTML = `<div style="margin-bottom:4px;">${url_type_tag}<span style="color:#f8f8f2; font-weight:bold;">${safe_link_text || escape_html(clean_line)}</span></div>${url_anchor ? `<div>${url_anchor}</div>` : ''}`;
 
                                             // X-Button zum Entfernen des Links
                                             if (link_url) {
