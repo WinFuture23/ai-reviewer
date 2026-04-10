@@ -110,11 +110,17 @@
                     const el = doc.querySelector( `meta[name="${n}"]` );
                     return el ? el.getAttribute( 'content' ) : null;
                 };
+                const article = ( p ) => {
+                    const el = doc.querySelector( `meta[property="article:${p}"]` );
+                    return el ? el.getAttribute( 'content' ) : null;
+                };
                 const title = og( 'title' ) || doc.querySelector( 'title' )?.textContent?.trim() || null;
                 const description = og( 'description' ) || meta( 'description' ) || null;
                 const image = og( 'image' ) || null;
+                const published_time = article( 'published_time' ) || null;
+                const modified_time = article( 'modified_time' ) || null;
                 if (title) {
-                    cache.set( url, { title, description, image, url } );
+                    cache.set( url, { title, description, image, url, published_time, modified_time } );
                 }
             } catch( e ) { /* silent — no card shown on error */ }
         }
@@ -125,6 +131,19 @@
             const d = document.createElement( 'div' );
             d.appendChild( document.createTextNode( str ) );
             return d.innerHTML;
+        }
+
+        // Format ISO date string to "DD.MM.YY H:MM Uhr"
+        function fmt_date( iso ) {
+            if (!iso) return null;
+            const d = new Date( iso );
+            if (isNaN( d )) return null;
+            const dd = String( d.getDate() ).padStart( 2, '0' );
+            const mm = String( d.getMonth() + 1 ).padStart( 2, '0' );
+            const yy = String( d.getFullYear() ).slice( -2 );
+            const hh = d.getHours();
+            const min = String( d.getMinutes() ).padStart( 2, '0' );
+            return `${dd}.${mm}.${yy} ${hh}:${min} Uhr`;
         }
 
         // Create singleton card element (lazy)
@@ -164,9 +183,18 @@
             const desc_html = data.description
                 ? `<div style="font-size:12.5px; color:#ccc; line-height:1.45; margin-top:6px; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden;">${esc( data.description )}</div>`
                 : '';
+            const pub = fmt_date( data.published_time );
+            const mod = fmt_date( data.modified_time );
+            let date_html = '';
+            if (pub) {
+                let date_str = pub;
+                if (mod && mod !== pub) date_str += ` (Update: ${mod})`;
+                date_html = `<div style="font-size:10px; color:#666; margin-bottom:2px;">${esc( date_str )}</div>`;
+            }
             c.innerHTML = `<div style="display:flex; gap:12px; padding:10px; align-items:flex-start;">`
                 + img_html
                 + `<div style="flex:1; min-width:0; display:flex; flex-direction:column;">`
+                + date_html
                 + `<div style="font-size:15px; font-weight:700; color:#ffffff; line-height:1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; text-wrap:balance;">${esc( data.title )}</div>`
                 + desc_html
                 + `<div style="text-align:right; font-size:10px; color:#666; margin-top:4px;">↗ Artikel öffnen</div>`
