@@ -7,7 +7,7 @@
  * tokens injected by the PHP integration class (wfv4_ai_reviewer::render).
  *
  * @author  mesios
- * @version 3 2026-04-10e
+ * @version 3 2026-04-10f
  * @see     docs/winfuture-integration.php
  */
 (function() {
@@ -171,12 +171,34 @@
             return card;
         }
 
+        // Position card near cursor, keeping it on-screen
+        function reposition( c, x, y ) {
+            c.style.opacity = '0';
+            c.style.display = 'block';
+            requestAnimationFrame( () => {
+                const cw = c.offsetWidth, ch = c.offsetHeight;
+                const vw = window.innerWidth, vh = window.innerHeight;
+                let left = x + 14, top = y + 14;
+                if (left + cw > vw - 12) left = x - cw - 14;
+                if (top + ch > vh - 12) top = y - ch - 14;
+                if (left < 8) left = 8;
+                if (top < 8) top = 8;
+                c.style.left = left + 'px';
+                c.style.top = top + 'px';
+                c.style.opacity = '1';
+                c.style.transform = 'translateY(0)';
+            });
+        }
+
         // Show preview card at given position
         function show( url, x, y ) {
             const data = cache.get( url );
             if (!data) return;
             const c = ensure_card();
+            // Skip innerHTML rebuild if card already shows this URL (avoids re-fetching the image)
+            const content_changed = c._url !== url;
             c._url = url;
+            if (!content_changed) { reposition( c, x, y ); return; }
             const img_html = data.image
                 ? `<img src="${esc( data.image )}" style="width:160px; min-width:160px; height:auto; object-fit:contain; border-radius:8px; background:#2a2a2c;" onerror="this.style.display='none'">`
                 : '';
@@ -202,21 +224,7 @@
                 + `<div style="text-align:right; font-size:10px; color:#666; margin-top:4px;">↗ Artikel öffnen</div>`
                 + `</div></div>`;
 
-            c.style.opacity = '0';
-            c.style.display = 'block';
-            requestAnimationFrame( () => {
-                const cw = c.offsetWidth, ch = c.offsetHeight;
-                const vw = window.innerWidth, vh = window.innerHeight;
-                let left = x + 14, top = y + 14;
-                if (left + cw > vw - 12) left = x - cw - 14;
-                if (top + ch > vh - 12) top = y - ch - 14;
-                if (left < 8) left = 8;
-                if (top < 8) top = 8;
-                c.style.left = left + 'px';
-                c.style.top = top + 'px';
-                c.style.opacity = '1';
-                c.style.transform = 'translateY(0)';
-            });
+            reposition( c, x, y );
         }
 
         // Hide preview card with fade-out
