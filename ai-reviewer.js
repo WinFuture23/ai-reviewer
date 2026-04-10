@@ -7,7 +7,7 @@
  * tokens injected by the PHP integration class (wfv4_ai_reviewer::render).
  *
  * @author  mesios
- * @version 3 2026-03-19
+ * @version 3 2026-04-10
  * @see     docs/winfuture-integration.php
  */
 (function() {
