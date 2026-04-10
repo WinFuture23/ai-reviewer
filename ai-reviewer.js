@@ -7,7 +7,7 @@
  * tokens injected by the PHP integration class (wfv4_ai_reviewer::render).
  *
  * @author  mesios
- * @version 3 2026-04-10d
+ * @version 3 2026-04-10e
  * @see     docs/winfuture-integration.php
  */
 (function() {
@@ -1192,9 +1192,11 @@
                                         if (line_lower.startsWith('link')) {
                                             // URL und Linktext aus der Zeile extrahieren
                                             const url_match = clean_line.match(/(https?:\/\/[^\s]+)/);
-                                            const link_text_match = clean_line.match(/[""„]([^""„"]+)[""„"]/);
+                                            // Greedy match: first opening quote to last closing quote (handles inner quotes)
+                                            const link_text_match = clean_line.match(/[""„](.+)[""„"]/);
                                             const link_url = url_match ? url_match[1] : null;
-                                            const link_text = link_text_match ? link_text_match[1] : null;
+                                            // Strip any trailing URL that leaked into the quoted text
+                                            const link_text = link_text_match ? link_text_match[1].replace(/\s*->?\s*https?:\/\/\S+$/, '').trim() : null;
                                             // Remove "-> URL" suffix from display line to avoid duplicate URL
                                             if (link_url) clean_line = clean_line.replace(/\s*->?\s*https?:\/\/[^\s]+/, '');
 
