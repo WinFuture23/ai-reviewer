@@ -7,7 +7,7 @@
  * tokens injected by the PHP integration class (wfv4_ai_reviewer::render).
  *
  * @author  mesios
- * @version 3 2026-04-10c
+ * @version 3 2026-04-10d
  * @see     docs/winfuture-integration.php
  */
 (function() {
@@ -1195,6 +1195,8 @@
                                             const link_text_match = clean_line.match(/[""„]([^""„"]+)[""„"]/);
                                             const link_url = url_match ? url_match[1] : null;
                                             const link_text = link_text_match ? link_text_match[1] : null;
+                                            // Remove "-> URL" suffix from display line to avoid duplicate URL
+                                            if (link_url) clean_line = clean_line.replace(/\s*->?\s*https?:\/\/[^\s]+/, '');
 
                                             // Content-Type-Tag anhand URL-Muster
                                             let url_type_tag = '';
