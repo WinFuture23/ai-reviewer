@@ -7,7 +7,7 @@
  * tokens injected by the PHP integration class (wfv4_ai_reviewer::render).
  *
  * @author  mesios
- * @version 3 2026-04-10b
+ * @version 3 2026-04-10c
  * @see     docs/winfuture-integration.php
  */
 (function() {
@@ -191,7 +191,7 @@
             if (pub) {
                 const update_part = mod && mod_delta >= 2
                     ? ` <span style="color:#888;">(Update: ${esc( mod )})</span>` : '';
-                date_html = `<div style="font-size:11px; color:#999; margin-bottom:4px; letter-spacing:0.2px;">📅 ${esc( pub )}${update_part}</div>`;
+                date_html = `<div style="font-size:11px; color:#999; margin-bottom:4px; letter-spacing:0.2px;">${esc( pub )}${update_part}</div>`;
             }
             c.innerHTML = `<div style="display:flex; gap:12px; padding:10px; align-items:flex-start;">`
                 + img_html
