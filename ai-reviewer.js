@@ -7,12 +7,13 @@
  * tokens injected by the PHP integration class (wfv4_ai_reviewer::render).
  *
  * @author  mesios
- * @version 3 2026-04-10f
+ * @version 3 2026-04-12
  * @see     docs/winfuture-integration.php
  */
 (function() {
     // Allowed user IDs (wfv4uid cookie)
-    const ALLOWED_USERS = [1, 124363];
+    // 1 = Sebastian Kuhbach, 124363 = Witold Pryjda, 174525 = Felix Krauth
+    const ALLOWED_USERS = [1, 124363, 174525];
 
     // Check user access before anything else
     const uid_match = document.cookie.match( /(?:^|;\s*)wfv4uid=(\d+)/ );
