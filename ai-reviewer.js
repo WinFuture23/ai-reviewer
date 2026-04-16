@@ -7,7 +7,7 @@
  * tokens injected by the PHP integration class (wfv4_ai_reviewer::render).
  *
  * @author  mesios
- * @version 3 2026-04-12
+ * @version 3 2026-04-16
  * @see     docs/winfuture-integration.php
  */
 (function() {
@@ -483,7 +483,26 @@
         if( specials.length > 0 ) {
             data.missing_specials = specials;
         }
+
+        const username = read_username();
+
+        if( username ) {
+            data.username = username;
+        }
         return data;
+    }
+
+    /**
+     * Read the editor username from the wfv4login cookie.
+     * Returns sanitised string (max 50 chars, a-zA-Z0-9 umlauts spaces) or empty string.
+     * @return {string}
+     */
+    function read_username() {
+        if( typeof wfv4_read_cookie !== 'function' ) return '';
+        const raw = wfv4_read_cookie( 'wfv4login' );
+        if( !raw || typeof raw !== 'string' ) return '';
+        const trimmed = raw.trim().substring( 0, 50 );
+        return /^[a-zA-ZäöüÄÖÜß0-9 ]+$/.test( trimmed ) ? trimmed : '';
     }
 
     // --- UTILITY FUNCTIONS ---
