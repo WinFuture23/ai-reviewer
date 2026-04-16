@@ -17,6 +17,7 @@
 |------|-----|---------------|-------------|
 | `teaser` | String | Nur News (6) | Teaser-/Anrisstext |
 | `software_name` | String | Nur Downloads (8) | Name der Software |
+| `username` | String | Alle, wenn vorhanden | Login-Name des Redakteurs (max 50 Zeichen) |
 | `missing_specials` | Array | Alle, wenn vorhanden | Fehlende Special-Verlinkungen |
 
 ## Content-Types

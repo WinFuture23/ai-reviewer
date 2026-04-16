@@ -38,13 +38,14 @@ Vor dem Weiterleiten an Make.com muessen folgende Validierungen durchgefuehrt we
 
 4. `headline` muss vorhanden sein und ein nicht-leerer String sein. Bei fehlendem oder leerem Wert: 400 mit `{"error": "Headline is required"}`.
 
-5. `teaser`, `software_name` und `missing_specials` sind optional.
+5. `teaser`, `software_name`, `username` und `missing_specials` sind optional.
 
 6. Maximale Laenge fuer String-Felder:
    - `content`: maximal 500.000 Zeichen
    - `headline`: maximal 500 Zeichen
    - `teaser`: maximal 2.000 Zeichen (wenn vorhanden)
    - `software_name`: maximal 200 Zeichen (wenn vorhanden)
+   - `username`: maximal 50 Zeichen (wenn vorhanden), erlaubt: a-zA-Z0-9, deutsche Umlaute (äöüÄÖÜß), Leerzeichen. Bei ungueltigen Zeichen: 400 mit `{"error": "Invalid username format"}`.
    Bei Ueberschreitung: 400 mit `{"error": "Field too long: <feldname>"}`.
 
 7. `missing_specials` muss, wenn vorhanden, ein Array sein. Jedes Element muss `name` (String) und `url` (String, muss mit `https://winfuture.de/` beginnen) enthalten. Bei ungueltigem Format: 400 mit `{"error": "Invalid missing_specials format"}`.
@@ -62,6 +63,7 @@ Der an Make.com weitergeleitete Body aendert sich. Bisher wurde nur `text` und `
     "teaser": "...",
     "software_name": "...",
     "content": "...",
+    "username": "...",
     "missing_specials": [...]
 }
 ```
