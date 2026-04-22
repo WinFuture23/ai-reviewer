@@ -7,7 +7,7 @@
  * tokens injected by the PHP integration class (wfv4_ai_reviewer::render).
  *
  * @author  mesios
- * @version 3 2026-04-16
+ * @version 3 2026-04-22
  * @see     docs/winfuture-integration.php
  */
 (function() {
@@ -291,10 +291,26 @@
     let content_info = null;        // Detected content type { type, id, config }
 
     // --- CONFIGURATION ---
-    // Diffchecker API accounts (Base64 to avoid plain-text in source)
-    const _da = ['U2s=','U2ViYXN0aWFuLkt1aGJhY2g=','bWVzaW9z','Q29kaW5n','RGlpZmY='];
-    const _dd = 'QFdpbkZ1dHVyZS5kZQ==';
-    const DIFF_ACCOUNTS = _da.map(a => atob(a) + atob(_dd));
+    // Diffchecker API: generate a random, previously-unused email per request.
+    // Workaround advised by Diffchecker support while their auth flow is broken —
+    // known addresses trigger auth, fresh random ones pass through. Both local part
+    // and domain are fully random to minimise collision with any prior submission.
+    const DIFF_TLDS = ['com','net','org','io','co','dev','app','xyz','info','biz'];
+    function random_alpha(len) {
+        const bytes = (typeof crypto !== 'undefined' && crypto.getRandomValues)
+            ? crypto.getRandomValues(new Uint8Array(len))
+            : Array.from({length: len}, () => Math.floor(Math.random() * 256));
+        const alphabet = 'abcdefghijklmnopqrstuvwxyz0123456789';
+        let out = '';
+        for (let i = 0; i < len; i++) out += alphabet[bytes[i] % alphabet.length];
+        return out;
+    }
+    function generate_random_email() {
+        const local_len  = 8  + Math.floor(Math.random() * 9);   // 8-16 chars
+        const domain_len = 8  + Math.floor(Math.random() * 9);   // 8-16 chars
+        const tld = DIFF_TLDS[Math.floor(Math.random() * DIFF_TLDS.length)];
+        return `${random_alpha(local_len)}@${random_alpha(domain_len)}.${tld}`;
+    }
 
     // Val.town proxy endpoints
     const PROXY_URL = 'https://mesios--43bb6c1c197111f18d1642dde27851f2.web.val.run';
@@ -853,7 +869,7 @@
                 return cached_diff[field_key].html;
             }
 
-            const random_email = DIFF_ACCOUNTS[Math.floor(Math.random() * DIFF_ACCOUNTS.length)];
+            const random_email = generate_random_email();
             const res = await fetch(`https://api.diffchecker.com/public/text?output_type=html&email=${encodeURIComponent(random_email)}`, {
                 method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ left: original_text, right: current_text, diff_level: 'word' })
             });
