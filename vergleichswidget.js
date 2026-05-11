@@ -473,6 +473,18 @@
 			open_re: /\s*<b\b[^>]*>[^<]{1,200}<\/b\s*>\s*(?:<br\s*\/?>\s*)?\s*<div\s+class\s*=\s*["'][^"']*\bchangelog_list\b[^"']*["'][^>]*>/gi,
 			close_tag: 'div'
 		},
+		// Standalone-Variante: <div class="…changelog_list…">…</div> OHNE
+		// vorangestellten <b>-Header. Wird gebraucht, wenn die KI z. B.
+		// eine Bullet-Liste mit Tarif-Details direkt einfügt. Wenn dieser
+		// Block innerhalb einer summary_box steht, übernimmt die overlap-
+		// Resolution in pre_extract_atomic_blocks das Ignorieren —
+		// summary_box matched den umschließenden Block und der inner
+		// changelog_list-Hit wird verworfen.
+		{
+			name: 'changelog_list_standalone',
+			open_re: /\s*<div\s+class\s*=\s*["'][^"']*\bchangelog_list\b[^"']*["'][^>]*>/gi,
+			close_tag: 'div'
+		},
 		// FAQ-Akkordeon: <div class="wfv4-accordion"> mit verschachtelten
 		// <details>-Elementen. find_balanced_close zählt <div>-Nesting.
 		{
