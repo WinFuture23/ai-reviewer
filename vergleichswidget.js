@@ -231,16 +231,13 @@
 		+ '.vw-keys{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;}'
 		+ '.vw-key{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border:1px solid #c5cad2;border-bottom-width:2px;border-radius:4px;background:#fff;font-family:ui-monospace,Menlo,Monaco,Consolas,monospace;font-size:11px;color:#1f2328;}'
 		+ '.vw-keys .vw-sep{color:#94979d;}'
-		// Footer-Action-Button: wechselt seinen Look je nach Decision-State.
-		// Default (alle decisions undecided oder accept) → grün "Alle annehmen".
-		// Sobald mindestens ein Row auf reject steht → grau "Übernehmen",
-		// damit der Redakteur klar sieht: jetzt wird nicht mehr alles
-		// automatisch angenommen, sondern die manuelle Auswahl übernommen.
-		+ '.vw-footer-action{appearance:none;border-radius:6px;padding:6px 14px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;line-height:1.2;transition:background-color .15s ease,border-color .15s ease;}'
-		+ '.vw-footer-action.vw-state-accept-all{border:1px solid #176c1f;background:#176c1f;color:#fff;}'
-		+ '.vw-footer-action.vw-state-accept-all:hover{background:#125a18;border-color:#125a18;}'
-		+ '.vw-footer-action.vw-state-commit{border:1px solid #d0d4dc;background:#fff;color:#1f2328;font-weight:500;}'
-		+ '.vw-footer-action.vw-state-commit:hover{background:#f1f3f6;}'
+		// Footer-Action-Button: immer grün. Der Text wechselt je nach
+		// Decision-State zwischen "✓ Alle annehmen" und "Übernehmen",
+		// damit dem Redakteur klar ist ob bei Klick alles angenommen
+		// wird oder seine manuelle Auswahl übernommen — der Button-Look
+		// bleibt gleich.
+		+ '.vw-footer-action{appearance:none;border:1px solid #176c1f;background:#176c1f;color:#fff;border-radius:6px;padding:6px 14px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;line-height:1.2;transition:background-color .15s ease,border-color .15s ease;}'
+		+ '.vw-footer-action:hover{background:#125a18;border-color:#125a18;}'
 		// Fade-out-Animation beim Schließen — kurz und unaufdringlich.
 		// Der User soll noch sehen, dass alle Haken grün werden, bevor
 		// das Modal weg ist. CSS-Transition läuft parallel zum DOM-Update.
@@ -1650,8 +1647,9 @@
 		setTimeout( function() { self.close(); }, 180 );
 	};
 
-	// Footer-Button live an das Decision-Profil anpassen: Klasse + Label
-	// wechseln je nachdem ob ein Reject im Spiel ist.
+	// Footer-Button live an das Decision-Profil anpassen: Label wechselt
+	// zwischen "Alle annehmen" und "Übernehmen", die Optik bleibt gleich
+	// (grün) — der Button ist immer die Primary Action.
 	Widget.prototype.update_footer_action = function() {
 		if( !this.root ) { return; }
 		var btn = this.root.querySelector( '[data-vw-footer-action]' );
@@ -1661,13 +1659,9 @@
 		var has_reject = this.rows.some( function( r ) { return r.decision === 'reject'; } );
 
 		if( has_reject ) {
-			btn.classList.remove( 'vw-state-accept-all' );
-			btn.classList.add( 'vw-state-commit' );
-			btn.innerHTML = '💾 Übernehmen';
+			btn.innerHTML = 'Übernehmen';
 			btn.title = 'Mit den aktuellen ✓/×-Entscheidungen übernehmen';
 		} else {
-			btn.classList.remove( 'vw-state-commit' );
-			btn.classList.add( 'vw-state-accept-all' );
 			btn.innerHTML = '✓ Alle annehmen';
 			btn.title = 'Alle offenen Entscheidungen annehmen und schließen';
 		}
@@ -1740,7 +1734,7 @@
 			+ '   </span>'
 			+ keys_footer_html()
 			+ '   <span class="vw-grow"></span>'
-			+ '   <button type="button" class="vw-footer-action vw-state-accept-all" data-vw-footer-action title="Alle offenen Entscheidungen annehmen und schließen">✓ Alle annehmen</button>'
+			+ '   <button type="button" class="vw-footer-action" data-vw-footer-action title="Alle offenen Entscheidungen annehmen und schließen">✓ Alle annehmen</button>'
 			+ ' </div>'
 			+ '</div>';
 	};
