@@ -478,16 +478,30 @@
 			.replace( /(?:\s|<br\s*\/?>)+$/gi, '' );
 	}
 
-	// Whitespace + <br/> auf eine kanonische Form kollabieren — ausschließlich
-	// für VERGLEICHE genutzt (Eq-Detection bei sonst identischen Absätzen).
-	// `trim_display` strippt nur außen, deshalb würden Heading-Merges wie
-	// `<h2>X</h2>\n\nBody…` vs `<h2>X</h2>\nBody…` sonst als Mod-Zeile
-	// auftauchen, obwohl optisch nichts geändert ist. Die Original-Bytes
-	// bleiben in row.before/row.after erhalten und werden bei resolve_text
-	// byte-exakt zurückgegeben.
+	// Inline-Wrapper- und Whitespace-Tags, die für die Eq-Detection als
+	// "unsichtbar" gelten. Diese Tags wirken visuell — ihre PRÄSENZ ist
+	// relevant, aber ihre POSITION nicht: wenn die KI z. B. einen `<b>`-
+	// Tag eine Newline früher oder später setzt, sollten beide Paragraphen
+	// trotzdem als gleich erkannt werden. Semantisch trennende Tags wie
+	// `<a>` (Link), `<h1>`–`<h6>` (Überschrift), `<p>`, `<div>` etc.
+	// bleiben für den Vergleich erhalten, damit echte Struktur-Änderungen
+	// sichtbar werden.
+	var EQ_INLINE_TAGS = /<\/?(?:br|b|i|em|strong|u|s|strike|sub|sup|small|big|tt|mark|nobr|span)\s*[^>]*?\/?>/gi;
+
+	// Kanonische Form für VERGLEICHE — Inline-Wrapper und Whitespace
+	// auf ein Space kollabieren. `trim_display` strippt nur außen,
+	// deshalb würden Heading-Merges wie `<h2>X</h2>\n\nBody…` vs
+	// `<h2>X</h2>\nBody…` sonst als Mod-Zeile auftauchen. Ebenso erkennt
+	// `compare_norm` Verschiebungen reiner Inline-Wrapper (z. B. wenn
+	// `<b>` im Source einen Absatz früher öffnet als auf der anderen
+	// Seite und durch den structural-empty-Merge an einer anderen
+	// Paragraph-Grenze landet) — visuell sind beide identisch, also
+	// sollen sie nicht als Änderung erscheinen. Die Original-Bytes
+	// bleiben in row.before/row.after erhalten und werden bei
+	// resolve_text byte-exakt zurückgegeben.
 	function compare_norm( text ) {
 		return text
-			.replace( /<br\s*\/?>/gi, '\n' )
+			.replace( EQ_INLINE_TAGS, ' ' )
 			.replace( /\s+/g, ' ' )
 			.trim();
 	}
