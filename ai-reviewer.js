@@ -1318,25 +1318,28 @@
                                     results_area.appendChild(korr_box);
                                 }
 
-                                {
-                                    const verl_box = document.createElement('div'); Object.assign(verl_box.style, { backgroundColor: '#fafbfc', padding: '14px 16px', borderRadius: '8px', border: '1px solid #e5e7eb' });
+                                verl_block: {
                                     const lines = verlinker_text ? verlinker_text.split('\n').map(l => l.trim()).filter(l => l.length > 0) : [];
                                     const link_count = lines.filter(l => l.toLowerCase().startsWith('link')).length;
+
+                                    // Wenn die KI keine Link-Empfehlungen gefunden hat,
+                                    // blenden wir den ganzen Verlinkungen-Block aus —
+                                    // ein leerer Hinweis-Block ist nur visuelles Rauschen,
+                                    // die Information "kein Link nötig" ist redundant zum
+                                    // generellen "Korrektur abgeschlossen"-Status.
+                                    if (link_count === 0) {
+                                        log_debug( 'Keine Verlinkungs-Empfehlungen — Block ausgeblendet.' );
+                                        break verl_block;
+                                    }
+
+                                    const verl_box = document.createElement('div'); Object.assign(verl_box.style, { backgroundColor: '#fafbfc', padding: '14px 16px', borderRadius: '8px', border: '1px solid #e5e7eb' });
                                     const v_title = document.createElement('div');
                                     Object.assign(v_title.style, { display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', paddingBottom: '10px', borderBottom: '1px solid #e5e7eb' });
-                                    const count_badge = link_count > 0
-                                        ? `<span style="background:#176c1f; color:#fff; font-size:11px; font-weight:600; padding:1px 7px; border-radius:10px; line-height:1.5;">${link_count}</span>`
-                                        : '';
+                                    const count_badge = `<span style="background:#176c1f; color:#fff; font-size:11px; font-weight:600; padding:1px 7px; border-radius:10px; line-height:1.5;">${link_count}</span>`;
                                     v_title.innerHTML = '<span style="font-size:15px;">🔗</span>'
                                         + `<span style="color:#1f2328; font-weight:600; font-size:13px; letter-spacing:.2px;">${link_count === 1 ? 'Verlinkung' : 'Verlinkungen'}</span>`
                                         + count_badge;
                                     verl_box.appendChild(v_title);
-                                    if (lines.length === 0) {
-                                        const no_links = document.createElement('div');
-                                        Object.assign(no_links.style, { borderLeft: '3px solid #b45309', border: '1px solid #e5e7eb', borderLeftWidth: '3px', borderLeftColor: '#b45309', backgroundColor: '#fff', padding: '10px 12px', borderRadius: '0 6px 6px 0', display: 'flex', alignItems: 'baseline', gap: '6px' });
-                                        no_links.innerHTML = '<span style="color:#b45309; font-weight:700;">ℹ</span><span style="color:#1f2328; font-size:13px; line-height:1.55;">Keine passenden Verlinkungen gefunden.</span>';
-                                        verl_box.appendChild(no_links);
-                                    }
                                     let current_group = null;
                                     lines.forEach(line => {
                                         let clean_line = line.replace(/^[-*•#\d.]+\s*/, '');
