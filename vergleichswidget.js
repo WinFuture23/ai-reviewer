@@ -438,20 +438,19 @@
 			}
 		}
 
-		// Merge heading-only paragraphs (<h1-6>...) into the following
-		// paragraph so the heading is rendered bold inline at the top of
-		// its body text, not as its own standalone row. Raw text remains
-		// 1:1 in the resolved output.
-		var with_headings_in_place = [];
-		for( var k = 0; k < merged.length; k++ ) {
-			var q = merged[ k ];
-			if( is_just_heading( q ) && k + 1 < merged.length ) {
-				merged[ k + 1 ] = q + merged[ k + 1 ];
-			} else {
-				with_headings_in_place.push( q );
-			}
-		}
-		return with_headings_in_place;
+		// Heading-only-Paragraphen bleiben als eigene Zeilen im Grid.
+		// Früher haben wir sie in den nachfolgenden Body-Absatz gemergt,
+		// damit die Überschrift fett am Anfang des Body-Cells erscheint.
+		// Das hat den Diff aber zerschossen, sobald eine Seite Headings
+		// als `<h2>…</h2>` setzt und die andere Plain-Text — split_paragraphs
+		// produzierte dann unterschiedlich viele Paragraphen und das
+		// Paragraph-LCS lief schief (Add+Del-Lawinen statt Mod-Pairs).
+		//
+		// Im Lesbar-Modus rendert der `<h1>`-`<h6>`-Inhalt weiterhin
+		// fett via CSS, jetzt eben in einer eigenen Zeile statt inline
+		// am Body-Anfang — das ist sogar etwas lesbarer und der Redakteur
+		// kann Heading und Body separat akzeptieren/ablehnen.
+		return merged;
 	}
 
 	function is_just_heading( text ) {
@@ -721,26 +720,45 @@
 		var d_vis = dels.map( visible_text );
 		var i_vis = ins.map( visible_text );
 
-		// Greedy best-match pairing — for each remaining del, find the best
-		// available ins by similarity. Threshold prevents pairing unrelated
-		// paragraphs together.
+		// Symmetric (Hungarian-light) best-match pairing — sammle ALLE
+		// Pair-Kandidaten oberhalb der Threshold, sortiere nach Score
+		// und nimm pro Iteration das beste noch freie Paar. Anders als
+		// das alte Greedy-by-d-Verfahren wird so nicht der erste del
+		// zur Ressourcen-Bremse für besser passende spätere dels — der
+		// im pair_by_d-Greedy häufige Effekt, dass ein "okay" Pair einem
+		// "perfekten" Pair gleich daneben den Slot wegschnappt.
 		var SIM_THRESHOLD = 0.2;
+		var candidates = [];
+
+		for( var di = 0; di < nD; di++ ) {
+			for( var ii = 0; ii < nI; ii++ ) {
+				var s = similarity( d_vis[ di ], i_vis[ ii ] );
+				if( s > SIM_THRESHOLD ) {
+					candidates.push( { di: di, ii: ii, score: s } );
+				}
+			}
+		}
+
+		// Score absteigend; bei Gleichstand das diagonalere Pair zuerst,
+		// damit die natürliche Vorher/Nachher-Reihenfolge erhalten bleibt.
+		candidates.sort( function( a, b ) {
+			if( b.score !== a.score ) { return b.score - a.score; }
+			return Math.abs( a.di - a.ii ) - Math.abs( b.di - b.ii );
+		});
+
+		var used_d = {};
 		var used_i = {};
 		var pairs_by_del = new Array( nD );
 
-		for( var di = 0; di < nD; di++ ) {
-			var best_i = -1, best_score = SIM_THRESHOLD;
-			for( var ii = 0; ii < nI; ii++ ) {
-				if( used_i[ ii ] ) { continue; }
-				var s = similarity( d_vis[ di ], i_vis[ ii ] );
-				if( s > best_score ) { best_score = s; best_i = ii; }
-			}
-			if( best_i !== -1 ) {
-				pairs_by_del[ di ] = best_i;
-				used_i[ best_i ] = true;
-			} else {
-				pairs_by_del[ di ] = -1;
-			}
+		for( var kk = 0; kk < nD; kk++ ) { pairs_by_del[ kk ] = -1; }
+
+		for( var c = 0; c < candidates.length; c++ ) {
+			var cand = candidates[ c ];
+
+			if( used_d[ cand.di ] || used_i[ cand.ii ] ) { continue; }
+			pairs_by_del[ cand.di ] = cand.ii;
+			used_d[ cand.di ] = true;
+			used_i[ cand.ii ] = true;
 		}
 
 		// Re-emit in a stable order: walk the longer side (whichever had the

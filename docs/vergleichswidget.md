@@ -181,17 +181,23 @@ Block-Shortcodes (`##contentad##`, `##video##`, `##gallery##`,
 `##embed##`, `##iframe##`, `##twitter##`, `##instagram##`,
 `##youtube##`).
 
-Zwei Post-Processing-Schritte danach:
+Ein Post-Processing-Schritt danach:
 
 1. **Structural-empty merge**: Absätze, die nach Strippen aller HTML-
    Tags und Whitespace leer wären (`<br/><br/>`, einsame `\n`, leere
    `<p>`-Tags …), werden in den vorherigen Absatz gemergt. Sie
    tauchen nie als eigene Zeile im Grid auf — der Roh-Text bleibt aber
    als Teil des Mit-Absatzes erhalten.
-2. **Heading-merge**: Absätze, die NUR aus einem `<h1>`–`<h6>`-Element
-   bestehen, werden in den folgenden Absatz gemergt. Dadurch wird die
-   Überschrift im Lesbar-Modus fett am Anfang ihres Body-Absatzes
-   gerendert.
+
+> Früher gab es zusätzlich einen Heading-Merge-Schritt: `<h1>`–`<h6>`-
+> Paragraphen wurden in den folgenden Body-Absatz hineingezogen, damit
+> die Überschrift fett am Anfang des Body-Cells erscheint. Das Feature
+> ist entfernt worden, weil es das Paragraph-LCS zerschossen hat sobald
+> nur EINE Seite die Headings als `<h2>` formatiert hatte und die andere
+> Plain-Text. Resultat damals: viele Add+Del-Reihen statt Mod-Pairs.
+> Headings bleiben jetzt als eigene Zeilen — im Lesbar-Modus rendert
+> der `<h1>`-`<h6>`-Inhalt weiterhin fett via CSS, der Redakteur kann
+> Heading-Änderung und Body-Änderung separat akzeptieren/ablehnen.
 
 ### Diff (`build_rows` → `build_rows_from_paras`)
 
