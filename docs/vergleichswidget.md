@@ -115,11 +115,11 @@ irgendetwas anderes.
 7. **Minimale Tastatursteuerung.** `↑`/`↓` navigieren (auch zu schon
    entschiedenen Zeilen, damit Decisions revidiert werden können);
    `→` annehmen (Toggle), `←` ablehnen (Toggle), `Esc` schließen —
-   außer in Inline-Edit / Suchfeld, dort nur Blur.
-8. **Inline-Edit auf der Nachher-Seite.** Alle drei Sektionen.
-   `contenteditable="plaintext-only"`. `resolve_text` nutzt für
-   Eq-Zeilen ebenfalls `row.after`, damit Inline-Edits auf
-   unveränderten Absätzen ins Ergebnis fließen.
+   außer in der Suchbox, dort nur Blur.
+8. **Read-only Cells.** Beide Spalten sind nicht editierbar. Wer den
+   Nachher-Text feinjustieren will, tut das nach dem Resolve direkt
+   im Ziel-Editor — der bekommt das byte-exakte Bundle und kann es
+   normal weiterbearbeiten.
 9. **Höhe an Inhalt angepasst.** `max-height: 94vh` plus `height: auto`.
    Kurze Diffs → kompaktes Modal; lange Diffs → 94 vh + Scroll.
 
@@ -155,7 +155,7 @@ einführt:
 | `↑` / `↓` | vorherige / nächste änderbare Zeile (cyclisch) |
 | `→` | annehmen (Toggle bei Wiederwahl) |
 | `←` | ablehnen (Toggle bei Wiederwahl) |
-| `Esc` | schließen — außer in Such-/Inline-Edit-Feld, dort nur Blur |
+| `Esc` | schließen — außer in der Suchbox, dort nur Blur |
 
 OS-Detection (`detect_os`) zeigt im Footer Mac-Symbole oder
 Windows/Linux-Beschriftung. Auf Touch-Geräten ohne Hover wird der
@@ -240,19 +240,23 @@ Status ablesen lässt:
 Bewusst keine Pfeil-Bubbles, Section-Labels oder zusätzlichen
 Indikatoren — die drei Quellen sind ausreichend redundant.
 
-### Inline-Edit
+### Cells sind read-only
 
-Jede Nachher-Cell trägt `contenteditable="plaintext-only"`. Ein
-`input`-Listener am Grid synct den getippten Text in `row.after`.
-`resolve_text` nutzt für Eq-Zeilen ebenfalls `row.after`, damit
-Inline-Edits auf unveränderten Absätzen ins Ergebnis fließen.
+Beide Spalten (Vorher und Nachher) sind nicht editierbar. Inline-Edit
+auf der Nachher-Seite gab es früher per `contenteditable="plaintext-only"`,
+hat aber im Lesbar-Modus den Source-Markup zerstört (HTML-Tags und
+`##`-Shortcodes sind dort visuell versteckt — der `innerText`-Sync ins
+`row.after` hat sie damit auf die rendered Plain-Text-Version reduziert
+und beim Resolve schlugen sie als kaputte Text-Inseln im Editor auf).
 
-Ein Capture-Phase-`keydown`-Listener am Grid verhindert, dass
-Shortcut-Tasten ein fokussiertes ContentEditable kapern.
+Heilige Kuh aus Sektion 3 verlangt byte-exakte Erhaltung; ein In-Modal-
+Editor, der das einhält, würde einen weit aufwändigeren Source-Diff-Sync
+brauchen. Bis dahin: Nachher-Text wird nach dem Resolve direkt im
+Ziel-Editor weiterbearbeitet, der das byte-genaue Bundle eh schon hat.
 
-`click`-Handler an Links innerhalb ContentEditable-Cells: öffnet die
-URL programmatisch in einem neuen Fenster (Browser-Default wäre
-„Cursor setzen" statt navigieren).
+Links in den Cells folgen `target="_blank" rel="noopener noreferrer"`
+aus dem Renderer — Klick öffnet sie ganz normal in einem neuen Tab,
+ohne weiteren JS-Eingriff.
 
 ## Sicherheit
 
