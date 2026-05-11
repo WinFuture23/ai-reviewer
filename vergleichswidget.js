@@ -407,7 +407,73 @@
 		'gi'
 	);
 
-	function split_paragraphs( text ) {
+	// Bekannte WinFuture-Block-Patterns, die der Splitter NICHT zerlegen
+	// darf, weil ihr HTML im Source bewusst balanced ist und ein nur
+	// teilweise akzeptierter Block ein offenes `<div>` im Editor hinterlässt.
+	// Konkret betroffen:
+	//   * summary_box (KI-generierte Zusammenfassung samt umschließendem
+	//     `<br/><br/>`-Vorlauf)
+	//   * siehe_auch (Liste verwandter Artikel inklusive vorangestelltem
+	//     "Siehe auch:"-Header)
+	// Beide Blöcke landen jeweils als EIN Paragraph in der Diff-Engine,
+	// werden also als Ganzes angenommen oder verworfen.
+	var ATOMIC_BLOCK_PATTERNS = [
+		// summary_box: optional vorangestellte Leerzeilen + <br/>-Vorlauf,
+		// dann <div class="summary_box">…</div></div>. Der Vorlauf ist
+		// optional — der Block wird auch ohne <br/> als atomar erkannt.
+		/\s*(?:<br\s*\/?>\s*)*\s*<div\s+class\s*=\s*["'][^"']*\bsummary_box\b[^"']*["'][^>]*>[\s\S]*?<\/div>\s*<\/div>/gi,
+		// siehe_auch: vorangestellter Whitespace + <b>Siehe auch:</b><br/>
+		// + <div class="…siehe_auch…">…</div>
+		/\s*<b\s*>\s*Siehe auch:?\s*<\/b\s*>\s*<br\s*\/?>\s*<div\s+class\s*=\s*["'][^"']*\bsiehe_auch\b[^"']*["'][^>]*>[\s\S]*?<\/div>/gi
+	];
+
+	// Vor dem normalen Paragraph-Splitting werden bekannte Block-Patterns
+	// (siehe ATOMIC_BLOCK_PATTERNS) als geschlossene Einheiten markiert.
+	// Der Rest läuft durchs normale Splitting; die atomic Blöcke kommen
+	// am Stück in die Paragraph-Liste.
+	function pre_extract_atomic_blocks( text ) {
+		var hits = [];
+
+		for( var p = 0; p < ATOMIC_BLOCK_PATTERNS.length; p++ ) {
+			var re = new RegExp( ATOMIC_BLOCK_PATTERNS[ p ].source, ATOMIC_BLOCK_PATTERNS[ p ].flags );
+			var m;
+			while( ( m = re.exec( text ) ) !== null ) {
+				hits.push( { start: m.index, end: m.index + m[ 0 ].length } );
+			}
+		}
+
+		if( hits.length === 0 ) { return [ { type: 'normal', text: text } ]; }
+
+		hits.sort( function( a, b ) { return a.start - b.start; } );
+
+		// Overlapping matches auflösen — erst gefundener Hit gewinnt.
+		var clean = [];
+
+		for( var h = 0; h < hits.length; h++ ) {
+			if( clean.length === 0 || hits[ h ].start >= clean[ clean.length - 1 ].end ) {
+				clean.push( hits[ h ] );
+			}
+		}
+
+		var segments = [];
+		var pos = 0;
+
+		for( var k = 0; k < clean.length; k++ ) {
+			if( clean[ k ].start > pos ) {
+				segments.push( { type: 'normal', text: text.slice( pos, clean[ k ].start ) } );
+			}
+			segments.push( { type: 'atomic', text: text.slice( clean[ k ].start, clean[ k ].end ) } );
+			pos = clean[ k ].end;
+		}
+
+		if( pos < text.length ) {
+			segments.push( { type: 'normal', text: text.slice( pos ) } );
+		}
+
+		return segments;
+	}
+
+	function split_paragraphs_normal( text ) {
 		var paragraphs = [];
 		var last = 0;
 		var re = new RegExp( PARA_BOUNDARY_RE.source, PARA_BOUNDARY_RE.flags );
@@ -418,6 +484,23 @@
 			last = end_of_para;
 		}
 		if( last < text.length ) { paragraphs.push( text.slice( last ) ); }
+		return paragraphs;
+	}
+
+	function split_paragraphs( text ) {
+		var segments = pre_extract_atomic_blocks( text );
+		var paragraphs = [];
+
+		for( var s = 0; s < segments.length; s++ ) {
+			if( segments[ s ].type === 'atomic' ) {
+				paragraphs.push( segments[ s ].text );
+			} else {
+				var sub = split_paragraphs_normal( segments[ s ].text );
+
+				for( var t = 0; t < sub.length; t++ ) { paragraphs.push( sub[ t ] ); }
+			}
+		}
+
 		while( paragraphs.length > 0 && paragraphs[ 0 ] === '' ) { paragraphs.shift(); }
 
 		// Merge structural-empty chunks (only whitespace and <br/> etc., no
