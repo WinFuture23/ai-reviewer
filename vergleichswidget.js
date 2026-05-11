@@ -211,6 +211,9 @@
 		+ '.vw-mode-editor .vw-syn-equals{color:#6b7280;}'
 		+ '.vw-mode-editor .vw-syn-sc-mark{color:#6b7280;font-weight:600;}'
 		+ '.vw-mode-editor .vw-syn-sc-name{color:#4338ca;font-weight:600;}'
+		// HTML-Kommentare: dezent grau + kursiv, damit man sie als
+		// "nicht im Output sichtbar" sofort erkennt.
+		+ '.vw-mode-editor .vw-syn-comment{color:#94979d;font-style:italic;}'
 		+ '.vw-mode-editor .vw-cell{color:#1f2328;}'
 
 		+ '.vw-actions-btn{appearance:none;border:1px solid #d0d4dc;background:#fff;width:24px;height:24px;border-radius:4px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:13px;line-height:1;color:#3a3f46;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}'
@@ -329,17 +332,23 @@
 	//
 
 	// TOKEN_RE-Alternativen, von oben nach unten geprüft:
-	//   1. HTML-Tag
-	//   2. ##shortcode##  — Inhalt darf einzelne `#` enthalten
+	//   1. HTML-Kommentar `<!-- … -->` — komplettes Block-Token (sonst
+	//      würde der Splitter das `<` verschlucken und der Kommentar-
+	//      Text als sichtbare Buchstaben/Sonderzeichen-Sequenz im Lesbar-
+	//      Modus erscheinen).
+	//   2. HTML-Tag
+	//   3. ##shortcode##  — Inhalt darf einzelne `#` enthalten
 	//      (z. B. `farbe="#ff7f01"` Hex-Codes); nur das `##`-Schluss-Sentinel
 	//      darf nicht im Inhalt vorkommen. Ohne dieses Detail wäre der
 	//      Tokenizer früher beim ersten Inhalt-`#` ausgestiegen und hätte
 	//      die `##`-Begrenzer komplett verschluckt — Source-Bytes weg.
-	//   3. Wort
-	//   4. Whitespace
-	//   5. einzelnes Sonderzeichen (jetzt INKLUSIVE `#`, damit verirrte
-	//      `#` nicht spurlos verschwinden, falls Pattern 2 oben nicht greift)
-	var TOKEN_RE = /<\/?[a-zA-Z][^>]*>|##(?:[^#\n]|#(?!#))*?##|[A-Za-zÀ-ɏ0-9_]+|\s+|[^\sA-Za-zÀ-ɏ0-9_<]/g;
+	//   4. Wort
+	//   5. Whitespace
+	//   6. einzelnes Sonderzeichen (jetzt INKLUSIVE `#` und `<`, damit
+	//      verirrte `<` aus z. B. „a < b" oder kaputten Tag-Anfängen
+	//      nicht spurlos verschwinden — sie kommen als Single-Char-Token
+	//      durch und werden im Render byte-exact zurückgegeben).
+	var TOKEN_RE = /<!--[\s\S]*?-->|<\/?[a-zA-Z][^>]*>|##(?:[^#\n]|#(?!#))*?##|[A-Za-zÀ-ɏ0-9_]+|\s+|[^\sA-Za-zÀ-ɏ0-9_]/g;
 
 	function tokenize( text ) {
 		if( !text ) { return []; }
@@ -1292,10 +1301,18 @@
 		if( mode === 'editor' ) {
 			// HTML+Shortcodes-Modus: kompletter Quelltext sichtbar, aber mit
 			// Syntax-Highlighting wie ein Code-Editor.
+			if( /^<!--/.test( token ) ) {
+				return '<span class="vw-syn vw-syn-comment">' + escape_html( token ) + '</span>';
+			}
 			if( /^<\/?[a-zA-Z]/.test( token ) ) { return syntax_html_tag( token ); }
 			if( /^##/.test( token ) ) { return syntax_shortcode( token ); }
 			return escape_html( token );
 		}
+
+		// Lesbar-Modus: HTML-Kommentare werden komplett verborgen —
+		// sie erscheinen weder im fertigen Artikel noch im Diff
+		// (Konzentration auf Text und sichtbare Änderungen).
+		if( /^<!--/.test( token ) ) { return ''; }
 
 		if( /^<\/?[a-zA-Z]/.test( token ) ) {
 			if( /^<br/i.test( token ) ) { return '<br>'; }
