@@ -82,12 +82,6 @@
 		+ '.vw-header{display:flex;align-items:center;gap:14px;padding:10px 14px;border-bottom:1px solid #e5e7eb;background:#f8f9fb;flex-shrink:0;}'
 		+ '.vw-title{font-size:15px;font-weight:600;letter-spacing:.2px;}'
 		+ '.vw-checkbox{display:inline-flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;user-select:none;}'
-		// "Nur Änderungen"-Filter ist im HTML-Code-Modus nicht relevant —
-		// dort soll der Redakteur den vollständigen Quelltext sehen. Wir
-		// blenden die Checkbox aus statt sie zu deaktivieren, damit der
-		// gespeicherte Filter-Zustand beim Zurückwechsel in den Lesbar-
-		// Modus erhalten bleibt.
-		+ '.vw-modal.vw-mode-editor .vw-checkbox{display:none;}'
 		+ '.vw-checkbox input{accent-color:#1f2328;}'
 		+ '.vw-grow{flex:1 1 auto;}'
 		+ '.vw-nav{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#3a3f46;}'
@@ -1842,7 +1836,19 @@
 			if( t.closest && t.closest( '[data-vw-next]' ) ) { self.navigate( 1 ); return; }
 			var modeBtn = t.closest && t.closest( '[data-vw-mode]' );
 			if( modeBtn ) {
-				self.mode = modeBtn.getAttribute( 'data-vw-mode' );
+				var newMode = modeBtn.getAttribute( 'data-vw-mode' );
+
+				// Beim Wechsel in den HTML-Code-Modus den „Nur Änderungen"-
+				// Filter automatisch deaktivieren — der Redakteur sieht
+				// dort standardmäßig den kompletten Quelltext. Wenn er den
+				// Filter im HTML-Code-Modus aktivieren will, klickt er
+				// die Checkbox selbst wieder an.
+				if( newMode === 'editor' && self.mode !== 'editor' && self.only_changes ) {
+					self.only_changes = false;
+					if( self.only_checkbox ) { self.only_checkbox.checked = false; }
+				}
+
+				self.mode = newMode;
 				self.render();
 				return;
 			}
@@ -1994,16 +2000,8 @@
 	};
 
 	Widget.prototype.visible_rows = function() {
-		// Im HTML-Code-Modus zeigen wir IMMER alle Rows — der Redakteur
-		// will dort den vollständigen Quelltext sehen (Vorher unverändert,
-		// Nachher zum Vergleich), nicht den gefilterten Mod-Diff.
-		// Der `only_changes`-Filter wird damit im editor-Modus ignoriert;
-		// die Checkbox bleibt im DOM (für den Zustands-Erhalt beim
-		// Zurückwechseln in den Lesbar-Modus) ist aber via CSS ausgeblendet.
-		var filterEq = this.only_changes && this.mode !== 'editor';
-
 		return this.rows.filter( function( r ) {
-			if( filterEq && r.type === 'eq' ) { return false; }
+			if( this.only_changes && r.type === 'eq' ) { return false; }
 			return is_row_renderable( r, this.mode );
 		}.bind( this ) );
 	};
