@@ -1132,11 +1132,20 @@
 			}
 		}
 
-		// Pass 3: render
+		// Pass 3: render. Im Lesbar-Modus werden del/ins-Tokens, die nur
+		// aus Whitespace und/oder <br>/leeren Block-Tags bestehen, OHNE
+		// rot/grünes Highlight ausgegeben — sie sind Layout-Rauschen,
+		// keine textliche Entscheidung. Der Text bleibt aber auf seiner
+		// Seite (Vorher behält sein \n\n, Nachher sein \n). Im HTML-Code-
+		// Modus bleiben sie hervorgehoben, weil der Redakteur dort
+		// bewusst den Quelltext prüft.
 		var parts = [];
 		for( var x = 0; x < merged.length; x++ ) {
 			var mop = merged[ x ];
+
 			if( mop.op === 'eq' ) {
+				parts.push( render_text_html( mop.text, mode ) );
+			} else if( mode === 'pseudo' && is_structural_only( mop.text ) ) {
 				parts.push( render_text_html( mop.text, mode ) );
 			} else {
 				parts.push( render_highlight_run( mop.text, ourMark === 'del' ? 'vw-del' : 'vw-ins', mode ) );
