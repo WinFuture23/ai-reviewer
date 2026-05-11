@@ -840,15 +840,19 @@
 
         set_status('🟢', 'Bereit.', null, '#176c1f');
 
-        // --- VERGLEICHSWIDGET BUTTON ---
-        // Opens the companion Vorher/Nachher diff modal (see vergleichswidget.js).
-        // The widget is lazy-loaded on first click via ensure_vergleichswidget().
-        // Resolution writes the byte-exact `resolved` bundle back into the editor
-        // fields, so the editor can accept/reject per paragraph instead of using
-        // the all-or-nothing Rückgängig button below.
-        btn_diff.onclick = async ( e ) => {
-            e.preventDefault();
-            e.stopPropagation();
+        // --- VERGLEICHSWIDGET ÖFFNEN ---
+        // Lazy-load das Vorher/Nachher-Modal, baue die before/after-Bundles
+        // aus backup_data + aktuellem Editor-Stand und öffne das Modal —
+        // mit einem Pre-Check: wenn die Diff-Engine keine Mod/Add/Del-
+        // Zeilen findet, zeigen wir stattdessen eine kurze Notiz im
+        // Terminal-Overlay, statt ein leeres Modal aufzumachen. So kann
+        // das Modal nach dem KI-Lauf auch automatisch geöffnet werden,
+        // ohne dem Redakteur eine sinnlose 0/0-Ansicht zu zeigen.
+        let auto_diff_opened = false; // verhindert doppeltes Auto-Open im selben Lauf
+
+        async function open_diff_modal( opts ) {
+            opts = opts || {};
+            const is_auto = !!opts.auto;
 
             if( !content_info || !backup_data ) {
                 log_debug( 'Vergleich nicht möglich: kein Backup vorhanden.' );
@@ -860,7 +864,7 @@
             btn_diff.disabled = true;
 
             try {
-                log_debug( 'Lade VergleichsWidget...' );
+                log_debug( is_auto ? 'Auto-Open: lade VergleichsWidget...' : 'Lade VergleichsWidget...' );
                 await ensure_vergleichswidget();
 
                 const fields = content_info.config.fields;
@@ -874,6 +878,27 @@
                     if( !fields[key] ) continue;
                     before[key] = ( backup_data && typeof backup_data[key] === 'string' ) ? backup_data[key] : '';
                     after[key]  = read_field_value( fields[key] ) || '';
+                }
+
+                // Pre-Check: Diff-Engine vorab laufen lassen. Wenn keine
+                // entscheidungsrelevante Zeile dabei ist (alles eq), gibt
+                // es nichts zu vergleichen — Notiz statt leeres Modal.
+                const rows = window.VergleichsWidget._internal.build_rows( before, after );
+                const has_changes = rows.some( function( r ) {
+                    return r.type === 'mod' || r.type === 'add' || r.type === 'del';
+                });
+
+                if( !has_changes ) {
+                    log_debug( 'Vergleich: keine Textunterschiede gefunden.' );
+
+                    if( !is_auto ) {
+                        // Nur bei manuellem Klick eine Notification — beim
+                        // Auto-Open wäre eine zusätzliche Zeile redundant,
+                        // weil die Korrektur-Box „Keine Änderungen" schon
+                        // sagt was Sache ist.
+                        add_message( '<b>Hinweis:</b> Die KI hat den Text 1:1 übernommen — es gibt keine Unterschiede zum Vergleich.', 'info' );
+                    }
+                    return;
                 }
 
                 window.VergleichsWidget.open( {
@@ -899,11 +924,20 @@
             } catch( err ) {
                 // Sicherheitsrichtlinie §12: Details nur ins Debug-Log, nicht an den User
                 log_debug( `VergleichsWidget-Fehler: ${err.message}` );
-                add_message( '<b>Hinweis:</b> Konnte das Vergleichs-Widget nicht laden.', 'warning' );
+
+                if( !is_auto ) {
+                    add_message( '<b>Hinweis:</b> Konnte das Vergleichs-Widget nicht laden.', 'warning' );
+                }
             } finally {
                 btn_diff.innerHTML = old_btn_text;
                 btn_diff.disabled = false;
             }
+        }
+
+        btn_diff.onclick = function( e ) {
+            e.preventDefault();
+            e.stopPropagation();
+            open_diff_modal();
         };
 
         /** Restore original editor content from backup. */
@@ -918,7 +952,7 @@
 
         // --- HAUPT-POLLING LOGIK ---
         btn_check.addEventListener('click', async () => {
-            btn_check.disabled = true; btn_check.style.display = 'none'; results_area.innerHTML = ''; debug_log = [];
+            btn_check.disabled = true; btn_check.style.display = 'none'; results_area.innerHTML = ''; debug_log = []; auto_diff_opened = false;
 
             log_debug('Starte Überprüfungsprozess...');
             let timer_interval;
@@ -1413,6 +1447,15 @@
                                     const max_h = window.innerHeight - 40;
                                     terminal_container.style.height = Math.min(needed, max_h) + 'px';
                                 });
+
+                                // Auto-Open: das Vergleichs-Modal aufmachen, sobald der KI-Lauf
+                                // durch ist. open_diff_modal() macht intern einen Pre-Check und
+                                // überspringt das Modal stillschweigend, wenn die KI keinen Text
+                                // geändert hat — die Korrektur-Box im Terminal sagt das ohnehin.
+                                if( !auto_diff_opened ) {
+                                    auto_diff_opened = true;
+                                    setTimeout( function() { open_diff_modal( { auto: true } ); }, 350 );
+                                }
                             }
                         }
                     } catch (poll_err) {

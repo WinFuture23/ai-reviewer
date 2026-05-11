@@ -52,10 +52,13 @@ Flag `window.wfv4_ai_reviewer_loaded` abgefangen.
   ├─ unlock_editor()
   ├─ Render Korrekturen + Verlinkungen ins Terminal
   ├─ btn_diff / btn_undo / btn_close_bottom werden sichtbar
-  └─ wfv4_link_preview.attach(...)  → Hover-Karten auf Linkboxen
+  ├─ wfv4_link_preview.attach(...)  → Hover-Karten auf Linkboxen
+  └─ Auto-Open (~350 ms)     → open_diff_modal({auto:true})
+                               überspringt sich selbst, wenn nichts
+                               zu vergleichen ist (Pre-Check)
 
 [User entscheidet]
-  ├─ „🔍 Unterschiede"  → ensure_vergleichswidget() + VergleichsWidget.open(…)
+  ├─ „🔍 Unterschiede"  → open_diff_modal()  (Pre-Check + ggf. Modal)
   ├─ „↺ Rückgängig"     → write_field_value() aus backup_data
   └─ „💾 Speichern"     → Content-Type-spezifische Submit-Funktion
                           (wfv4_news_submit / form.requestSubmit)
@@ -141,8 +144,16 @@ nach einem Fehler nicht in einem sperrenden Zustand hängen bleibt.
 
 ## Diff-Anzeige (VergleichsWidget)
 
-Der Button „🔍 Unterschiede anzeigen" erscheint nach einem erfolgreichen
-Lauf. Beim Klick:
+Zwei Auslöser, eine gemeinsame Funktion `open_diff_modal( opts )`:
+
+- **Auto-Open** ~350 ms nach Success-Render — der Redakteur sieht das
+  Vorher/Nachher-Modal sofort, ohne extra Klick. Ein `auto_diff_opened`-
+  Flag verhindert mehrfaches Auf-Auf bei Re-Renders im selben Lauf;
+  beim nächsten `btn_check`-Klick wird er wieder auf `false` gesetzt.
+- **Manueller Klick** auf den Button „🔍 Unterschiede anzeigen" —
+  derselbe Pfad, identisches Verhalten.
+
+Ablauf in `open_diff_modal()`:
 
 1. `ensure_vergleichswidget()` lädt `vergleichswidget.js` lazy nach,
    falls noch nicht geschehen. Die URL wird aus dem eigenen
@@ -151,16 +162,23 @@ Lauf. Beim Klick:
    KI-Lauf), `after` aus dem aktuellen Editor-Stand. Es werden nur
    die Felder befüllt, die der aktuelle Content-Typ tatsächlich hat
    (Headline / Teaser / Content — `software_name` bleibt aktuell aus).
-3. `VergleichsWidget.open({ before, after, onResolve })` öffnet das
-   Modal. Der Redakteur entscheidet absatzweise.
-4. In `onResolve(resolved, stats)` werden die drei `resolved.*`-Strings
+3. **Pre-Check**: `VergleichsWidget._internal.build_rows( before, after )`
+   wird vorab aufgerufen. Wenn keine Mod/Add/Del-Zeile dabei ist (= die
+   KI hat den Text nicht angefasst), wird das Modal NICHT geöffnet —
+   stattdessen erscheint bei manuellem Klick eine kurze Notiz im
+   Terminal (beim Auto-Open keine Notiz, weil die Korrektur-Box im
+   Terminal schon „Keine Änderungen" sagt).
+4. Andernfalls: `VergleichsWidget.open({ before, after, onResolve })`
+   öffnet das Modal. Der Redakteur entscheidet absatzweise.
+5. In `onResolve(resolved, stats)` werden die drei `resolved.*`-Strings
    byte-exakt zurück in die Editor-Felder geschrieben — aber nur, wenn
    sie sich vom aktuellen Stand unterscheiden, damit `setValue` keinen
    unnötigen Dirty-Flag triggert.
 
 Das ersetzt die frühere Integration mit der externen Diffchecker-API.
-Vorteile: kein Artikelinhalt geht mehr an einen Drittanbieter, und
-der Redakteur kann pro Absatz entscheiden statt nur all-or-nothing.
+Vorteile: kein Artikelinhalt geht mehr an einen Drittanbieter, der
+Redakteur kann pro Absatz entscheiden statt nur all-or-nothing, und
+das Modal erscheint genau dann, wenn es etwas zu zeigen gibt.
 
 ## Rückgängig (Backup-basiert)
 
