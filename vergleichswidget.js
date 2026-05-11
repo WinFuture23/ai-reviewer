@@ -451,34 +451,17 @@
 		// am Body-Anfang — das ist sogar etwas lesbarer und der Redakteur
 		// kann Heading und Body separat akzeptieren/ablehnen.
 
-		// Aufeinanderfolgende Listen-Markup-Paragraphen (alle enthalten
-		// `<ul>`, `<ol>` oder `<li>`) werden zu einem Block gemergt.
-		// Damit erscheint eine neu hinzugefügte oder entfernte Liste als
-		// EINE Add/Del-Row statt N — typisch für KI-erzeugte Summary-Boxen
-		// oder Bullet-Aufzählungen, die als Ganzes angenommen oder
-		// abgelehnt werden, nicht item-by-item.
-		var list_merged = [];
-
-		for( var li_idx = 0; li_idx < merged.length; li_idx++ ) {
-			var p = merged[ li_idx ];
-			var lprev = list_merged[ list_merged.length - 1 ];
-
-			if( lprev && is_list_part( p ) && is_list_part( lprev ) ) {
-				list_merged[ list_merged.length - 1 ] = lprev + p;
-			} else {
-				list_merged.push( p );
-			}
-		}
-
-		return list_merged;
+		// Listen-Items bleiben hier als separate Paragraphen. Aggregation
+		// passiert später in build_rows_from_paras (group_list_adds_dels)
+		// — nur Add/Del-Blöcke werden zusammengefasst, Mod- und Eq-Items
+		// bleiben einzeln, damit eine Item-Änderung in einer Bestandsliste
+		// nicht die ganze Liste hervorhebt.
+		return merged;
 	}
 
 	function is_list_part( text ) {
 		// Paragraph zählt zu einem Listen-Block, wenn er Listen-Markup
 		// enthält (öffnende oder schließende `<ul>`, `<ol>`, `<li>`).
-		// Andere Tags / Plain-Text-Wrapper machen ihn zu „kein Listen-Teil",
-		// sodass z. B. ein Heading direkt vor einer Liste die Liste nicht
-		// in den Heading hinein mergt.
 		return /<\/?(?:ul|ol|li)\b/i.test( text );
 	}
 
@@ -756,7 +739,75 @@
 			}
 		}
 
-		return rows;
+		return group_list_adds_dels( rows );
+	}
+
+	// Post-Process: aufeinanderfolgende Add-Rows (oder Del-Rows), die
+	// alle aus Listen-Markup bestehen (`<ul>`, `<ol>`, `<li>`-Tags) werden
+	// zu einer einzigen Block-Row zusammengefasst. Damit wird eine neu
+	// hinzugefügte oder entfernte Liste (z. B. eine KI-Summary-Box) als
+	// EIN Block annehmbar/ablehnbar — statt N einzelne Bullet-Reihen
+	// mit jeweils eigenen ✓/×-Buttons.
+	//
+	// Mod-Rows werden NICHT aggregiert, sodass eine einzelne Wort-
+	// Änderung in einem bestehenden Listen-Item weiterhin als einzelnes
+	// Item-Diff sichtbar wird, statt die ganze Liste als Mod zu markieren.
+	// Eq-Rows brechen einen laufenden Block ebenfalls auf (Listen-Anfang
+	// gehört nicht zu unverändertem Body).
+	function group_list_adds_dels( rows ) {
+		var out = [];
+		var i = 0;
+
+		while( i < rows.length ) {
+			var row = rows[ i ];
+			var collapsible = ( row.type === 'add' || row.type === 'del' ) && is_list_part( row.type === 'add' ? row.after : row.before );
+
+			if( !collapsible ) {
+				out.push( row );
+				i++;
+				continue;
+			}
+
+			// Look ahead: alle aufeinanderfolgenden Rows desselben Typs (add
+			// oder del), deren Inhalt list_part ist.
+			var j = i + 1;
+
+			while( j < rows.length ) {
+				var next = rows[ j ];
+
+				if( next.type !== row.type ) { break; }
+				if( !is_list_part( row.type === 'add' ? next.after : next.before ) ) { break; }
+				j++;
+			}
+
+			if( j === i + 1 ) {
+				out.push( row );
+				i++;
+				continue;
+			}
+
+			// Mehrere — aggregiere zu einer Block-Row.
+			var slice = rows.slice( i, j );
+			var combined_before = '';
+			var combined_after = '';
+
+			for( var k = 0; k < slice.length; k++ ) {
+				combined_before += slice[k].before || '';
+				combined_after += slice[k].after || '';
+			}
+
+			out.push( {
+				id: row.id, type: row.type,
+				section: row.section,
+				before: combined_before, after: combined_after,
+				before_display: trim_display( combined_before ),
+				after_display: trim_display( combined_after ),
+				decision: null
+			} );
+			i = j;
+		}
+
+		return out;
 	}
 
 	// Pair removed and added paragraphs using Jaccard similarity on the
@@ -1035,6 +1086,12 @@
 			// Headings stay — they're rendered as bold inline in CSS so the
 			// reader sees them as a clear subheading inside the paragraph row.
 			if( /^<\/?\s*h[1-6]\b/i.test( token ) ) { return render_tag( token ); }
+			// Listen-Items im Lesbar-Modus mit Bullet-Präfix, damit der
+			// Redakteur sie als Aufzählung erkennt. Der öffnende `<li>`
+			// wird zum „• "-Marker; der schließende Tag bleibt unsichtbar,
+			// die folgende Newline aus dem Source ergibt den Zeilenumbruch
+			// zwischen Items.
+			if( /^<li\b/i.test( token ) ) { return '• '; }
 			// All other tags: drop. Paragraph splitting handles block flow.
 			return '';
 		}
