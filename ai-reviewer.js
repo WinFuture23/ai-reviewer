@@ -156,15 +156,15 @@
                 position: 'fixed', zIndex: '1000000',
                 minWidth: '360px', maxWidth: 'min(600px, calc(100vw - 24px))',
                 width: 'auto',
-                backgroundColor: '#1e1e1e', border: '1px solid #555', borderRadius: '10px',
-                boxShadow: '0 8px 28px rgba(0,0,0,0.55)', overflow: 'hidden',
+                backgroundColor: '#fff', border: '1px solid #d0d4dc', borderRadius: '10px',
+                boxShadow: '0 12px 32px rgba(0,0,0,.14)', overflow: 'hidden',
                 opacity: '0', transform: 'translateY(6px)',
                 transition: 'opacity 0.18s ease, transform 0.18s ease, border-color 0.15s ease',
-                pointerEvents: 'auto', fontFamily: 'system-ui, -apple-system, sans-serif',
+                pointerEvents: 'auto', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
                 cursor: 'pointer', display: 'none'
             });
-            card.addEventListener( 'mouseenter', () => { clearTimeout( hide_timer ); card.style.borderColor = '#66d9ef'; } );
-            card.addEventListener( 'mouseleave', () => { card.style.borderColor = '#555'; hide(); } );
+            card.addEventListener( 'mouseenter', () => { clearTimeout( hide_timer ); card.style.borderColor = '#1f2328'; } );
+            card.addEventListener( 'mouseleave', () => { card.style.borderColor = '#d0d4dc'; hide(); } );
             card.addEventListener( 'click', () => {
                 if (card._url) { window.open( card._url, '_blank', 'noopener' ); hide(); }
             });
@@ -201,10 +201,10 @@
             c._url = url;
             if (!content_changed) { reposition( c, x, y ); return; }
             const img_html = data.image
-                ? `<img src="${esc( data.image )}" style="width:160px; min-width:160px; height:auto; object-fit:contain; border-radius:8px; background:#2a2a2c;" onerror="this.style.display='none'">`
+                ? `<img src="${esc( data.image )}" style="width:160px; min-width:160px; height:auto; object-fit:contain; border-radius:8px; background:#f1f3f6;" onerror="this.style.display='none'">`
                 : '';
             const desc_html = data.description
-                ? `<div style="font-size:12.5px; color:#ccc; line-height:1.45; margin-top:6px; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden;">${esc( data.description )}</div>`
+                ? `<div style="font-size:12.5px; color:#3a3f46; line-height:1.45; margin-top:6px; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden;">${esc( data.description )}</div>`
                 : '';
             const pub = fmt_date( data.published_time );
             const mod = fmt_date( data.modified_time );
@@ -213,16 +213,16 @@
             let date_html = '';
             if (pub) {
                 const update_part = mod && mod_delta >= 2
-                    ? ` <span style="color:#888;">(Update: ${esc( mod )})</span>` : '';
-                date_html = `<div style="font-size:11px; color:#999; margin-bottom:4px; letter-spacing:0.2px;">${esc( pub )}${update_part}</div>`;
+                    ? ` <span style="color:#94979d;">(Update: ${esc( mod )})</span>` : '';
+                date_html = `<div style="font-size:11px; color:#94979d; margin-bottom:4px; letter-spacing:0.2px;">${esc( pub )}${update_part}</div>`;
             }
             c.innerHTML = `<div style="display:flex; gap:12px; padding:10px; align-items:flex-start;">`
                 + img_html
                 + `<div style="flex:1; min-width:0; display:flex; flex-direction:column;">`
                 + date_html
-                + `<div style="font-size:15px; font-weight:700; color:#ffffff; line-height:1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; text-wrap:balance;">${esc( data.title )}</div>`
+                + `<div style="font-size:15px; font-weight:700; color:#1f2328; line-height:1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; text-wrap:balance;">${esc( data.title )}</div>`
                 + desc_html
-                + `<div style="text-align:right; font-size:10px; color:#666; margin-top:4px;">↗ Artikel öffnen</div>`
+                + `<div style="text-align:right; font-size:10px; color:#94979d; margin-top:4px;">↗ Artikel öffnen</div>`
                 + `</div></div>`;
 
             reposition( c, x, y );
@@ -284,38 +284,66 @@
     let terminal_container = null;  // Main overlay DOM element
     let launcher_tab = null;        // Bottom-right launcher tab
     let poll_active = false;        // True while a job is being polled
-    let cached_diff = { content: null, teaser: null }; // Diffchecker cache per field
     let debug_log = [];             // Debug messages (copyable via header button)
     let backup_data = null;         // All field values before AI modification (for undo)
     let btn_check = null;           // "Artikel überprüfen" button reference
     let content_info = null;        // Detected content type { type, id, config }
 
     // --- CONFIGURATION ---
-    // Diffchecker API: generate a random, previously-unused email per request.
-    // Workaround advised by Diffchecker support while their auth flow is broken —
-    // known addresses trigger auth, fresh random ones pass through. Both local part
-    // and domain are fully random to minimise collision with any prior submission.
-    const DIFF_TLDS = ['com','net','org','io','co','dev','app','xyz','info','biz'];
-    function random_alpha(len) {
-        const bytes = (typeof crypto !== 'undefined' && crypto.getRandomValues)
-            ? crypto.getRandomValues(new Uint8Array(len))
-            : Array.from({length: len}, () => Math.floor(Math.random() * 256));
-        const alphabet = 'abcdefghijklmnopqrstuvwxyz0123456789';
-        let out = '';
-        for (let i = 0; i < len; i++) out += alphabet[bytes[i] % alphabet.length];
-        return out;
-    }
-    function generate_random_email() {
-        const local_len  = 8  + Math.floor(Math.random() * 9);   // 8-16 chars
-        const domain_len = 8  + Math.floor(Math.random() * 9);   // 8-16 chars
-        const tld = DIFF_TLDS[Math.floor(Math.random() * DIFF_TLDS.length)];
-        return `${random_alpha(local_len)}@${random_alpha(domain_len)}.${tld}`;
-    }
-
     // Val.town proxy endpoints
     const PROXY_URL = 'https://mesios--43bb6c1c197111f18d1642dde27851f2.web.val.run';
     const POLLER_URL = 'https://mesios--f12a09281c8f11f1845142dde27851f2.web.val.run';
     const POLLER_API_KEY = 'wf_super_secret_key_2026_xyz';
+
+    // --- COMPANION SCRIPT (VergleichsWidget) ---
+    // The Vorher/Nachher diff modal lives in vergleichswidget.js, which sits
+    // next to this file on the GitHub-Pages bucket. We derive its URL from our
+    // own <script src> at IIFE-load time (document.currentScript) and load it
+    // lazily on the first click of the diff button — that way the larger diff
+    // module is only fetched when an editor actually wants to compare.
+    const SELF_SCRIPT_URL = ( document.currentScript && document.currentScript.src ) || null;
+
+    function get_companion_url( filename ) {
+        if( !SELF_SCRIPT_URL ) return null;
+        try {
+            const url = new URL( SELF_SCRIPT_URL );
+            const parts = url.pathname.split( '/' );
+            parts[parts.length - 1] = filename;
+            url.pathname = parts.join( '/' );
+            return url.toString();
+        } catch( e ) {
+            return null;
+        }
+    }
+
+    let vw_load_promise = null;
+    function ensure_vergleichswidget() {
+        if( window.VergleichsWidget && typeof window.VergleichsWidget.open === 'function' ) {
+            return Promise.resolve();
+        }
+
+        if( vw_load_promise ) return vw_load_promise;
+        vw_load_promise = new Promise( function( resolve, reject ) {
+            const companion = get_companion_url( 'vergleichswidget.js' );
+
+            if( !companion ) {
+                vw_load_promise = null;
+                reject( new Error( 'Companion-URL konnte nicht ermittelt werden.' ) );
+                return;
+            }
+
+            const s = document.createElement( 'script' );
+            s.src = companion;
+            s.async = true;
+            s.onload = function() { resolve(); };
+            s.onerror = function() {
+                vw_load_promise = null; // allow retry on next click
+                reject( new Error( 'VergleichsWidget konnte nicht geladen werden (' + companion + ').' ) );
+            };
+            document.head.appendChild( s );
+        } );
+        return vw_load_promise;
+    }
 
     // --- CONTENT TYPE CONFIGURATION ---
     // Each content type maps to the DOM element IDs used on its editor page.
@@ -653,76 +681,22 @@
         log_debug( 'Editor-Felder freigegeben.' );
     }
 
-    /** Show a full-screen overlay with the Diffchecker HTML comparison in a sandboxed iframe. */
-    /**
-     * Show diff overlay with one or more sections.
-     * @param {Array<{label: string, html: string}>} sections
-     */
-    function show_diff_overlay(sections) {
-        const overlay = document.createElement('div');
-        Object.assign(overlay.style, { position: 'fixed', top: '0', left: '0', width: '100vw', height: '100vh', backgroundColor: 'rgba(0,0,0,0.85)', zIndex: '9999999', display: 'flex', flexDirection: 'column', padding: '20px', boxSizing: 'border-box' });
-        const header_bar = document.createElement('div'); Object.assign(header_bar.style, { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', color: '#fff', fontFamily: 'sans-serif' });
-        header_bar.innerHTML = '<h2 style="margin:0;">🔍 Diff-Ansicht: Vorher vs. Nachher</h2>';
-        const close_diff_btn = document.createElement('button'); close_diff_btn.type = 'button'; close_diff_btn.innerHTML = '✖ Ansicht schließen';
-        Object.assign(close_diff_btn.style, { backgroundColor: '#ff5555', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px' });
-        function close_diff() { overlay.remove(); document.body.style.overflow = ''; document.removeEventListener('keydown', esc_handler); }
-        close_diff_btn.onclick = close_diff; header_bar.appendChild(close_diff_btn);
-        overlay.appendChild(header_bar);
-
-        const scroll_wrap = document.createElement('div');
-        const is_single = sections.length === 1;
-        Object.assign(scroll_wrap.style, { flexGrow: '1', overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: '4px' });
-
-        for( let i = 0; i < sections.length; i++ ) {
-            const iframe = document.createElement('iframe');
-            iframe.sandbox = 'allow-same-origin'; // Sicherheitsrichtlinie §20: minimal permissions
-            Object.assign(iframe.style, { width: '100%', backgroundColor: '#fff', border: 'none', borderRadius: '6px', flexShrink: '0' });
-
-            if( is_single ) {
-                iframe.style.flexGrow = '1';
-                iframe.style.height = '100%';
-            } else if( i === 0 ) {
-                // Teaser: auto-size to content height after load
-                iframe.style.height = '0';
-                iframe.onload = function() {
-                    try {
-                        const doc = iframe.contentDocument || iframe.contentWindow.document;
-                        const h = doc.documentElement.scrollHeight || doc.body.scrollHeight;
-                        iframe.style.height = Math.min( h + 4, Math.round( window.innerHeight * 0.35 ) ) + 'px';
-                    } catch(e) { iframe.style.height = '20vh'; }
-                };
-            } else {
-                // Content: fill remaining space
-                iframe.style.flexGrow = '1';
-                iframe.style.minHeight = '40vh';
-            }
-
-            iframe.srcdoc = sections[i].html;
-            scroll_wrap.appendChild(iframe);
-        }
-
-        overlay.appendChild(scroll_wrap); document.body.appendChild(overlay);
-        document.body.style.overflow = 'hidden';
-        const esc_handler = (e) => { if (e.key === 'Escape') close_diff(); };
-        document.addEventListener('keydown', esc_handler);
-    }
-
     // --- WIDGET INITIALISATION (LAUNCHER TAB) ---
     /** Create and attach the bottom-right launcher tab. Terminal is built lazily on first click. */
     function init_widget() {
         launcher_tab = document.createElement('div');
         launcher_tab.id = 'ai-reviewer-launcher';
         Object.assign(launcher_tab.style, {
-            position: 'fixed', bottom: '0', right: '40px', backgroundColor: '#007acc', color: '#fff',
+            position: 'fixed', bottom: '0', right: '40px', backgroundColor: '#1f2328', color: '#fff',
             padding: '10px 20px', borderTopLeftRadius: '8px', borderTopRightRadius: '8px',
-            cursor: 'pointer', fontFamily: 'Consolas, "Courier New", monospace', fontWeight: 'bold',
-            fontSize: '14px', zIndex: '999999', boxShadow: '0 -2px 10px rgba(0,0,0,0.3)',
+            cursor: 'pointer', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif', fontWeight: '600',
+            fontSize: '13px', letterSpacing: '.2px', zIndex: '999999', boxShadow: '0 -2px 14px rgba(0,0,0,.12)',
             transition: 'background-color 0.2s', display: 'flex', alignItems: 'center', gap: '8px'
         });
         launcher_tab.innerHTML = '<span>🤖 KI-Korrektor</span>';
 
-        launcher_tab.onmouseover = () => launcher_tab.style.backgroundColor = '#005f9e';
-        launcher_tab.onmouseout = () => launcher_tab.style.backgroundColor = '#007acc';
+        launcher_tab.onmouseover = () => launcher_tab.style.backgroundColor = '#3a3f46';
+        launcher_tab.onmouseout = () => launcher_tab.style.backgroundColor = '#1f2328';
 
         launcher_tab.onclick = () => {
             launcher_tab.style.display = 'none';
@@ -745,10 +719,11 @@
         terminal_container.id = 'ai-reviewer-terminal';
         Object.assign(terminal_container.style, {
             position: 'fixed', bottom: '20px', right: '20px', width: '650px', height: '600px',
-            minWidth: '400px', minHeight: '350px', backgroundColor: '#1e1e1e', color: '#f8f8f2', 
-            fontFamily: 'Consolas, "Courier New", monospace', border: '1px solid #444', 
-            borderRadius: '6px', zIndex: '999999', display: 'flex', flexDirection: 'column', 
-            boxShadow: '0 10px 40px rgba(0,0,0,0.9)', fontSize: '13px', overflow: 'hidden' 
+            minWidth: '400px', minHeight: '350px', backgroundColor: '#fff', color: '#1f2328',
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+            border: '1px solid #d0d4dc', borderRadius: '10px', zIndex: '999999',
+            display: 'flex', flexDirection: 'column',
+            boxShadow: '0 20px 50px rgba(0,0,0,.18)', fontSize: '13px', overflow: 'hidden'
         });
 
         // Resize Handles
@@ -766,14 +741,14 @@
 
         // Header
         const header = document.createElement('div');
-        Object.assign(header.style, { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 15px', backgroundColor: '#333333', borderBottom: '1px solid #222', color: '#ccc', fontSize: '12px', userSelect: 'none' });
+        Object.assign(header.style, { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', backgroundColor: '#f8f9fb', borderBottom: '1px solid #e5e7eb', color: '#1f2328', fontSize: '13px', fontWeight: '600', letterSpacing: '.2px', userSelect: 'none' });
         header.innerHTML = '<span>🤖 KI-Korrektor & Verlinker</span>';
-        
-        const header_right = document.createElement('div'); Object.assign(header_right.style, { display: 'flex', gap: '15px', alignItems: 'center' });
+
+        const header_right = document.createElement('div'); Object.assign(header_right.style, { display: 'flex', gap: '14px', alignItems: 'center' });
 
         const debug_btn = document.createElement('span'); debug_btn.innerHTML = 'Debug';
-        Object.assign(debug_btn.style, { cursor: 'pointer', color: '#6272a4', fontSize: '11px', transition: 'color 0.2s' });
-        debug_btn.onmouseover = () => debug_btn.style.color = '#8be9fd'; debug_btn.onmouseout = () => debug_btn.style.color = '#6272a4';
+        Object.assign(debug_btn.style, { cursor: 'pointer', color: '#3a3f46', fontSize: '12px', fontWeight: '400', transition: 'color 0.2s' });
+        debug_btn.onmouseover = () => debug_btn.style.color = '#1f2328'; debug_btn.onmouseout = () => debug_btn.style.color = '#3a3f46';
         debug_btn.onclick = () => {
             const meta = `URL: ${location.href}\nJobID: ${debug_log.find(l => l.includes('JobID:'))?.match(/JobID:\s*(\S+)/)?.[1] || 'n/a'}\n\n`;
             navigator.clipboard.writeText(meta + debug_log.join('\n')).then(() => {
@@ -783,8 +758,8 @@
 
         // MINIMIEREN STATT LÖSCHEN
         const close_header_btn = document.createElement('span'); close_header_btn.innerHTML = '▼ Verbergen';
-        Object.assign(close_header_btn.style, { cursor: 'pointer', fontWeight: 'bold', color: '#ffb86c', transition: 'color 0.2s' });
-        close_header_btn.onmouseover = () => close_header_btn.style.color = '#ff9900'; close_header_btn.onmouseout = () => close_header_btn.style.color = '#ffb86c';
+        Object.assign(close_header_btn.style, { cursor: 'pointer', fontWeight: '500', fontSize: '12px', color: '#3a3f46', transition: 'color 0.2s' });
+        close_header_btn.onmouseover = () => close_header_btn.style.color = '#1f2328'; close_header_btn.onmouseout = () => close_header_btn.style.color = '#3a3f46';
         close_header_btn.onclick = () => { terminal_container.style.display = 'none'; launcher_tab.style.display = 'flex'; wfv4_link_preview.destroy(); };
 
         header_right.appendChild(debug_btn); header_right.appendChild(close_header_btn);
@@ -792,33 +767,40 @@
 
         // Content Area
         const content_area = document.createElement('div');
-        Object.assign(content_area.style, { flexGrow: '1', overflowY: 'auto', padding: '15px', display: 'flex', flexDirection: 'column', gap: '12px', wordWrap: 'break-word', backgroundColor: '#1e1e1e' });
-        const status_el = document.createElement('div'); status_el.style.fontWeight = 'bold'; content_area.appendChild(status_el);
-        const results_area = document.createElement('div'); Object.assign(results_area.style, { display: 'flex', flexDirection: 'column', gap: '12px' }); 
+        Object.assign(content_area.style, { flexGrow: '1', overflowY: 'auto', padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '12px', wordWrap: 'break-word', backgroundColor: '#fff' });
+        const status_el = document.createElement('div'); status_el.style.fontWeight = '600'; content_area.appendChild(status_el);
+        const results_area = document.createElement('div'); Object.assign(results_area.style, { display: 'flex', flexDirection: 'column', gap: '12px' });
         content_area.appendChild(results_area);
 
         // Footer & Buttons
         const footer = document.createElement('div');
-        Object.assign(footer.style, { padding: '15px', backgroundColor: '#252526', display: 'flex', gap: '10px', justifyContent: 'center', alignItems: 'stretch', borderTop: '1px solid #333', width: '100%', boxSizing: 'border-box' });
+        Object.assign(footer.style, { padding: '10px 14px', backgroundColor: '#f8f9fb', display: 'flex', gap: '8px', justifyContent: 'center', alignItems: 'stretch', borderTop: '1px solid #e5e7eb', width: '100%', boxSizing: 'border-box' });
+
+        // Base button style shared between btn_check and the three action buttons.
+        // Sans-serif throughout, subtle 1px border + 6px radius like vw-close.
+        const BASE_BTN_STYLE = { padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif', fontWeight: '500', fontSize: '13px', transition: 'all 0.15s ease', outline: 'none' };
 
         btn_check = document.createElement('button'); btn_check.type = 'button'; btn_check.innerHTML = '🚀 Artikel überprüfen';
-        Object.assign(btn_check.style, { backgroundColor: '#007acc', color: '#ffffff', border: '1px solid #005f9e', padding: '10px 24px', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Consolas, "Courier New", monospace', fontWeight: 'bold', fontSize: '14px', transition: 'all 0.2s ease', outline: 'none', display: 'none' });
-        btn_check.onmouseover = () => btn_check.style.backgroundColor = '#005f9e'; btn_check.onmouseout = () => btn_check.style.backgroundColor = '#007acc';
+        Object.assign(btn_check.style, BASE_BTN_STYLE, { backgroundColor: '#1f2328', color: '#fff', border: '1px solid #1f2328', padding: '8px 20px', display: 'none' });
+        btn_check.onmouseover = () => btn_check.style.backgroundColor = '#3a3f46'; btn_check.onmouseout = () => btn_check.style.backgroundColor = '#1f2328';
 
-        const ACTION_BTN_STYLE = { padding: '10px 5px', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Consolas, "Courier New", monospace', fontWeight: 'bold', fontSize: '13px', outline: 'none', border: 'none', display: 'none', justifyContent: 'center', alignItems: 'center', gap: '6px', transition: 'all 0.2s ease', flex: '1', whiteSpace: 'nowrap' };
+        // Footer-action buttons (Unterschiede / Rückgängig / Speichern).
+        const ACTION_BTN_STYLE = Object.assign( {}, BASE_BTN_STYLE, { padding: '8px 10px', border: '1px solid #d0d4dc', backgroundColor: '#fff', color: '#1f2328', display: 'none', justifyContent: 'center', alignItems: 'center', gap: '6px', flex: '1', whiteSpace: 'nowrap' } );
 
         const btn_diff = document.createElement('button'); btn_diff.type = 'button'; btn_diff.innerHTML = '🔍 Unterschiede anzeigen';
-        Object.assign(btn_diff.style, ACTION_BTN_STYLE, { backgroundColor: '#f1fa8c', color: '#282a36' });
-        btn_diff.onmouseover = () => btn_diff.style.backgroundColor = '#e2eb70'; btn_diff.onmouseout = () => btn_diff.style.backgroundColor = '#f1fa8c';
+        Object.assign(btn_diff.style, ACTION_BTN_STYLE);
+        btn_diff.onmouseover = () => btn_diff.style.backgroundColor = '#f1f3f6'; btn_diff.onmouseout = () => btn_diff.style.backgroundColor = '#fff';
 
         const btn_undo = document.createElement('button'); btn_undo.type = 'button'; btn_undo.innerHTML = '↺ Rückgängig machen';
-        Object.assign(btn_undo.style, ACTION_BTN_STYLE, { backgroundColor: '#d9534f', color: '#ffffff' });
-        btn_undo.onmouseover = () => btn_undo.style.backgroundColor = '#c9302c'; btn_undo.onmouseout = () => btn_undo.style.backgroundColor = '#d9534f';
+        // Outline-Variante: weißer Hintergrund, rote Schrift, dezenter rosa-Hover.
+        Object.assign(btn_undo.style, ACTION_BTN_STYLE, { color: '#a30015' });
+        btn_undo.onmouseover = () => btn_undo.style.backgroundColor = '#ffe1e1'; btn_undo.onmouseout = () => btn_undo.style.backgroundColor = '#fff';
 
         const btn_close_bottom = document.createElement('button'); btn_close_bottom.type = 'button'; btn_close_bottom.innerHTML = '💾 Speichern';
         btn_close_bottom.className = 'css_button green';
-        Object.assign(btn_close_bottom.style, ACTION_BTN_STYLE, { backgroundColor: '#008800', color: '#fff', borderColor: '#7dc07d #003300 #003300 #7dc07d' });
-        btn_close_bottom.onmouseover = () => btn_close_bottom.style.backgroundColor = '#006600'; btn_close_bottom.onmouseout = () => btn_close_bottom.style.backgroundColor = '#008800';
+        // Speichern ist die Primary-Aktion nach dem Lauf — gefüllt grün.
+        Object.assign(btn_close_bottom.style, ACTION_BTN_STYLE, { backgroundColor: '#176c1f', color: '#fff', border: '1px solid #176c1f', fontWeight: '600' });
+        btn_close_bottom.onmouseover = () => btn_close_bottom.style.backgroundColor = '#125a18'; btn_close_bottom.onmouseout = () => btn_close_bottom.style.backgroundColor = '#176c1f';
         btn_close_bottom.onclick = () => {
             // Content-type-specific form submission
             if( content_info ) {
@@ -844,67 +826,83 @@
         document.body.appendChild(terminal_container);
 
         /** Update the status line in the content area (icon, text, optional subtitle). */
-        function set_status(icon, main_text, sub_text = null, color = '#f8f8f2', write_to_debug = true) {
-            status_el.innerHTML = `<div style="display: flex; align-items: flex-start; gap: 8px; color: ${color};"><span style="line-height: 1.4; font-size: 14px; width: 20px; text-align: center;">${icon}</span><div style="display: flex; flex-direction: column;"><span style="line-height: 1.4;">${main_text}</span>${sub_text ? `<span style="font-size: 11px; color: #aaaaaa; font-weight: normal; margin-top: 2px;">${sub_text}</span>` : ''}</div></div>`;
+        function set_status(icon, main_text, sub_text = null, color = '#1f2328', write_to_debug = true) {
+            status_el.innerHTML = `<div style="display: flex; align-items: flex-start; gap: 8px; color: ${color};"><span style="line-height: 1.4; font-size: 14px; width: 20px; text-align: center;">${icon}</span><div style="display: flex; flex-direction: column;"><span style="line-height: 1.4;">${main_text}</span>${sub_text ? `<span style="font-size: 11px; color: #94979d; font-weight: normal; margin-top: 2px;">${sub_text}</span>` : ''}</div></div>`;
             if (write_to_debug) log_debug(`Status: ${main_text}`);
         }
 
         /** Append a message to the results area (types: info, error, warning, success). */
         function add_message(msg, type = 'info') {
             const entry = document.createElement('div'); entry.innerHTML = msg;
-            if (type === 'error') entry.style.color = '#ff5555'; if (type === 'warning') entry.style.color = '#ffb86c'; if (type === 'success') entry.style.color = '#50fa7b';
+            if (type === 'error') entry.style.color = '#a30015'; if (type === 'warning') entry.style.color = '#b45309'; if (type === 'success') entry.style.color = '#176c1f';
             results_area.appendChild(entry); content_area.scrollTop = content_area.scrollHeight;
         }
 
-        set_status('🟢', 'Bereit.', null, '#50fa7b');
+        set_status('🟢', 'Bereit.', null, '#176c1f');
 
-        // --- DIFFCHECKER BUTTON ---
-        /** Fetch word-level diff for content (and teaser if present) via Diffchecker API. */
-        async function fetch_diff(field_key) {
-            const current_text = content_info ? read_field_value( content_info.config.fields[field_key] ) : '';
-            const original_text = (backup_data && backup_data[field_key]) || '';
+        // --- VERGLEICHSWIDGET BUTTON ---
+        // Opens the companion Vorher/Nachher diff modal (see vergleichswidget.js).
+        // The widget is lazy-loaded on first click via ensure_vergleichswidget().
+        // Resolution writes the byte-exact `resolved` bundle back into the editor
+        // fields, so the editor can accept/reject per paragraph instead of using
+        // the all-or-nothing Rückgängig button below.
+        btn_diff.onclick = async ( e ) => {
+            e.preventDefault();
+            e.stopPropagation();
 
-            // Return cached result if inputs unchanged
-            if( cached_diff[field_key] && cached_diff[field_key].left === original_text && cached_diff[field_key].right === current_text ) {
-                return cached_diff[field_key].html;
+            if( !content_info || !backup_data ) {
+                log_debug( 'Vergleich nicht möglich: kein Backup vorhanden.' );
+                return;
             }
 
-            const random_email = generate_random_email();
-            const res = await fetch(`https://api.diffchecker.com/public/text?output_type=html&email=${encodeURIComponent(random_email)}`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ left: original_text, right: current_text, diff_level: 'word' })
-            });
+            const old_btn_text = btn_diff.innerHTML;
+            btn_diff.innerHTML = '⏳ Lade...';
+            btn_diff.disabled = true;
 
-            if( !res.ok ) throw new Error( `HTTP ${res.status}` );
-            const html = await res.text();
-            cached_diff[field_key] = { left: original_text, right: current_text, html: html };
-            return html;
-        }
-
-        btn_diff.onclick = async (e) => {
-            e.preventDefault(); e.stopPropagation();
-            const old_btn_text = btn_diff.innerHTML; btn_diff.innerHTML = '⏳ Lade...'; btn_diff.disabled = true;
             try {
-                const has_teaser = content_info && content_info.config.fields.teaser;
-                const sections = [];
+                log_debug( 'Lade VergleichsWidget...' );
+                await ensure_vergleichswidget();
 
-                if( has_teaser ) {
-                    log_debug( 'Rufe Diffchecker API auf (Teaser + Content)...' );
-                    const teaser_html = await fetch_diff( 'teaser' );
-                    sections.push( { label: 'Teaser', html: teaser_html } );
-                } else {
-                    log_debug( 'Rufe Diffchecker API auf (Content)...' );
+                const fields = content_info.config.fields;
+                const before = {};
+                const after = {};
+
+                // Headline / Teaser / Content sind die drei Sektionen, die das
+                // VergleichsWidget kennt. Felder, die der aktuelle Content-Typ
+                // nicht hat (z. B. kein Teaser bei Video/FAQ), bleiben weg.
+                for( const key of [ 'headline', 'teaser', 'content' ] ) {
+                    if( !fields[key] ) continue;
+                    before[key] = ( backup_data && typeof backup_data[key] === 'string' ) ? backup_data[key] : '';
+                    after[key]  = read_field_value( fields[key] ) || '';
                 }
 
-                const content_html = await fetch_diff( 'content' );
-                sections.push( { label: 'Content', html: content_html } );
+                window.VergleichsWidget.open( {
+                    before: before,
+                    after:  after,
+                    title:  'Unterschiede: Vorher / Nachher',
+                    onResolve: function( resolved, stats ) {
+                        // resolved kommt byte-exakt aus den Eingaben zurück
+                        // (Heilige Kuh, siehe vergleichswidget.js).
+                        for( const key of [ 'headline', 'teaser', 'content' ] ) {
+                            if( !fields[key] || typeof resolved[key] !== 'string' ) continue;
+                            const current = read_field_value( fields[key] );
 
-                show_diff_overlay( sections );
-            } catch (err) {
+                            if( resolved[key] !== current ) {
+                                write_field_value( fields[key], resolved[key] );
+                            }
+                        }
+
+                        const open_count = stats.total - stats.accepted - stats.rejected;
+                        log_debug( `Vergleich übernommen: ${stats.accepted} angenommen, ${stats.rejected} abgelehnt, ${open_count} unverändert (Default angenommen).` );
+                    }
+                } );
+            } catch( err ) {
                 // Sicherheitsrichtlinie §12: Details nur ins Debug-Log, nicht an den User
-                log_debug( `DiffChecker-Fehler: ${err.message}` );
-                add_message( '<b>Hinweis:</b> Konnte DiffChecker API nicht laden.', 'warning' );
+                log_debug( `VergleichsWidget-Fehler: ${err.message}` );
+                add_message( '<b>Hinweis:</b> Konnte das Vergleichs-Widget nicht laden.', 'warning' );
             } finally {
-                btn_diff.innerHTML = old_btn_text; btn_diff.disabled = false;
+                btn_diff.innerHTML = old_btn_text;
+                btn_diff.disabled = false;
             }
         };
 
@@ -920,7 +918,7 @@
 
         // --- HAUPT-POLLING LOGIK ---
         btn_check.addEventListener('click', async () => {
-            btn_check.disabled = true; btn_check.style.display = 'none'; results_area.innerHTML = ''; debug_log = []; cached_diff = { content: null, teaser: null }; 
+            btn_check.disabled = true; btn_check.style.display = 'none'; results_area.innerHTML = ''; debug_log = [];
 
             log_debug('Starte Überprüfungsprozess...');
             let timer_interval;
@@ -930,12 +928,12 @@
             let manual_poll_area = null;
 
             try {
-                set_status( '⏳', 'Erkenne Content-Type...', null, '#8be9fd' );
+                set_status( '⏳', 'Erkenne Content-Type...', null, '#0550ae' );
                 content_info = detect_content_info();
 
                 if( !content_info ) throw new Error( 'Content-Type konnte nicht ermittelt werden. Abbruch.' );
 
-                set_status( '⏳', 'Lese Editor-Inhalte aus...', null, '#8be9fd' );
+                set_status( '⏳', 'Lese Editor-Inhalte aus...', null, '#0550ae' );
                 const article_data = gather_article_data( content_info );
 
                 if( !article_data.content || !article_data.content.trim() ) throw new Error( 'Der Editor ist leer. Abbruch.' );
@@ -974,11 +972,12 @@
                         poll_active = false; unlock_editor();
                         launcher_tab.querySelector('span').innerText = '🔑 Token abgelaufen';
                         log_debug( 'Token abgelaufen oder ungueltig. Seite muss neu geladen werden.' );
-                        set_status( '🔑', 'Sitzung abgelaufen.', 'Bitte Seite neu laden, um ein neues Token zu erhalten.', '#ffb86c', true );
+                        set_status( '🔑', 'Sitzung abgelaufen.', 'Bitte Seite neu laden, um ein neues Token zu erhalten.', '#b45309', true );
                         add_message( '<b>Das Sicherheits-Token ist abgelaufen.</b> Bitte laden Sie die Seite neu.', 'warning' );
                         const reload_btn = document.createElement('button');
                         reload_btn.className = 'css_button'; reload_btn.innerHTML = '🔄 Seite jetzt neu laden';
-                        Object.assign( reload_btn.style, { marginTop: '8px', padding: '8px 16px', cursor: 'pointer', backgroundColor: '#ff9900', color: '#fff', border: 'none', borderRadius: '4px', fontWeight: 'bold', fontSize: '13px' } );
+                        Object.assign( reload_btn.style, { marginTop: '8px', padding: '8px 16px', cursor: 'pointer', backgroundColor: '#1f2328', color: '#fff', border: '1px solid #1f2328', borderRadius: '6px', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif', fontWeight: '500', fontSize: '13px', transition: 'background-color 0.15s ease' } );
+                        reload_btn.onmouseover = () => reload_btn.style.backgroundColor = '#3a3f46'; reload_btn.onmouseout = () => reload_btn.style.backgroundColor = '#1f2328';
                         reload_btn.onclick = () => location.reload();
                         results_area.appendChild( reload_btn );
                         btn_check.style.display = 'block'; btn_check.disabled = false;
@@ -991,7 +990,7 @@
                 let elapsed_seconds = 0; 
                 const TIMEOUT_MAX = 900; // 15 Minuten
                 
-                set_status('⏳', `Artikel wird verarbeitet... (0 Sekunden)`, `Geschätzte Dauer: ca. 2 - 3 Minuten`, '#f1fa8c', true);
+                set_status('⏳', `Artikel wird verarbeitet... (0 Sekunden)`, `Geschätzte Dauer: ca. 2 - 3 Minuten`, '#b45309', true);
                 const start_time = Date.now();
 
                 let cached_poll_response = null;
@@ -1029,8 +1028,8 @@
                             // Visuelles Feedback im Countdown-Bereich
                             if (countdown_el) {
                                 countdown_el.textContent = job_status === 'pending' ? 'Abfrage erfolgreich — wird noch verarbeitet...' : 'Abfrage erfolgreich — Ergebnis wird geladen...';
-                                countdown_el.style.color = '#50fa7b';
-                                setTimeout(() => { if (countdown_el) countdown_el.style.color = '#6272a4'; }, 2000);
+                                countdown_el.style.color = '#176c1f';
+                                setTimeout(() => { if (countdown_el) countdown_el.style.color = '#3a3f46'; }, 2000);
                             }
                         }
                     } catch(e) { log_debug(`${label}: Fehlgeschlagen (${e.message})`); }
@@ -1046,18 +1045,18 @@
                     if (Date.now() - last_poll_time < 5000) { log_debug('Tab sichtbar, aber letzter Abruf <5s her. Übersprungen.'); return; }
                     tab_return_until = Date.now() + 60000; // 60s schnelles Polling nach Tab-Rückkehr
                     next_poll_time = Date.now(); // poll_loop soll nach Aufwachen sofort abfragen
-                    if (countdown_el) { countdown_el.textContent = 'Abfrage läuft...'; countdown_el.style.color = '#f1fa8c'; }
+                    if (countdown_el) { countdown_el.textContent = 'Abfrage läuft...'; countdown_el.style.color = '#b45309'; }
                     do_manual_poll('Tab-Rückkehr');
                 }
                 document.addEventListener('visibilitychange', on_visibility_change);
 
                 // Build persistent poll info area (below status, never destroyed by set_status)
                 manual_poll_area = document.createElement('div');
-                manual_poll_area.style.cssText = 'margin-top: 2px; margin-left: 28px; font-size: 12px; color: #aaa; display: none;';
+                manual_poll_area.style.cssText = 'margin-top: 2px; margin-left: 28px; font-size: 12px; color: #94979d; display: none;';
 
                 // Countdown line: "Nächste Abfrage in 12s"
                 const countdown_el = document.createElement('div');
-                countdown_el.style.cssText = 'color: #6272a4; margin-bottom: 4px;';
+                countdown_el.style.cssText = 'color: #3a3f46; margin-bottom: 4px;';
                 manual_poll_area.appendChild(countdown_el);
 
                 // Last poll result (highlighted)
@@ -1072,7 +1071,7 @@
                     if (!poll_active) return;
                     elapsed_seconds = Math.round((Date.now() - start_time) / 1000);
                     const time_str = format_duration_friendly(elapsed_seconds);
-                    set_status('⏳', `Artikel wird verarbeitet... (${time_str})`, `Geschätzte Dauer: ca. 2 - 3 Minuten`, '#f1fa8c', false);
+                    set_status('⏳', `Artikel wird verarbeitet... (${time_str})`, `Geschätzte Dauer: ca. 2 - 3 Minuten`, '#b45309', false);
 
                     // Show poll area after 30s (countdown visible), manual button after 2 min
                     if (elapsed_seconds >= 30) {
@@ -1097,7 +1096,7 @@
                             document.removeEventListener('visibilitychange', on_visibility_change);
                             wakeup(); // unblock poll_loop so it exits
                             launcher_tab.querySelector('span').innerText = '🤖 KI-Korrektor';
-                            set_status('❌', 'Leider ist ein Fehler aufgetreten.', 'Bitte versuchen Sie es erneut.', '#ff5555', true);
+                            set_status('❌', 'Leider ist ein Fehler aufgetreten.', 'Bitte versuchen Sie es erneut.', '#a30015', true);
                             manual_poll_area.style.display = 'none';
                             add_message(`Das Polling wurde nach ${format_duration_friendly(TIMEOUT_MAX)} abgebrochen.`, 'error');
                             btn_check.style.display = 'block'; btn_check.disabled = false;
@@ -1158,7 +1157,7 @@
                                 log_debug(`Fehlerdetails vom Server: ${err_msg}`);
 
                                 launcher_tab.querySelector('span').innerText = '❌ KI-Fehler';
-                                set_status('❌', 'Leider ist ein Fehler aufgetreten.', 'Bitte versuchen Sie es erneut.', '#ff5555', true);
+                                set_status('❌', 'Leider ist ein Fehler aufgetreten.', 'Bitte versuchen Sie es erneut.', '#a30015', true);
                                 add_message('<b>Fehlerdetails:</b> Bei der Verarbeitung ist ein Fehler aufgetreten. Details im Debug-Log.', 'error');
                                 btn_check.style.display = 'block'; btn_check.disabled = false;
                                 return;
@@ -1179,7 +1178,7 @@
                                 if (!new_content) throw new Error('Erfolg gemeldet, aber kein Text gespeichert.');
 
                                 new_content = clean_ai_content( new_content );
-                                set_status( '⏳', 'Schreibe Korrekturen in Editor...', null, '#8be9fd' );
+                                set_status( '⏳', 'Schreibe Korrekturen in Editor...', null, '#0550ae' );
 
                                 // Write corrected content back to the content field
                                 if( !write_field_value( content_info.config.fields.content, new_content ) ) {
@@ -1196,12 +1195,12 @@
                                     write_field_value( content_info.config.fields.teaser, data.teaser );
                                 }
 
-                                set_status('✅', `Erfolgreich aktualisiert! (Dauer: ${final_duration_str})`, null, '#50fa7b');
+                                set_status('✅', `Erfolgreich aktualisiert! (Dauer: ${final_duration_str})`, null, '#176c1f');
                                 btn_diff.style.display = 'flex'; btn_undo.style.display = 'flex'; btn_close_bottom.style.display = 'flex';
 
                                 if (korrektor_text) {
-                                    const korr_box = document.createElement('div'); Object.assign(korr_box.style, { backgroundColor: '#2d2d30', padding: '12px', borderRadius: '6px', border: '1px solid #3a3a3c' });
-                                    const k_title = document.createElement('div'); k_title.innerHTML = '<span style="color:#8be9fd; font-weight:bold; font-size:14px;">📝 Text- & Shortcode-Korrekturen</span><hr style="border:0; border-top:1px solid #444; margin:8px 0;">';
+                                    const korr_box = document.createElement('div'); Object.assign(korr_box.style, { backgroundColor: '#fafbfc', padding: '12px', borderRadius: '6px', border: '1px solid #e5e7eb' });
+                                    const k_title = document.createElement('div'); k_title.innerHTML = '<span style="color:#0550ae; font-weight:bold; font-size:14px;">📝 Text- & Shortcode-Korrekturen</span><hr style="border:0; border-top:1px solid #e5e7eb; margin:8px 0;">';
                                     korr_box.appendChild(k_title);
                                     const lines = korrektor_text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
                                     lines.forEach(line => {
@@ -1209,9 +1208,9 @@
                                         const safe_line = escape_html(clean_line);
                                         const div = document.createElement('div');
                                         if(clean_line.toLowerCase().includes('keine korrek') || clean_line.toLowerCase().includes('nicht')) {
-                                            div.innerHTML = `<span style="color:#ffb86c;">►</span> <span style="color:#f8f8f2;">${safe_line}</span>`; div.style.marginTop = '6px';
+                                            div.innerHTML = `<span style="color:#b45309;">►</span> <span style="color:#1f2328;">${safe_line}</span>`; div.style.marginTop = '6px';
                                         } else {
-                                            div.innerHTML = `<span style="color:#6272a4;">►</span> <span style="color:#f8f8f2;">${safe_line}</span>`; div.style.marginTop = '6px'; div.style.paddingLeft = '5px';
+                                            div.innerHTML = `<span style="color:#3a3f46;">►</span> <span style="color:#1f2328;">${safe_line}</span>`; div.style.marginTop = '6px'; div.style.paddingLeft = '5px';
                                         }
                                         korr_box.appendChild(div);
                                     });
@@ -1219,14 +1218,14 @@
                                 }
 
                                 {
-                                    const verl_box = document.createElement('div'); Object.assign(verl_box.style, { backgroundColor: '#2d2d30', padding: '12px', borderRadius: '6px', border: '1px solid #3a3a3c' });
+                                    const verl_box = document.createElement('div'); Object.assign(verl_box.style, { backgroundColor: '#fafbfc', padding: '12px', borderRadius: '6px', border: '1px solid #e5e7eb' });
                                     const lines = verlinker_text ? verlinker_text.split('\n').map(l => l.trim()).filter(l => l.length > 0) : [];
                                     const link_count = lines.filter(l => l.toLowerCase().startsWith('link')).length;
-                                    const v_title = document.createElement('div'); v_title.innerHTML = `<span style="color:#50fa7b; font-weight:bold; font-size:14px;">🔗 ${link_count === 1 ? 'Verlinkung' : 'Verlinkungen'}</span><hr style="border:0; border-top:1px solid #444; margin:8px 0;">`;
+                                    const v_title = document.createElement('div'); v_title.innerHTML = `<span style="color:#176c1f; font-weight:bold; font-size:14px;">🔗 ${link_count === 1 ? 'Verlinkung' : 'Verlinkungen'}</span><hr style="border:0; border-top:1px solid #e5e7eb; margin:8px 0;">`;
                                     verl_box.appendChild(v_title);
                                     if (lines.length === 0) {
-                                        const no_links = document.createElement('div'); Object.assign(no_links.style, { borderLeft: '3px solid #ffb86c', backgroundColor: '#1e1e1e', padding: '10px 12px', margin: '8px 0', borderRadius: '0 4px 4px 0' });
-                                        no_links.innerHTML = '<span style="color:#ffb86c;">►</span> <span style="color:#f8f8f2;">Keine passenden Verlinkungen gefunden.</span>';
+                                        const no_links = document.createElement('div'); Object.assign(no_links.style, { borderLeft: '3px solid #b45309', backgroundColor: '#fff', padding: '10px 12px', margin: '8px 0', borderRadius: '0 4px 4px 0' });
+                                        no_links.innerHTML = '<span style="color:#b45309;">►</span> <span style="color:#1f2328;">Keine passenden Verlinkungen gefunden.</span>';
                                         verl_box.appendChild(no_links);
                                     }
                                     let current_group = null;
@@ -1248,12 +1247,12 @@
                                             let url_type_tag = '';
                                             if (link_url) {
                                                 const u = link_url.toLowerCase();
-                                                const tag = u.includes('/news,') || u.includes('/news/') ? { label: 'News', bg: '#007acc' }
-                                                    : u.includes('/download') ? { label: 'Download', bg: '#8b5cf6' }
-                                                    : u.includes('/videos,') || u.includes('/video/') || u.includes('/videos/') ? { label: 'Video', bg: '#e74c3c' }
-                                                    : u.includes('/faq/') || u.includes('/faq,') ? { label: 'FAQ', bg: '#f59e0b' }
-                                                    : u.includes('/special/') ? { label: 'Special', bg: '#10b981' }
-                                                    : u.includes('/tests,') || u.includes('/tests/') || u.includes('/test/') ? { label: 'Test', bg: '#ec4899' }
+                                                const tag = u.includes('/news,') || u.includes('/news/') ? { label: 'News', bg: '#0550ae' }
+                                                    : u.includes('/download') ? { label: 'Download', bg: '#4338ca' }
+                                                    : u.includes('/videos,') || u.includes('/video/') || u.includes('/videos/') ? { label: 'Video', bg: '#a30015' }
+                                                    : u.includes('/faq/') || u.includes('/faq,') ? { label: 'FAQ', bg: '#b45309' }
+                                                    : u.includes('/special/') ? { label: 'Special', bg: '#176c1f' }
+                                                    : u.includes('/tests,') || u.includes('/tests/') || u.includes('/test/') ? { label: 'Test', bg: '#be185d' }
                                                     : null;
                                                 if (tag) url_type_tag = `<span style="display:inline-block; background:${tag.bg}; color:#fff; font-size:10px; font-weight:bold; padding:1px 6px; border-radius:3px; margin-right:5px; vertical-align:middle; letter-spacing:0.3px;">${tag.label}</span>`;
                                             }
@@ -1261,22 +1260,22 @@
                                             // Strukturierte Darstellung: Type-Tag + Linktext (erste Zeile), URL (zweite Zeile)
                                             const safe_link_text = link_text ? escape_html(link_text) : null;
                                             const safe_url = link_url ? escape_html(link_url) : null;
-                                            const url_anchor = safe_url ? `<a href="${safe_url}" target="_blank" rel="noopener noreferrer" style="color: #66d9ef; text-decoration: underline; font-size: 12px; word-break: break-all;">${safe_url}</a>` : '';
+                                            const url_anchor = safe_url ? `<a href="${safe_url}" target="_blank" rel="noopener noreferrer" style="color: #2563eb; text-decoration: underline; font-size: 12px; word-break: break-all;">${safe_url}</a>` : '';
 
-                                            current_group = document.createElement('div'); Object.assign(current_group.style, { borderLeft: '3px solid #007acc', backgroundColor: '#1e1e1e', padding: '10px 12px 10px 12px', margin: '8px 0', borderRadius: '0 4px 4px 0', position: 'relative', transition: 'opacity 0.3s, max-height 0.3s, margin 0.3s, padding 0.3s', overflow: 'hidden', paddingRight: '38px' });
+                                            current_group = document.createElement('div'); Object.assign(current_group.style, { borderLeft: '3px solid #0550ae', backgroundColor: '#fff', padding: '10px 12px 10px 12px', margin: '8px 0', borderRadius: '0 4px 4px 0', position: 'relative', transition: 'opacity 0.3s, max-height 0.3s, margin 0.3s, padding 0.3s', overflow: 'hidden', paddingRight: '38px' });
                                             if (link_url) current_group.dataset.previewUrl = link_url;
                                             const display_text = safe_link_text
-                                                ? `${url_type_tag}<span style="color:#f8f8f2; font-weight:bold;">\u201E${safe_link_text}\u201C</span>`
-                                                : `${url_type_tag}<span style="color:#f8f8f2; font-weight:bold;">${escape_html(clean_line)}</span>`;
+                                                ? `${url_type_tag}<span style="color:#1f2328; font-weight:bold;">\u201E${safe_link_text}\u201C</span>`
+                                                : `${url_type_tag}<span style="color:#1f2328; font-weight:bold;">${escape_html(clean_line)}</span>`;
                                             current_group.innerHTML = `<div style="margin-bottom:4px;">${display_text}</div>${url_anchor ? `<div>${url_anchor}</div>` : ''}`;
 
                                             // X-Button zum Entfernen des Links
                                             if (link_url) {
                                                 const remove_btn = document.createElement('span');
                                                 remove_btn.innerHTML = '✕';
-                                                Object.assign(remove_btn.style, { position: 'absolute', top: '6px', right: '8px', cursor: 'pointer', backgroundColor: '#cc3333', color: '#fff', fontSize: '12px', fontWeight: 'bold', lineHeight: '1', width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', transition: 'background-color 0.2s' });
+                                                Object.assign(remove_btn.style, { position: 'absolute', top: '6px', right: '8px', cursor: 'pointer', backgroundColor: '#a30015', color: '#fff', fontSize: '12px', fontWeight: 'bold', lineHeight: '1', width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', transition: 'background-color 0.2s' });
                                                 remove_btn.title = 'Link entfernen';
-                                                remove_btn.onmouseover = () => remove_btn.style.backgroundColor = '#ff4444'; remove_btn.onmouseout = () => remove_btn.style.backgroundColor = '#cc3333';
+                                                remove_btn.onmouseover = () => remove_btn.style.backgroundColor = '#7d000f'; remove_btn.onmouseout = () => remove_btn.style.backgroundColor = '#a30015';
                                                 const group_ref = current_group;
                                                 remove_btn.onclick = () => {
                                                     // Link aus allen Editor-Feldern entfernen (Linktext behalten)
@@ -1291,7 +1290,6 @@
 
                                                             if( cleaned !== field_val ) {
                                                                 write_field_value( content_info.config.fields[key], cleaned );
-                                                                cached_diff[key] = null;
                                                                 removed = true;
                                                                 log_debug( `Link entfernt aus ${key}: ${link_url}` );
                                                             }
@@ -1310,17 +1308,17 @@
                                             verl_box.appendChild(current_group);
                                         } else if (line_lower.startsWith('begründung') && current_group) {
                                             const safe_text = escape_html(clean_line);
-                                            const reason_div = document.createElement('div'); reason_div.innerHTML = `<span style="color:#cccccc;">${safe_text}</span>`; reason_div.style.marginTop = '6px';
+                                            const reason_div = document.createElement('div'); reason_div.innerHTML = `<span style="color:#3a3f46;">${safe_text}</span>`; reason_div.style.marginTop = '6px';
                                             current_group.appendChild(reason_div);
                                         } else {
                                             current_group = null;
                                             const safe_text = escape_html(clean_line);
                                             const div = document.createElement('div'); Object.assign(div.style, { marginTop: '6px', paddingLeft: '5px' });
                                             if(line_lower.includes('keine') || line_lower.includes('nicht') || line_lower.includes('wurden')) {
-                                                Object.assign(div.style, { borderLeft: '3px solid #ffb86c', backgroundColor: '#1e1e1e', padding: '10px 12px', margin: '8px 0', borderRadius: '0 4px 4px 0' });
-                                                div.innerHTML = `<span style="color:#ffb86c;">►</span> <span style="color:#f8f8f2;">${safe_text}</span>`;
+                                                Object.assign(div.style, { borderLeft: '3px solid #b45309', backgroundColor: '#fff', padding: '10px 12px', margin: '8px 0', borderRadius: '0 4px 4px 0' });
+                                                div.innerHTML = `<span style="color:#b45309;">►</span> <span style="color:#1f2328;">${safe_text}</span>`;
                                             } else {
-                                                div.innerHTML = `<span style="color:#6272a4;">►</span> <span style="color:#f8f8f2;">${safe_text}</span>`;
+                                                div.innerHTML = `<span style="color:#3a3f46;">►</span> <span style="color:#1f2328;">${safe_text}</span>`;
                                             }
                                             verl_box.appendChild(div);
                                         }
@@ -1350,7 +1348,7 @@
                             log_debug(`Polling-Fehler: ${poll_err.message}`);
                             launcher_tab.querySelector('span').innerText = '🤖 KI-Korrektor';
                             btn_check.style.display = 'block'; btn_check.disabled = false;
-                            set_status('❌', 'Leider ist ein Fehler aufgetreten.', 'Bitte versuchen Sie es erneut.', '#ff5555', true);
+                            set_status('❌', 'Leider ist ein Fehler aufgetreten.', 'Bitte versuchen Sie es erneut.', '#a30015', true);
                             add_message('Bei der Statusabfrage ist ein Fehler aufgetreten. Details im Debug-Log.', 'error');
                         }
                     }
@@ -1362,7 +1360,7 @@
                 log_debug(`Allgemeiner Fehler: ${error.message}`);
                 launcher_tab.querySelector('span').innerText = '🤖 KI-Korrektor';
                 btn_check.style.display = 'block'; btn_check.disabled = false;
-                set_status('❌', 'Leider ist ein Fehler aufgetreten.', 'Bitte versuchen Sie es erneut.', '#ff5555', true);
+                set_status('❌', 'Leider ist ein Fehler aufgetreten.', 'Bitte versuchen Sie es erneut.', '#a30015', true);
                 add_message('Ein unerwarteter Fehler ist aufgetreten. Details im Debug-Log.', 'error');
             }
         });

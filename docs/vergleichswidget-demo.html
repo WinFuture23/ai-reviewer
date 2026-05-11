@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>VergleichsWidget — Demo</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+	body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; background: #f4f6fa; color: #1f2328; }
+	.wrap { max-width: 1200px; margin: 0 auto; padding: 32px 24px 80px; }
+	h1 { font-size: 24px; margin: 0 0 6px; }
+	.lead { color: #555a63; margin: 0 0 24px; }
+	.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+	.col-label { display: block; font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #1f2328; margin: 0 0 10px; padding-left: 2px; }
+	.field { margin-bottom: 10px; }
+	.field-label { display: block; font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: #6b7280; margin: 0 0 4px; padding-left: 2px; }
+	input.field-input, textarea.field-input {
+		width: 100%; padding: 10px 12px; border: 1px solid #d0d4dc; border-radius: 8px;
+		font: 13px/1.45 ui-monospace, Menlo, Monaco, Consolas, monospace;
+		background: #fff; box-sizing: border-box; resize: vertical;
+	}
+	input.field-input { font-weight: 600; }
+	textarea.field-teaser { min-height: 90px; }
+	textarea.field-content { min-height: 220px; }
+	.actions { margin-top: 18px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+	.btn { appearance: none; border: 1px solid #1f2328; background: #1f2328; color: #fff; font: inherit; font-size: 14px; padding: 9px 18px; border-radius: 8px; cursor: pointer; }
+	.btn.alt { background: #fff; color: #1f2328; }
+	.btn:hover { opacity: .92; }
+	.muted { color: #777; font-size: 13px; }
+	.result { margin-top: 24px; display: none; }
+	.result.visible { display: block; }
+	.result h3 { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #94979d; margin: 16px 0 6px; }
+	.result pre {
+		background: #fff; border: 1px solid #e5e7eb; border-radius: 8px;
+		padding: 12px 14px; font: 13px/1.5 ui-monospace, Menlo, Monaco, Consolas, monospace;
+		white-space: pre-wrap; word-break: break-word; max-height: 320px; overflow: auto;
+		margin: 0;
+	}
+	code.kbd { font: 12px ui-monospace, Menlo, Monaco, Consolas, monospace; background: #eef0f4; padding: 1px 6px; border-radius: 4px; border: 1px solid #d0d4dc; }
+	.api { margin-top: 32px; padding: 16px 18px; border: 1px dashed #c9cfd9; border-radius: 8px; background: #fbfcfd; font-size: 13px; color: #3a3f46; }
+	.api code { font: 12px ui-monospace, Menlo, Monaco, Consolas, monospace; }
+	.api pre { font: 12px ui-monospace, Menlo, Monaco, Consolas, monospace; background: #1f2328; color: #e6e8eb; padding: 12px 14px; border-radius: 6px; overflow-x: auto; margin: 8px 0; }
+</style>
+</head>
+<body>
+	<div class="wrap">
+		<h1>VergleichsWidget</h1>
+		<p class="lead">Side-by-side Vorher/Nachher-Diff für Artikel — Überschrift, Teaser und Body getrennt vergleichen.</p>
+
+		<div class="cols">
+			<div>
+				<span class="col-label">● Vorher</span>
+				<div class="field">
+					<label class="field-label" for="vorher-headline">Überschrift</label>
+					<input id="vorher-headline" class="field-input field-headline" type="text">
+				</div>
+				<div class="field">
+					<label class="field-label" for="vorher-teaser">Teaser</label>
+					<textarea id="vorher-teaser" class="field-input field-teaser"></textarea>
+				</div>
+				<div class="field">
+					<label class="field-label" for="vorher-content">Body</label>
+					<textarea id="vorher-content" class="field-input field-content"></textarea>
+				</div>
+			</div>
+			<div>
+				<span class="col-label">● Nachher</span>
+				<div class="field">
+					<label class="field-label" for="nachher-headline">Überschrift</label>
+					<input id="nachher-headline" class="field-input field-headline" type="text">
+				</div>
+				<div class="field">
+					<label class="field-label" for="nachher-teaser">Teaser</label>
+					<textarea id="nachher-teaser" class="field-input field-teaser"></textarea>
+				</div>
+				<div class="field">
+					<label class="field-label" for="nachher-content">Body</label>
+					<textarea id="nachher-content" class="field-input field-content"></textarea>
+				</div>
+			</div>
+		</div>
+
+		<div class="actions">
+			<button class="btn" id="open">Vergleich öffnen</button>
+			<button class="btn alt" id="example">Beispieltexte laden</button>
+			<span class="muted">Tipp: <code class="kbd">↑</code>/<code class="kbd">↓</code> Absatz, <code class="kbd">→</code> annehmen, <code class="kbd">←</code> ablehnen, <code class="kbd">Esc</code> schließen.</span>
+		</div>
+
+		<div class="result" id="result">
+			<h3>Ergebnis-Überschrift</h3>
+			<pre id="result-headline"></pre>
+			<h3>Ergebnis-Teaser</h3>
+			<pre id="result-teaser"></pre>
+			<h3>Ergebnis-Body</h3>
+			<pre id="result-content"></pre>
+			<p class="muted" id="result-stats" style="margin-top:10px;"></p>
+		</div>
+
+		<div class="api">
+			<strong>Einbettung auf einer beliebigen Seite:</strong>
+<pre>&lt;script src="vergleichswidget.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+VergleichsWidget.open({
+  before: { headline, teaser, content },
+  after:  { headline, teaser, content },
+  onResolve: function (resolved, stats) {
+    // resolved = { headline, teaser, content }
+    // stats    = { total, accepted, rejected }
+  }
+});
+&lt;/script&gt;</pre>
+			Alle drei Felder bleiben byte-genau erhalten (HTML & ##-Shortcodes 1:1).
+			Wer mag, kann auch direkt einen String übergeben — dann wird er als <code>content</code> behandelt und das Resultat ist wieder ein String.
+		</div>
+	</div>
+
+	<script src="../vergleichswidget.js"></script>
+	<script>
+		var EXAMPLE = {
+			before: {
+				headline: 'Microsoft schreibt an den neuen EU-Regeln für Datenzentren heimlich mit und schwächt Transparenzpflichten ab',
+				teaser: 'Der Einfluss großer Technologiekonzerne auf Brüssel wächst: Recherchen legen nahe, dass Microsoft Formulierungen der Energieeffizienzrichtlinie massgeblich geprägt hat — und Transparenzpflichten für Rechenzentren abschwächt.',
+				content:
+					'Der massive Ausbau von ##a i="296" t="KI-Datenzentren"## bringt auch allerlei Probleme mit sich, bei denen staatliche Organe eigentlich regulierend tätig werden müssten. Allerdings scheinen ausgerechnet große Betreiber wie Microsoft an den Gesetzen mitzuschreiben.\n'
+					+ '<h2>Was darf verschwiegen werden?</h2>\n'
+					+ 'Der Einfluss großer Technologiekonzerne auf die europäische Gesetzgebung rückt zunehmend in den Fokus der öffentlichen Debatte. Im Zentrum aktueller Kritik steht dabei insbesondere der US-Konzern Microsoft, dem eine prägende Rolle bei der Ausgestaltung von Transparenzregeln für Rechenzentren in der Europäischen Union zugeschrieben wird.\n'
+					+ '<br/><br/>\n'
+					+ 'Ausgangspunkt ist die ##a i="65" t="Energieeffizienzrichtlinie"## (EED), die 2023 im Rahmen des europäischen Green Deal verabschiedet wurde. Sie sieht vor, dass Betreiber von Rechenzentren Daten zu Energieverbrauch, Wasserverbrauch und dem Einsatz erneuerbarer Energien offenlegen. Ziel dieser Regelung ist es, mehr Transparenz über die ökologischen Auswirkungen der schnell wachsenden digitalen Infrastruktur zu schaffen.\n'
+					+ '<br/><br/>\n'
+					+ '##video id="auto" title="" playlist=""##\n'
+					+ 'Wie <a class="newslink" href="https://algorithmwatch.org/de/kopieren-einfuegen-regieren-microsoft-schreibt-eu-richtlinie/">Recherchen</a> der Nichtregierungsorganisation Corporate and Europe Observatory und AlgorithmWatch nahelegen, könnte diese Transparenz jedoch deutlich eingeschränkt werden sein.\n'
+					+ 'Besonders brisant ist der Vorwurf, dass Formulierungen aus Positionspapieren der Unternehmen nahezu wortgleich in den finalen Gesetzestext übernommen worden sein sollen.\n'
+					+ '<br/><br/>\n'
+					+ '##contentad ausrichtung=""##'
+			},
+			after: {
+				headline: 'Microsoft schreibt an den neuen EU-Regeln für KI-Datenzentren heimlich mit und schwächt Transparenzpflichten ab',
+				teaser: 'Der Einfluss großer Technologiekonzerne auf Brüssel wächst: Recherchen legen nahe, dass Microsoft Formulierungen der Energieeffizienzrichtlinie maßgeblich geprägt hat – und Transparenzpflichten für Rechenzentren abschwächt.',
+				content:
+					'Der massive Ausbau von ##a i="296" t="KI-Datenzentren"## bringt auch allerlei Probleme mit sich, bei denen staatliche Organe eigentlich regulierend tätig werden müssten. Allerdings scheinen ausgerechnet große Betreiber wie Microsoft an den Gesetzen mitzuschreiben.\n'
+					+ '<h2>Was darf verschwiegen werden?</h2>\n'
+					+ 'Der Einfluss großer Technologiekonzerne auf die europäische Gesetzgebung rückt zunehmend in den Fokus der öffentlichen Debatte. Im Zentrum aktueller Kritik steht dabei insbesondere der US-Konzern Microsoft, dem eine prägende Rolle bei der Ausgestaltung von Transparenzregeln für Rechenzentren in der Europäischen Union zugeschrieben wird.\n'
+					+ '<br/><br/>\n'
+					+ 'Ausgangspunkt ist die ##a i="65" t="Energieeffizienzrichtlinie"## (EED), die 2023 im Rahmen des europäischen Green Deal verabschiedet wurde. Sie sieht vor, dass Betreiber von Rechenzentren <a href="https://winfuture.de/news,144636.html">Daten zu Energieverbrauch, Wasserverbrauch und dem Einsatz erneuerbarer Energien</a> offenlegen. Ziel dieser Regelung ist es, mehr Transparenz über <a href="https://winfuture.de/news,143737.html">die ökologischen Folgen dieser Entwicklung transparenter zu machen</a>.\n'
+					+ '<br/><br/>\n'
+					+ '##video id="auto" title="" playlist=""##\n'
+					+ 'Wie <a class="newslink" href="https://algorithmwatch.org/de/kopieren-einfuegen-regieren-microsoft-schreibt-eu-richtlinie/">Recherchen</a> der Nichtregierungsorganisation Corporate Europe Observatory und AlgorithmWatch nahelegen, könnte diese Transparenz jedoch deutlich eingeschränkt werden sein.\n'
+					+ 'Besonders heikel ist der Vorwurf, dass Formulierungen aus Positionspapieren der Unternehmen nahezu wortgleich in den finalen Gesetzestext übernommen worden sein sollen.\n'
+					+ '<br/><br/>\n'
+					+ '##contentad ausrichtung=""##'
+			}
+		};
+
+		function $( id ) { return document.getElementById( id ); }
+
+		function loadExample() {
+			$( 'vorher-headline' ).value = EXAMPLE.before.headline;
+			$( 'vorher-teaser' ).value = EXAMPLE.before.teaser;
+			$( 'vorher-content' ).value = EXAMPLE.before.content;
+			$( 'nachher-headline' ).value = EXAMPLE.after.headline;
+			$( 'nachher-teaser' ).value = EXAMPLE.after.teaser;
+			$( 'nachher-content' ).value = EXAMPLE.after.content;
+		}
+		loadExample();
+
+		$( 'example' ).addEventListener( 'click', loadExample );
+		$( 'open' ).addEventListener( 'click', function () {
+			VergleichsWidget.open( {
+				before: {
+					headline: $( 'vorher-headline' ).value,
+					teaser: $( 'vorher-teaser' ).value,
+					content: $( 'vorher-content' ).value
+				},
+				after: {
+					headline: $( 'nachher-headline' ).value,
+					teaser: $( 'nachher-teaser' ).value,
+					content: $( 'nachher-content' ).value
+				},
+				title: 'Unterschiede',
+				onResolve: function ( resolved, stats ) {
+					$( 'result' ).classList.add( 'visible' );
+					$( 'result-headline' ).textContent = resolved.headline;
+					$( 'result-teaser' ).textContent = resolved.teaser;
+					$( 'result-content' ).textContent = resolved.content;
+					$( 'result-stats' ).textContent =
+						stats.accepted + ' angenommen · ' + stats.rejected + ' abgelehnt · '
+						+ ( stats.total - stats.accepted - stats.rejected ) + ' offen (Default: angenommen)';
+				}
+			} );
+		} );
+	</script>
+</body>
+</html>
