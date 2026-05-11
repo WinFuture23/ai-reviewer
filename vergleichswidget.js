@@ -648,7 +648,32 @@
 		// — nur Add/Del-Blöcke werden zusammengefasst, Mod- und Eq-Items
 		// bleiben einzeln, damit eine Item-Änderung in einer Bestandsliste
 		// nicht die ganze Liste hervorhebt.
-		return merged;
+
+		// Heading-Body-Merge: ein heading-only Paragraph (`<h1>`-`<h6>` ohne
+		// weiteren sichtbaren Text) wird mit dem direkt nachfolgenden Body-
+		// Paragraph zu einem zusammengezogen. So gehören Zwischen-
+		// Überschrift und der zugehörige Absatz im Diff zur SELBEN Zeile;
+		// der Redakteur entscheidet sie zusammen.
+		//
+		// Hinweis (Historie): Diese Logik hatten wir mal entfernt, weil
+		// asymmetrische Headings (eine Seite mit `<h2>`, andere ohne)
+		// das Paragraph-LCS verschoben. Mit der heutigen Hybrid-Similarity
+		// und compare_norm ist das robust genug — bei einseitigen Headings
+		// landet der `<h2>`-Tag inline im Diff statt eine Lawine an
+		// Add+Del-Zeilen zu produzieren.
+		var with_headings_merged = [];
+
+		for( var k = 0; k < merged.length; k++ ) {
+			var q = merged[ k ];
+
+			if( is_just_heading( q ) && k + 1 < merged.length ) {
+				merged[ k + 1 ] = q + merged[ k + 1 ];
+			} else {
+				with_headings_merged.push( q );
+			}
+		}
+
+		return with_headings_merged;
 	}
 
 	function is_list_part( text ) {
