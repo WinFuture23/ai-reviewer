@@ -1174,7 +1174,6 @@
                                 let korrektor_text = korrektor_match ? korrektor_match[1].trim() : null;
                                 const verlinker_text = verlinker_match ? verlinker_match[1].trim() : null;
 
-                                if (korrektor_text) korrektor_text = korrektor_text.replace(/\. (Rechtschreibung|Grammatik|Die Rechtschreibung|Zur Rechtschreibung|Es wurden keine signifikanten)/gi, '.\n$1').replace(/\. (Die Shortcode|Shortcodes)/gi, '.\n$1');
                                 if (!new_content) throw new Error('Erfolg gemeldet, aber kein Text gespeichert.');
 
                                 new_content = clean_ai_content( new_content );
@@ -1199,33 +1198,109 @@
                                 btn_diff.style.display = 'flex'; btn_undo.style.display = 'flex'; btn_close_bottom.style.display = 'flex';
 
                                 if (korrektor_text) {
-                                    const korr_box = document.createElement('div'); Object.assign(korr_box.style, { backgroundColor: '#fafbfc', padding: '12px', borderRadius: '6px', border: '1px solid #e5e7eb' });
-                                    const k_title = document.createElement('div'); k_title.innerHTML = '<span style="color:#0550ae; font-weight:bold; font-size:14px;">📝 Text- & Shortcode-Korrekturen</span><hr style="border:0; border-top:1px solid #e5e7eb; margin:8px 0;">';
+                                    const korr_box = document.createElement('div');
+                                    Object.assign(korr_box.style, { backgroundColor: '#fafbfc', padding: '14px 16px', borderRadius: '8px', border: '1px solid #e5e7eb' });
+
+                                    // Title-Zeile: Icon + Label, dezenter Underline-Separator
+                                    const k_title = document.createElement('div');
+                                    Object.assign(k_title.style, { display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', paddingBottom: '10px', borderBottom: '1px solid #e5e7eb' });
+                                    k_title.innerHTML = '<span style="font-size:15px;">📝</span><span style="color:#1f2328; font-weight:600; font-size:13px; letter-spacing:.2px;">Text- &amp; Shortcode-Korrekturen</span>';
                                     korr_box.appendChild(k_title);
-                                    const lines = korrektor_text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-                                    lines.forEach(line => {
-                                        let clean_line = line.replace(/^[-*•#\d.]+\s*/, '');
-                                        const safe_line = escape_html(clean_line);
-                                        const div = document.createElement('div');
-                                        if(clean_line.toLowerCase().includes('keine korrek') || clean_line.toLowerCase().includes('nicht')) {
-                                            div.innerHTML = `<span style="color:#b45309;">►</span> <span style="color:#1f2328;">${safe_line}</span>`; div.style.marginTop = '6px';
-                                        } else {
-                                            div.innerHTML = `<span style="color:#3a3f46;">►</span> <span style="color:#1f2328;">${safe_line}</span>`; div.style.marginTop = '6px'; div.style.paddingLeft = '5px';
+
+                                    // Server liefert nummerierte Items, durch Leerzeilen getrennt:
+                                    //   "1. Heading: Body...\n\n2. Heading: Body..."
+                                    // Wir splitten primaer an Doppel-Newlines; als Fallback an
+                                    // Zeilenanfaengen mit nummeriertem/bullet-Prefix.
+                                    let raw_items = korrektor_text.split(/\n\s*\n/).map(s => s.trim()).filter(s => s.length > 0);
+
+                                    if (raw_items.length === 1) {
+                                        raw_items = korrektor_text.split(/\n(?=\s*(?:\d+[.)]|[-*•])\s)/).map(s => s.trim()).filter(s => s.length > 0);
+                                    }
+
+                                    const items_wrap = document.createElement('div');
+                                    Object.assign(items_wrap.style, { display: 'flex', flexDirection: 'column', gap: '8px' });
+
+                                    raw_items.forEach(raw => {
+                                        // Leading "1." / "1)" / "-" / "*" / "•" / "#" abschneiden
+                                        const stripped = raw.replace(/^\s*(?:\d+[.)]\s*|[-*•#]\s*)/, '').trim();
+
+                                        if (!stripped) return;
+
+                                        // Heading vor erstem ":", Body danach — nur wenn der
+                                        // Doppelpunkt in der ersten Zeile UND vor Position 80 steht.
+                                        let heading = null;
+                                        let body = stripped;
+                                        const first_line_end = stripped.indexOf('\n');
+                                        const colon_idx = stripped.indexOf(':');
+
+                                        if (colon_idx > 0 && colon_idx <= 80 && (first_line_end === -1 || colon_idx < first_line_end)) {
+                                            heading = stripped.slice(0, colon_idx).trim();
+                                            body = stripped.slice(colon_idx + 1).trim();
                                         }
-                                        korr_box.appendChild(div);
+
+                                        // Status: "Keine Aenderungen" / "nicht erforderlich" / etc.
+                                        const body_lower = body.toLowerCase();
+                                        const is_no_change = /^keine\s+(änderung|korrek|anpassung)/.test(body_lower)
+                                            || /^nicht\s+(erforderlich|notwendig|nötig)/.test(body_lower)
+                                            || body_lower.startsWith('keine ')
+                                            || body_lower === 'keine.';
+
+                                        const accent_color = is_no_change ? '#176c1f' : '#0550ae';
+                                        const icon = is_no_change ? '✓' : 'ℹ';
+
+                                        const item = document.createElement('div');
+                                        Object.assign(item.style, {
+                                            borderLeft: `3px solid ${accent_color}`,
+                                            border: '1px solid #e5e7eb',
+                                            borderLeftWidth: '3px',
+                                            borderLeftColor: accent_color,
+                                            padding: '10px 12px',
+                                            backgroundColor: '#fff',
+                                            borderRadius: '0 6px 6px 0'
+                                        });
+
+                                        let html = '';
+
+                                        if (heading) {
+                                            html += `<div style="color:#1f2328; font-weight:600; font-size:13px; line-height:1.4; display:flex; align-items:baseline; gap:6px; margin-bottom:${body ? '4px' : '0'};">`
+                                                + `<span style="color:${accent_color}; font-weight:700;">${icon}</span>`
+                                                + `<span>${escape_html(heading)}</span>`
+                                                + `</div>`;
+                                        }
+
+                                        if (body) {
+                                            const body_color = heading ? '#3a3f46' : '#1f2328';
+                                            const inline_icon = heading
+                                                ? ''
+                                                : `<span style="color:${accent_color}; font-weight:700; margin-right:6px;">${icon}</span>`;
+                                            html += `<div style="color:${body_color}; font-size:13px; line-height:1.55; white-space:pre-line;">${inline_icon}${escape_html(body)}</div>`;
+                                        }
+
+                                        item.innerHTML = html;
+                                        items_wrap.appendChild(item);
                                     });
+
+                                    korr_box.appendChild(items_wrap);
                                     results_area.appendChild(korr_box);
                                 }
 
                                 {
-                                    const verl_box = document.createElement('div'); Object.assign(verl_box.style, { backgroundColor: '#fafbfc', padding: '12px', borderRadius: '6px', border: '1px solid #e5e7eb' });
+                                    const verl_box = document.createElement('div'); Object.assign(verl_box.style, { backgroundColor: '#fafbfc', padding: '14px 16px', borderRadius: '8px', border: '1px solid #e5e7eb' });
                                     const lines = verlinker_text ? verlinker_text.split('\n').map(l => l.trim()).filter(l => l.length > 0) : [];
                                     const link_count = lines.filter(l => l.toLowerCase().startsWith('link')).length;
-                                    const v_title = document.createElement('div'); v_title.innerHTML = `<span style="color:#176c1f; font-weight:bold; font-size:14px;">🔗 ${link_count === 1 ? 'Verlinkung' : 'Verlinkungen'}</span><hr style="border:0; border-top:1px solid #e5e7eb; margin:8px 0;">`;
+                                    const v_title = document.createElement('div');
+                                    Object.assign(v_title.style, { display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', paddingBottom: '10px', borderBottom: '1px solid #e5e7eb' });
+                                    const count_badge = link_count > 0
+                                        ? `<span style="background:#176c1f; color:#fff; font-size:11px; font-weight:600; padding:1px 7px; border-radius:10px; line-height:1.5;">${link_count}</span>`
+                                        : '';
+                                    v_title.innerHTML = '<span style="font-size:15px;">🔗</span>'
+                                        + `<span style="color:#1f2328; font-weight:600; font-size:13px; letter-spacing:.2px;">${link_count === 1 ? 'Verlinkung' : 'Verlinkungen'}</span>`
+                                        + count_badge;
                                     verl_box.appendChild(v_title);
                                     if (lines.length === 0) {
-                                        const no_links = document.createElement('div'); Object.assign(no_links.style, { borderLeft: '3px solid #b45309', backgroundColor: '#fff', padding: '10px 12px', margin: '8px 0', borderRadius: '0 4px 4px 0' });
-                                        no_links.innerHTML = '<span style="color:#b45309;">►</span> <span style="color:#1f2328;">Keine passenden Verlinkungen gefunden.</span>';
+                                        const no_links = document.createElement('div');
+                                        Object.assign(no_links.style, { borderLeft: '3px solid #b45309', border: '1px solid #e5e7eb', borderLeftWidth: '3px', borderLeftColor: '#b45309', backgroundColor: '#fff', padding: '10px 12px', borderRadius: '0 6px 6px 0', display: 'flex', alignItems: 'baseline', gap: '6px' });
+                                        no_links.innerHTML = '<span style="color:#b45309; font-weight:700;">ℹ</span><span style="color:#1f2328; font-size:13px; line-height:1.55;">Keine passenden Verlinkungen gefunden.</span>';
                                         verl_box.appendChild(no_links);
                                     }
                                     let current_group = null;
