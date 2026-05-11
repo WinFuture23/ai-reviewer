@@ -220,13 +220,22 @@
 		+ '.vw-search-hit{outline:2px solid #f5b942;outline-offset:1px;border-radius:3px;background:#fff5d8;}'
 
 		+ '.vw-footer{display:flex;align-items:center;gap:14px;padding:8px 14px;border-top:1px solid #e5e7eb;background:#f8f9fb;flex-shrink:0;font-size:12px;color:#3a3f46;}'
-		+ '.vw-legend{display:inline-flex;align-items:center;gap:10px;}'
+		+ '.vw-legend{display:inline-flex;align-items:center;gap:6px;}'
+		+ '.vw-legend-label{color:#94979d;font-size:11px;font-weight:500;letter-spacing:.5px;text-transform:uppercase;margin-right:2px;}'
+		// Legenden-Tags benutzen denselben Hintergrund wie die Diff-Highlights
+		// im Body — damit der Redakteur sofort erkennt: das sind Beispiele
+		// für die Markierungen im Diff darüber.
 		+ '.vw-legend-tag{padding:1px 8px;border-radius:3px;font-weight:600;font-size:11px;}'
-		+ '.vw-legend-tag.vw-del{text-decoration:none;color:#a30015;}'
-		+ '.vw-legend-tag.vw-ins{color:#176c1f;}'
+		+ '.vw-legend-tag.vw-del{background:#ffe1e1;color:#a30015;text-decoration:none;}'
+		+ '.vw-legend-tag.vw-ins{background:#d6f0d6;color:#176c1f;}'
 		+ '.vw-keys{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;}'
 		+ '.vw-key{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border:1px solid #c5cad2;border-bottom-width:2px;border-radius:4px;background:#fff;font-family:ui-monospace,Menlo,Monaco,Consolas,monospace;font-size:11px;color:#1f2328;}'
 		+ '.vw-keys .vw-sep{color:#94979d;}'
+		// Primary-Action im Footer rechts unten: alle ausstehenden Entscheidungen
+		// auf "annehmen" setzen und Modal schließen. Gleicher Grünton wie der
+		// Speichern-Button im Terminal-Overlay.
+		+ '.vw-accept-all{appearance:none;border:1px solid #176c1f;background:#176c1f;color:#fff;border-radius:6px;padding:6px 14px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;line-height:1.2;transition:background-color .15s ease;}'
+		+ '.vw-accept-all:hover{background:#125a18;border-color:#125a18;}'
 
 		// Widget runs in light mode only — no @media prefers-color-scheme.
 	;
@@ -1492,6 +1501,19 @@
 		this.modal.focus();
 	};
 
+	// Alle offenen Entscheidungen (inkl. bereits abgelehnter) zwingend auf
+	// "annehmen" setzen und Modal schließen. Der Redakteur kann damit ein
+	// vorgesichtetes Bundle in einem Klick übernehmen, ohne durch jede
+	// Mod-Zeile durchzunavigieren.
+	Widget.prototype.accept_all_and_close = function() {
+		if( !this.root ) { return; }
+
+		for( var i = 0; i < this.rows.length; i++ ) {
+			this.rows[ i ].decision = 'accept';
+		}
+		this.close();
+	};
+
 	Widget.prototype.close = function() {
 		if( !this.root ) { return; }
 		var bundle = resolve_text( this.rows );
@@ -1550,13 +1572,14 @@
 			+ '   </div>'
 			+ ' </div>'
 			+ ' <div class="vw-footer">'
-			+ '   <span>Legende:</span>'
 			+ '   <span class="vw-legend">'
+			+ '     <span class="vw-legend-label">Legende</span>'
 			+ '     <span class="vw-legend-tag vw-del">entfernt</span>'
 			+ '     <span class="vw-legend-tag vw-ins">hinzugefügt</span>'
 			+ '   </span>'
-			+ '   <span class="vw-grow"></span>'
 			+ keys_footer_html()
+			+ '   <span class="vw-grow"></span>'
+			+ '   <button type="button" class="vw-accept-all" data-vw-accept-all title="Alle offenen Entscheidungen annehmen und schließen">✓ Alle annehmen</button>'
 			+ ' </div>'
 			+ '</div>';
 	};
@@ -1577,6 +1600,7 @@
 		this.root.addEventListener( 'click', function( ev ) {
 			var t = ev.target;
 			if( t.closest && t.closest( '[data-vw-close]' ) ) { self.close(); return; }
+			if( t.closest && t.closest( '[data-vw-accept-all]' ) ) { self.accept_all_and_close(); return; }
 			if( t.closest && t.closest( '[data-vw-prev]' ) ) { self.navigate( -1 ); return; }
 			if( t.closest && t.closest( '[data-vw-next]' ) ) { self.navigate( 1 ); return; }
 			var modeBtn = t.closest && t.closest( '[data-vw-mode]' );

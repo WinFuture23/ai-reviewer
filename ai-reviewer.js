@@ -850,6 +850,23 @@
         // ohne dem Redakteur eine sinnlose 0/0-Ansicht zu zeigen.
         let auto_diff_opened = false; // verhindert doppeltes Auto-Open im selben Lauf
 
+        // Wenn nichts zu vergleichen ist (KI hat den Text 1:1 übernommen),
+        // werden „Unterschiede anzeigen" und „Rückgängig machen" ausgegraut
+        // und nicht klickbar — der Redakteur soll gar nicht erst auf eine
+        // Aktion klicken können, die nichts bewirkt.
+        function disable_diff_buttons( reason ) {
+            [ btn_diff, btn_undo ].forEach( function( btn ) {
+                if( !btn ) return;
+                btn.disabled = true;
+                btn.style.opacity = '.5';
+                btn.style.cursor = 'not-allowed';
+                btn.title = reason;
+                // Hover-Effekte deaktivieren, damit das ausgegraute Aussehen erhalten bleibt
+                btn.onmouseover = null;
+                btn.onmouseout = null;
+            });
+        }
+
         async function open_diff_modal( opts ) {
             opts = opts || {};
             const is_auto = !!opts.auto;
@@ -891,11 +908,12 @@
                 if( !has_changes ) {
                     log_debug( 'Vergleich: keine Textunterschiede gefunden.' );
 
+                    // Buttons ausgrauen, wenn die KI nichts angefasst hat —
+                    // dann gibt es nichts zu vergleichen oder rückgängig zu
+                    // machen. Cursor und Opacity zeigen das visuell.
+                    disable_diff_buttons( 'Keine Unterschiede zum Vergleichen' );
+
                     if( !is_auto ) {
-                        // Nur bei manuellem Klick eine Notification — beim
-                        // Auto-Open wäre eine zusätzliche Zeile redundant,
-                        // weil die Korrektur-Box „Keine Änderungen" schon
-                        // sagt was Sache ist.
                         add_message( '<b>Hinweis:</b> Die KI hat den Text 1:1 übernommen — es gibt keine Unterschiede zum Vergleich.', 'info' );
                     }
                     return;
