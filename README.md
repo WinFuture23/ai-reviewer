@@ -1,27 +1,56 @@
-# AI-Reviewer: KI-Korrektor & Verlinker
+# KI-Korrektor
 
-Browser-Widget für Redakteure, das Artikel automatisch auf Rechtschreibung, Grammatik und Verlinkungen prüfen lässt.
+Browser-Widget für die WinFuture-Redaktion. Lässt Artikel durch eine
+KI-Pipeline auf Rechtschreibung, Grammatik und passende interne
+Verlinkungen prüfen und zeigt das Ergebnis in einem schwebenden
+Overlay-Panel direkt im CMS-Editor an. Inklusive einem Vorher/Nachher-
+Diff-Modal, mit dem der Redakteur die KI-Vorschläge absatzweise
+annehmen oder verwerfen kann. Beide Komponenten teilen denselben
+hellen, system-nativen Look (System-Sans-Serif, dezente Border und
+Akzent-Palette).
+
+## Module
+
+Das Projekt besteht aus zwei eigenständigen JavaScript-Dateien, die
+nebeneinander auf GitHub Pages ausgeliefert werden:
+
+| Datei | Zweck | Größe | Details |
+|---|---|---|---|
+| [`ai-reviewer.js`](ai-reviewer.js) | Haupt-Widget. Erkennt den Content-Type, liest die Editor-Felder, schickt sie an den Backend-Worker, pollt das Ergebnis, schreibt es zurück und rendert Korrekturen + Verlinkungsvorschläge. | ~80 KB | [`docs/ai-reviewer.md`](docs/ai-reviewer.md) |
+| [`vergleichswidget.js`](vergleichswidget.js) | Lazy nachgeladener Vorher/Nachher-Diff. Drei Sektionen (Headline / Teaser / Body), pro Absatz eine Accept-/Reject-Entscheidung, byte-exakte Erhaltung von HTML- und `##`-Shortcode-Markup. | ~73 KB | [`docs/vergleichswidget.md`](docs/vergleichswidget.md) |
+
+`ai-reviewer.js` lädt `vergleichswidget.js` erst beim ersten Klick auf
+„🔍 Unterschiede anzeigen" nach. Die URL wird aus dem eigenen
+`<script src>` abgeleitet, beide Dateien liegen also auf derselben
+Origin (Production: `https://winfuture23.github.io/ai-reviewer/`).
 
 ## Architektur
 
 ```
-Browser-Widget (ai-reviewer.js)
-    ├─ Start-Request (HMAC-authentifiziert)
-    │       ↓
-    │   Val.town Proxy → Make.com Worker → KI-Agenten
-    │                                          ↓
-    │                                    Val.town Poller-DB (SQLite)
-    │                                          ↑
-    └─ Poll-Request (API-Key) ────────────────┘
+Browser (CMS-Editor)
+  └─ ai-reviewer.js (per <script> aus GitHub Pages)
+       ├─ Start-Request (HMAC-Token, content_type, content_id)
+       │       ↓
+       │   Val.town Proxy  ─▶  Make.com Worker  ─▶  KI-Agenten
+       │                                                ↓
+       │                                          Val.town Poller-DB (SQLite)
+       │                                                ↑
+       └─ Poll-Request (API-Key) ──────────────────────┘
+
+       beim Klick auf „Unterschiede anzeigen":
+       └─ vergleichswidget.js (nachgeladen, gleicher Origin)
+            └─ onResolve(resolved) ─▶  Editor-Felder werden absatzweise
+                                       byte-exakt aktualisiert
 ```
 
 | Komponente | Beschreibung |
 |---|---|
-| `ai-reviewer.js` | Frontend-Widget, wird per GitHub Pages ausgeliefert |
-| `docs/winfuture-integration.php` | PHP-Klasse zur Auth-Token-Generierung |
-| Val.town Proxy | Sicherheits-Proxy, leitet Start-Requests an Make.com weiter |
-| Val.town Poller-DB | SQLite-basierte API, speichert und liefert Job-Ergebnisse |
-| Make.com Worker | Orchestriert die KI-Agenten, schreibt Ergebnis in Poller-DB |
+| `ai-reviewer.js` | Frontend-Widget, GitHub Pages |
+| `vergleichswidget.js` | Frontend-Diff-Modal, GitHub Pages |
+| [`docs/winfuture-integration.php`](docs/winfuture-integration.php) | PHP-Klasse `wfv4_ai_reviewer::render()` für die Auth-Token-Generierung im CMS |
+| Val.town Proxy | Leitet HMAC-authentifizierte Start-Requests an Make.com weiter |
+| Val.town Poller-DB | SQLite-API, in der Make.com das KI-Ergebnis ablegt und das Widget es abholt |
+| Make.com Worker | Orchestriert die KI-Agenten (Korrektor + Verlinker) |
 
 ## Unterstützte Content-Types
 
@@ -32,28 +61,42 @@ Browser-Widget (ai-reviewer.js)
 | 5 | Video | Headline, Content |
 | 1 | FAQ | Headline, Content |
 
-Erkennung via `window.wfv4_content = { type: 6, id: 157585 }` (vom CMS gesetzt).
+Erkennung über `window.wfv4_content = { type: 6, id: 157585 }`, das
+das CMS auf der Editorseite setzt. Fallback: wenn ein `#news_text`
+DOM-Element existiert, nimmt das Widget News an.
 
-## Einbindung
+## Einbindung im CMS
+
+In einem Editor-Template, nur für eingeloggte Redakteure:
 
 ```php
-wfv4_ai_reviewer::render( $secret, $content_type, $content_id );
+wfv4_ai_reviewer::render( WFV4_AI_REVIEWER_SECRET, $content_type, $content_id );
 ```
 
-Gibt zwei Script-Tags aus:
-1. Inline-Script mit HMAC-Token gebunden an Content-Type und Content-ID (90 Min gültig)
-2. Script-Tag, das das Widget von GitHub Pages lädt
+Das gibt zwei `<script>`-Tags aus:
+
+1. Inline-Script, das `window.wfv4_ai_reviewer_auth` mit einem
+   HMAC-SHA256-Token belegt, gebunden an Timestamp + Content-Type +
+   Content-ID (90 Minuten gültig).
+2. Script-Tag, das `ai-reviewer.js` von GitHub Pages lädt.
+
+Setup im Detail: [`docs/SETUP.md`](docs/SETUP.md).
 
 ## Deployment
 
-Das Widget wird automatisch über **GitHub Pages** ausgeliefert:
+GitHub Pages serviert beide JS-Dateien aus dem Repo-Root. Der Workflow
+([`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml))
+triggert bei jedem Push auf `main`, der eine der beiden Dateien ändert,
+und kopiert genau diese beiden Dateien (sonst nichts) in das deployte
+`_site/`-Verzeichnis:
 
 ```
 https://winfuture23.github.io/ai-reviewer/ai-reviewer.js
+https://winfuture23.github.io/ai-reviewer/vergleichswidget.js
 ```
 
-Bei jedem Push auf `main`, der `ai-reviewer.js` ändert, wird automatisch deployed.
-Nur `ai-reviewer.js` ist über Pages erreichbar — keine anderen Dateien.
+Alles andere (`docs/`, `gfx/`, `README.md`) ist im Repo, wird aber
+**nicht** ausgeliefert.
 
 ## Setup (Ersteinrichtung)
 
@@ -63,55 +106,81 @@ Nur `ai-reviewer.js` ist über Pages erreichbar — keine anderen Dateien.
 openssl rand -hex 32
 ```
 
-Das Secret wird benötigt in:
-- **Val.town** → Umgebungsvariable `AI_REVIEWER_SECRET`
-- **WinFuture PHP** → Konfiguration (z.B. `define('WFV4_AI_REVIEWER_SECRET', '...')`)
+Wird benötigt in:
+
+- **Val.town Proxy** → Umgebungsvariable `AI_REVIEWER_SECRET`
+- **WinFuture PHP** → z. B. `define( 'WFV4_AI_REVIEWER_SECRET', '...' );`
 
 ### 2. Val.town Proxy einrichten
 
-Umgebungsvariablen auf [val.town](https://www.val.town/settings/environment-variables) setzen:
+Umgebungsvariablen auf [val.town](https://www.val.town/settings/environment-variables):
 
 | Variable | Beschreibung |
 |---|---|
-| `AI_REVIEWER_SECRET` | Shared HMAC-Secret (für den Proxy) |
-| `MAKE_WORKER_URL` | Make.com Webhook-URL für den Worker |
-| `MAKE_WORKER_APIKEY` | API-Key für Make.com (wird als `x-make-apikey` Header mitgesendet) |
+| `AI_REVIEWER_SECRET` | Shared HMAC-Secret für den Proxy |
+| `MAKE_WORKER_URL` | Make.com-Webhook-URL |
+| `MAKE_WORKER_APIKEY` | API-Key für Make.com (`x-make-apikey` Header) |
 | `SKIP_ORIGIN_CHECK` | `true` nur für Tests, danach löschen |
 
 ### 3. Val.town Poller-DB einrichten
 
 | Variable | Beschreibung |
 |---|---|
-| `WINFUTURE_API_KEY` | API-Key für Lese-/Schreibzugriff auf die Job-Datenbank |
+| `WINFUTURE_API_KEY` | API-Key für Lese-/Schreibzugriff auf die Job-DB |
 
 ### 4. PHP-Klasse einbinden
 
-Die Datei `docs/winfuture-integration.php` enthält die Klasse `wfv4_ai_reviewer`.
-Im Editor-Template (nur für eingeloggte Redakteure):
+`docs/winfuture-integration.php` enthält `wfv4_ai_reviewer`. Im
+Editor-Template:
 
 ```php
 wfv4_ai_reviewer::render( WFV4_AI_REVIEWER_SECRET, $content_type, $content_id );
 ```
 
-## Technische Details
+## Dateien
 
-- Erstellt DOM-Elemente mit Prefix `ai-reviewer-`
-- Window-Variablen: `wfv4_ai_reviewer_loaded`, `wfv4_ai_reviewer_auth`, `wfv4_content`
-- Erkennt Content-Type über `window.wfv4_content` und liest Felder aus ACE-Editoren
-- HMAC-Token gebunden an Timestamp, Content-Type und Content-ID
-- Setzt `window.wfv4_news_changed = true` nach Aktualisierung
-- Keine jQuery-Abhängigkeit, keine externen CSS-Dateien
+```
+KI Korrektor/
+├── ai-reviewer.js           Haupt-Widget
+├── vergleichswidget.js      Lazy nachgeladenes Diff-Modal
+├── README.md                Diese Datei
+├── .github/workflows/       Pages-Deploy-Workflow
+├── docs/
+│   ├── ai-reviewer.md           Detail-Doku zum Haupt-Widget
+│   ├── vergleichswidget.md      Detail-Doku zum Diff-Modal
+│   ├── vergleichswidget-demo.html  Standalone-Demo des Diff-Modals
+│   ├── SETUP.md                 PHP-Setup-Anleitung
+│   ├── Programmierstil.md       WinFuture Coding-Richtlinien
+│   ├── Sicherheitsrichtlinie.md WinFuture Sicherheitsrichtlinien
+│   ├── winfuture-integration.php  PHP-Klasse fürs CMS
+│   ├── townie-prompt-proxy.md   Townie-Prompt für Val.town Proxy
+│   ├── townie-prompt-poller-db.md  Townie-Prompt für Poller-DB
+│   ├── townie-update-proxy.md   Update-Prompt für Proxy (v3)
+│   ├── townie-update-poller-db.md  Update-Prompt für Poller-DB (v3)
+│   ├── make-payload-felder.md   Feldübersicht für Make.com-Payload
+│   ├── make-example-payload.json   Beispiel-JSON für Make.com
+│   └── test.html                manuelle Test-Seite
+└── gfx/                     Screenshots
+```
 
-## Dokumentation
+## Lokal entwickeln
 
-| Datei | Inhalt |
-|---|---|
-| `docs/Programmierstil.md` | WinFuture Coding-Richtlinien |
-| `docs/Sicherheitsrichtlinie.md` | WinFuture Sicherheitsrichtlinien |
-| `docs/winfuture-integration.php` | PHP-Klasse für die CMS-Integration |
-| `docs/townie-prompt-proxy.md` | Townie-Prompt für den Val.town Proxy |
-| `docs/townie-prompt-poller-db.md` | Townie-Prompt für die Val.town Poller-DB |
-| `docs/townie-update-proxy.md` | Townie-Prompt für Proxy-Erweiterungen (v3) |
-| `docs/townie-update-poller-db.md` | Townie-Prompt für Poller-DB-Erweiterungen (v3) |
-| `docs/make-payload-felder.md` | Feldübersicht für Make.com Payload |
-| `docs/make-example-payload.json` | Beispiel-JSON für Make.com |
+Das VergleichsWidget hat eine Standalone-Demo:
+
+```bash
+cd "/Users/mesios/Downloads/_Code/KI Korrektor"
+python3 -m http.server 8765
+# → http://localhost:8765/docs/vergleichswidget-demo.html
+```
+
+Das CMS-Widget (`ai-reviewer.js`) lässt sich nicht trivial lokal
+testen, weil es einen `wfv4uid`-Cookie, ACE-Editor-Instanzen
+(`window.<feldname>_editor`), das Backend-Auth-Token und einen
+laufenden Val.town-Proxy + Poller voraussetzt. Tests laufen direkt
+im CMS-Editor gegen die produktiven Endpoints.
+
+## Kontakt / Eigentum
+
+Interne WinFuture-Komponente. Kontakt: **Sebastian Kuhbach** —
+Telegram [@wf_sebastian](https://t.me/wf_sebastian) ·
+Email [sk@winfuture.de](mailto:sk@winfuture.de)
