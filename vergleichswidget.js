@@ -822,12 +822,22 @@
 	// gewichten wir Jaccard und Overlap zu gleichen Teilen. So pairen
 	// gefühlt-zusammengehörige Paragraphen, ohne dass „Der" als
 	// gemeinsames Stoppwort schon ein False-Match auslöst.
+	// Tokenisiert Text für den Similarity-Vergleich. Splittet an
+	// Whitespace UND Bindestrichen — letzteres weil die KI häufig
+	// Durchkopplung korrigiert ("SMS / Telefon Flat" → "SMS- / Telefon-Flat")
+	// und die Original-Strings bei reinem Whitespace-Split kaum
+	// Überlappung haben (sms vs sms-, telefon+flat vs telefon-flat).
+	// Mit Hyphen-Split fallen beide auf dieselbe Wortmenge zurück.
+	function compare_words( text ) {
+		return text.toLowerCase().split( /[\s\-]+/ ).filter( Boolean );
+	}
+
 	function similarity( a, b ) {
 		if( !a && !b ) { return 1; }
 		if( !a || !b ) { return 0; }
 
-		var wa = a.toLowerCase().split( /\s+/ ).filter( Boolean );
-		var wb = b.toLowerCase().split( /\s+/ ).filter( Boolean );
+		var wa = compare_words( a );
+		var wb = compare_words( b );
 
 		if( wa.length === 0 || wb.length === 0 ) { return 0; }
 
