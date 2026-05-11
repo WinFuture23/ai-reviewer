@@ -478,6 +478,20 @@
 			.replace( /(?:\s|<br\s*\/?>)+$/gi, '' );
 	}
 
+	// Whitespace + <br/> auf eine kanonische Form kollabieren — ausschließlich
+	// für VERGLEICHE genutzt (Eq-Detection bei sonst identischen Absätzen).
+	// `trim_display` strippt nur außen, deshalb würden Heading-Merges wie
+	// `<h2>X</h2>\n\nBody…` vs `<h2>X</h2>\nBody…` sonst als Mod-Zeile
+	// auftauchen, obwohl optisch nichts geändert ist. Die Original-Bytes
+	// bleiben in row.before/row.after erhalten und werden bei resolve_text
+	// byte-exakt zurückgegeben.
+	function compare_norm( text ) {
+		return text
+			.replace( /<br\s*\/?>/gi, '\n' )
+			.replace( /\s+/g, ' ' )
+			.trim();
+	}
+
 	//
 	// ────────────────────────────────────────────────────────────────────────────
 	//   4. Visible text — extract the user-readable content from a paragraph.
@@ -650,12 +664,13 @@
 				if( pr.before != null && pr.after != null ) {
 					var bt = trim_display( pr.before );
 					var at = trim_display( pr.after );
-					// Skip mod-rows where the trimmed text is identical — those
-					// are pure whitespace/separator differences that are noise.
-					// Both raw values are kept; we treat the row as eq for
-					// display and pick the NACHHER raw on resolve to keep
-					// "accept all" byte-exact.
-					if( bt === at ) {
+					// Skip mod-rows that only differ in whitespace (incl. inner
+					// `\n+`, `<br>` etc.) — that's noise from heading merges and
+					// KI-Reformatierungen, nichts was der Redakteur entscheiden
+					// soll. Both raw values are kept; we treat the row as eq
+					// for display and pick the NACHHER raw on resolve so
+					// "accept all" stays byte-exact with the new version.
+					if( compare_norm( bt ) === compare_norm( at ) ) {
 						rows.push( {
 							id: rowId++, type: 'eq',
 							before: pr.after, after: pr.after,
