@@ -732,7 +732,7 @@
 			var best_i = -1, best_score = SIM_THRESHOLD;
 			for( var ii = 0; ii < nI; ii++ ) {
 				if( used_i[ ii ] ) { continue; }
-				var s = jaccard( d_vis[ di ], i_vis[ ii ] );
+				var s = similarity( d_vis[ di ], i_vis[ ii ] );
 				if( s > best_score ) { best_score = s; best_i = ii; }
 			}
 			if( best_i !== -1 ) {
@@ -773,20 +773,66 @@
 		return out;
 	}
 
-	function jaccard( a, b ) {
+	// Ähnlichkeit zweier Paragraphen-Visible-Texts, in [0..1].
+	//
+	// Klassisches Jaccard (|A∩B| / |A∪B|) bestraft stark unterschiedlich
+	// lange Paragraphen — z. B. wenn die KI einen `<h2>`-Tag eingefügt
+	// oder entfernt hat und der Heading-Merge auf den beiden Seiten zu
+	// unterschiedlich großen Paragraphen führt. „Vorteile sind groß"
+	// (3 Wörter) komplett enthalten in „Vorteile sind groß Microsoft hat
+	// dafür …" (30 Wörter) ergibt Jaccard 3/30 = 0.1 — unter unserer
+	// 0.2-Schwelle, also kein Pair. Resultat: Vorher- und Nachher-
+	// Paragraph laufen als separate del / add nebeneinander her, obwohl
+	// sie offensichtlich zusammengehören.
+	//
+	// Lösung: Wenn mind. 3 unique Wörter gemeinsam sind UND die kleinere
+	// Seite eine starke Untermenge der größeren ist (Overlap ≥ 0.7),
+	// gewichten wir Jaccard und Overlap zu gleichen Teilen. So pairen
+	// gefühlt-zusammengehörige Paragraphen, ohne dass „Der" als
+	// gemeinsames Stoppwort schon ein False-Match auslöst.
+	function similarity( a, b ) {
 		if( !a && !b ) { return 1; }
 		if( !a || !b ) { return 0; }
+
 		var wa = a.toLowerCase().split( /\s+/ ).filter( Boolean );
 		var wb = b.toLowerCase().split( /\s+/ ).filter( Boolean );
+
+		if( wa.length === 0 || wb.length === 0 ) { return 0; }
+
 		var sa = {};
 		var sb = {};
-		for( var i = 0; i < wa.length; i++ ) { sa[ wa[ i ] ] = true; }
-		for( var j = 0; j < wb.length; j++ ) { sb[ wb[ j ] ] = true; }
-		var inter = 0, total = 0;
-		for( var k in sa ) { total++; if( sb[ k ] ) { inter++; } }
-		for( var l in sb ) { if( !sa[ l ] ) { total++; } }
-		return total === 0 ? 0 : inter / total;
+		var na = 0, nb = 0;
+
+		for( var i = 0; i < wa.length; i++ ) {
+			if( !sa[ wa[ i ] ] ) { sa[ wa[ i ] ] = true; na++; }
+		}
+
+		for( var j = 0; j < wb.length; j++ ) {
+			if( !sb[ wb[ j ] ] ) { sb[ wb[ j ] ] = true; nb++; }
+		}
+
+		var inter = 0;
+
+		for( var k in sa ) {
+			if( sb[ k ] ) { inter++; }
+		}
+
+		if( inter === 0 ) { return 0; }
+
+		var union_size = na + nb - inter;
+		var jacc = inter / union_size;
+		var min_size = Math.min( na, nb );
+		var overlap = inter / min_size;
+
+		if( inter >= 3 && overlap >= 0.7 ) {
+			return ( jacc + overlap ) / 2;
+		}
+		return jacc;
 	}
+
+	// Backwards-Compat: einige Aufrufer könnten weiterhin den alten
+	// Namen erwarten, also leiten wir um.
+	function jaccard( a, b ) { return similarity( a, b ); }
 
 	//
 	// ────────────────────────────────────────────────────────────────────────────
