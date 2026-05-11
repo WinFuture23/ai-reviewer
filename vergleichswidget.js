@@ -231,11 +231,23 @@
 		+ '.vw-keys{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;}'
 		+ '.vw-key{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border:1px solid #c5cad2;border-bottom-width:2px;border-radius:4px;background:#fff;font-family:ui-monospace,Menlo,Monaco,Consolas,monospace;font-size:11px;color:#1f2328;}'
 		+ '.vw-keys .vw-sep{color:#94979d;}'
-		// Primary-Action im Footer rechts unten: alle ausstehenden Entscheidungen
-		// auf "annehmen" setzen und Modal schließen. Gleicher Grünton wie der
-		// Speichern-Button im Terminal-Overlay.
-		+ '.vw-accept-all{appearance:none;border:1px solid #176c1f;background:#176c1f;color:#fff;border-radius:6px;padding:6px 14px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;line-height:1.2;transition:background-color .15s ease;}'
-		+ '.vw-accept-all:hover{background:#125a18;border-color:#125a18;}'
+		// Footer-Action-Button: wechselt seinen Look je nach Decision-State.
+		// Default (alle decisions undecided oder accept) → grün "Alle annehmen".
+		// Sobald mindestens ein Row auf reject steht → grau "Übernehmen",
+		// damit der Redakteur klar sieht: jetzt wird nicht mehr alles
+		// automatisch angenommen, sondern die manuelle Auswahl übernommen.
+		+ '.vw-footer-action{appearance:none;border-radius:6px;padding:6px 14px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;line-height:1.2;transition:background-color .15s ease,border-color .15s ease;}'
+		+ '.vw-footer-action.vw-state-accept-all{border:1px solid #176c1f;background:#176c1f;color:#fff;}'
+		+ '.vw-footer-action.vw-state-accept-all:hover{background:#125a18;border-color:#125a18;}'
+		+ '.vw-footer-action.vw-state-commit{border:1px solid #d0d4dc;background:#fff;color:#1f2328;font-weight:500;}'
+		+ '.vw-footer-action.vw-state-commit:hover{background:#f1f3f6;}'
+		// Fade-out-Animation beim Schließen — kurz und unaufdringlich.
+		// Der User soll noch sehen, dass alle Haken grün werden, bevor
+		// das Modal weg ist. CSS-Transition läuft parallel zum DOM-Update.
+		+ '.vw-overlay{transition:opacity .18s ease;}'
+		+ '.vw-modal{transition:transform .18s ease,opacity .18s ease;}'
+		+ '.vw-overlay.vw-closing{opacity:0;pointer-events:none;}'
+		+ '.vw-overlay.vw-closing .vw-modal{transform:scale(.97);}'
 
 		// Widget runs in light mode only — no @media prefers-color-scheme.
 	;
@@ -290,15 +302,20 @@
 	function keys_footer_html() {
 		if( !has_physical_keyboard() ) { return ''; }
 		var k = key_labels();
-		// "Schließen" liegt schon als × Schließen-Button oben rechts —
-		// im Footer reichen die Entscheidungs-Pfeile.
+		// Tastatur-Hint im Footer. Das vorangestellte "TASTENKÜRZEL"-Label
+		// macht klar, dass die Tasten-Boxen daneben Shortcuts sind und
+		// keine reine Dekoration. Enter ist der neue Primary-Shortcut für
+		// den Footer-Button.
 		return ''
+			+ '<span class="vw-legend-label">Tastenkürzel</span>'
 			+ '<span class="vw-keys">'
 			+ '<span class="vw-key">' + k.up + '</span><span class="vw-sep">/</span><span class="vw-key">' + k.down + '</span> Absatz'
 			+ '<span class="vw-sep">·</span>'
 			+ '<span class="vw-key">' + k.right + '</span> annehmen'
 			+ '<span class="vw-sep">·</span>'
 			+ '<span class="vw-key">' + k.left + '</span> ablehnen'
+			+ '<span class="vw-sep">·</span>'
+			+ '<span class="vw-key">Enter</span> übernehmen'
 			+ '</span>';
 	}
 
@@ -1558,17 +1575,83 @@
 		this.modal.focus();
 	};
 
-	// Alle offenen Entscheidungen (inkl. bereits abgelehnter) zwingend auf
-	// "annehmen" setzen und Modal schließen. Der Redakteur kann damit ein
-	// vorgesichtetes Bundle in einem Klick übernehmen, ohne durch jede
-	// Mod-Zeile durchzunavigieren.
-	Widget.prototype.accept_all_and_close = function() {
+	// Footer-Button hat zwei States, die durch das Decision-Profil bestimmt
+	// werden:
+	//   * Solange kein Row auf 'reject' steht → grüner "Alle annehmen"-Button.
+	//     Beim Klick werden alle Rows zwangsweise auf 'accept' gesetzt und
+	//     das Modal mit Fade-out geschlossen.
+	//   * Sobald mind. ein Row auf 'reject' steht → grauer "Übernehmen"-Button.
+	//     Beim Klick werden die User-Entscheidungen unverändert übernommen,
+	//     Modal-Animation läuft identisch.
+	Widget.prototype.trigger_footer_action = function() {
+		if( !this.root ) { return; }
+		var has_reject = this.rows.some( function( r ) { return r.decision === 'reject'; } );
+
+		if( !has_reject ) {
+			for( var i = 0; i < this.rows.length; i++ ) {
+				this.rows[ i ].decision = 'accept';
+			}
+			this.flash_all_accepted();
+		}
+		this.close_animated();
+	};
+
+	// Sofortiges DOM-Update: alle ×/✓-Buttons und Row-Akzente auf "angenommen"
+	// setzen, ohne ein volles re-render zu triggern (das würde im laufenden
+	// Fade-out neue Zellen anlegen und die Animation stören). Macht die
+	// Akzeptanz für den Redakteur kurz visuell sichtbar, während das Modal
+	// schon im Hintergrund verschwindet.
+	Widget.prototype.flash_all_accepted = function() {
 		if( !this.root ) { return; }
 
-		for( var i = 0; i < this.rows.length; i++ ) {
-			this.rows[ i ].decision = 'accept';
+		var rejectedCells = this.root.querySelectorAll( '.vw-cell.vw-row-rejected' );
+		for( var i = 0; i < rejectedCells.length; i++ ) {
+			rejectedCells[ i ].classList.remove( 'vw-row-rejected' );
+			rejectedCells[ i ].classList.add( 'vw-row-resolved' );
 		}
-		this.close();
+
+		var rejectBtns = this.root.querySelectorAll( '.vw-actions-btn.vw-reject.vw-on-reject' );
+		for( var j = 0; j < rejectBtns.length; j++ ) {
+			rejectBtns[ j ].classList.remove( 'vw-on-reject' );
+		}
+
+		var acceptBtns = this.root.querySelectorAll( '.vw-actions-btn.vw-accept' );
+		for( var k = 0; k < acceptBtns.length; k++ ) {
+			acceptBtns[ k ].classList.add( 'vw-on-accept' );
+		}
+	};
+
+	// Schließt das Modal mit kurzer Fade-out-Animation. Die CSS-Transition
+	// läuft 180ms; nach Ablauf wird close() aufgerufen, das das DOM entfernt
+	// und onResolve/onClose triggert.
+	Widget.prototype.close_animated = function() {
+		if( !this.root ) { return; }
+		this.root.classList.add( 'vw-closing' );
+		var self = this;
+		setTimeout( function() { self.close(); }, 180 );
+	};
+
+	// Footer-Button live an das Decision-Profil anpassen: Klasse + Label
+	// wechseln je nachdem ob ein Reject im Spiel ist.
+	Widget.prototype.update_footer_action = function() {
+		if( !this.root ) { return; }
+		var btn = this.root.querySelector( '[data-vw-footer-action]' );
+
+		if( !btn ) { return; }
+
+		var has_reject = this.rows.some( function( r ) { return r.decision === 'reject'; } );
+
+		if( has_reject ) {
+			btn.classList.remove( 'vw-state-accept-all' );
+			btn.classList.add( 'vw-state-commit' );
+			btn.innerHTML = '💾 Übernehmen';
+			btn.title = 'Mit den aktuellen ✓/×-Entscheidungen übernehmen';
+		} else {
+			btn.classList.remove( 'vw-state-commit' );
+			btn.classList.add( 'vw-state-accept-all' );
+			btn.innerHTML = '✓ Alle annehmen';
+			btn.title = 'Alle offenen Entscheidungen annehmen und schließen';
+		}
 	};
 
 	Widget.prototype.close = function() {
@@ -1636,7 +1719,7 @@
 			+ '   </span>'
 			+ keys_footer_html()
 			+ '   <span class="vw-grow"></span>'
-			+ '   <button type="button" class="vw-accept-all" data-vw-accept-all title="Alle offenen Entscheidungen annehmen und schließen">✓ Alle annehmen</button>'
+			+ '   <button type="button" class="vw-footer-action vw-state-accept-all" data-vw-footer-action title="Alle offenen Entscheidungen annehmen und schließen">✓ Alle annehmen</button>'
 			+ ' </div>'
 			+ '</div>';
 	};
@@ -1657,7 +1740,7 @@
 		this.root.addEventListener( 'click', function( ev ) {
 			var t = ev.target;
 			if( t.closest && t.closest( '[data-vw-close]' ) ) { self.close(); return; }
-			if( t.closest && t.closest( '[data-vw-accept-all]' ) ) { self.accept_all_and_close(); return; }
+			if( t.closest && t.closest( '[data-vw-footer-action]' ) ) { self.trigger_footer_action(); return; }
 			if( t.closest && t.closest( '[data-vw-prev]' ) ) { self.navigate( -1 ); return; }
 			if( t.closest && t.closest( '[data-vw-next]' ) ) { self.navigate( 1 ); return; }
 			var modeBtn = t.closest && t.closest( '[data-vw-mode]' );
@@ -1718,6 +1801,9 @@
 			else if( ev.key === 'ArrowRight' ) { ev.preventDefault(); self.decide_active( 'accept' ); }
 			// ← = ablehnen (Toggle bei Wiederwahl).
 			else if( ev.key === 'ArrowLeft' ) { ev.preventDefault(); self.decide_active( 'reject' ); }
+			// Enter = Footer-Button auslösen (Alle annehmen oder Übernehmen,
+			// je nach aktuellem Decision-State).
+			else if( ev.key === 'Enter' ) { ev.preventDefault(); self.trigger_footer_action(); }
 		};
 		document.addEventListener( 'keydown', this.key_handler, true );
 	};
@@ -1747,6 +1833,7 @@
 		while( inner.firstChild ) { grid.appendChild( inner.firstChild ); }
 
 		this.update_counter();
+		this.update_footer_action();
 		this.apply_search();
 		this.highlight_active();
 	};
