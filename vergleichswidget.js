@@ -463,7 +463,8 @@
 		// summary_box mit optionalem <br/><br/>-Vorlauf.
 		{
 			name: 'summary_box',
-			open_re: /\s*(?:<br\s*\/?>\s*)*\s*<div\s+class\s*=\s*["'][^"']*\bsummary_box\b[^"']*["'][^>]*>/gi
+			open_re: /\s*(?:<br\s*\/?>\s*)*\s*<div\s+class\s*=\s*["'][^"']*\bsummary_box\b[^"']*["'][^>]*>/gi,
+			close_tag: 'div'
 		},
 		// <b>Header</b> + optionaler <br/> + <div class="…changelog_list…">…</div>.
 		// Deckt sowohl `siehe_auch` als auch `colored` und alle anderen
@@ -472,20 +473,30 @@
 		// enthalten ([^<]*).
 		{
 			name: 'changelog_list_with_header',
-			open_re: /\s*<b\b[^>]*>[^<]{1,200}<\/b\s*>\s*(?:<br\s*\/?>\s*)?\s*<div\s+class\s*=\s*["'][^"']*\bchangelog_list\b[^"']*["'][^>]*>/gi
+			open_re: /\s*<b\b[^>]*>[^<]{1,200}<\/b\s*>\s*(?:<br\s*\/?>\s*)?\s*<div\s+class\s*=\s*["'][^"']*\bchangelog_list\b[^"']*["'][^>]*>/gi,
+			close_tag: 'div'
 		},
 		// FAQ-Akkordeon: <div class="wfv4-accordion"> mit verschachtelten
 		// <details>-Elementen. find_balanced_close zählt <div>-Nesting.
 		{
 			name: 'wfv4_accordion',
-			open_re: /\s*<div\s+class\s*=\s*["'][^"']*\bwfv4-accordion\b[^"']*["'][^>]*>/gi
+			open_re: /\s*<div\s+class\s*=\s*["'][^"']*\bwfv4-accordion\b[^"']*["'][^>]*>/gi,
+			close_tag: 'div'
+		},
+		// <table class="wftable …">…</table> — WinFuture-typische Tarif-
+		// und Spec-Tabellen. Wird als Block angenommen oder verworfen,
+		// damit ein partielles Akzeptieren nicht den </table>-Tag verliert.
+		{
+			name: 'wftable',
+			open_re: /\s*<table\s+class\s*=\s*["'][^"']*\bwftable\b[^"']*["'][^>]*>/gi,
+			close_tag: 'table'
 		}
 	];
 
-	// Sucht ab `start_pos` das passende </div> mit Nesting-Counter, sodass
-	// inner <div>…</div>-Paare das Ende NICHT vorzeitig markieren.
-	function find_balanced_div_close( text, start_pos ) {
-		var re = /<\/?div\b[^>]*>/gi;
+	// Sucht ab `start_pos` das passende </tag> mit Nesting-Counter, sodass
+	// inner <tag>…</tag>-Paare das Ende NICHT vorzeitig markieren.
+	function find_balanced_close( text, start_pos, tag_name ) {
+		var re = new RegExp( '<\\/?' + tag_name + '\\b[^>]*>', 'gi' );
 		re.lastIndex = start_pos;
 		var depth = 1;
 		var m;
@@ -514,7 +525,7 @@
 			var m;
 			while( ( m = re.exec( text ) ) !== null ) {
 				var open_end = m.index + m[ 0 ].length;
-				var close_end = find_balanced_div_close( text, open_end );
+				var close_end = find_balanced_close( text, open_end, det.close_tag );
 
 				if( close_end === -1 ) { continue; }
 				hits.push( { start: m.index, end: close_end } );
@@ -1567,6 +1578,14 @@
 		this.root.innerHTML = this.shell_html();
 		document.body.appendChild( this.root );
 
+		// Hintergrund-Scroll sperren, solange das Modal offen ist —
+		// damit der Editor beim Scrollen im Diff nicht versehentlich die
+		// darunterliegende CMS-Seite mitscrollt. Den vorherigen Overflow-
+		// Wert merken und beim Schließen wiederherstellen, damit wir den
+		// CMS-Editor-Status nicht überschreiben.
+		this._prev_body_overflow = document.body.style.overflow;
+		document.body.style.overflow = 'hidden';
+
 		this.cache_dom();
 		this.bind_events();
 		this.render();
@@ -1670,6 +1689,8 @@
 		document.removeEventListener( 'keydown', this.key_handler, true );
 		this.root.remove();
 		this.root = null;
+		// Body-Overflow auf den vorherigen Wert zurücksetzen.
+		document.body.style.overflow = this._prev_body_overflow || '';
 		if( typeof this.opts.onResolve === 'function' ) {
 			try { this.opts.onResolve( resolved, stats ); } catch( e ) { /* noop */ }
 		}

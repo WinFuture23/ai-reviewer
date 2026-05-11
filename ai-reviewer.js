@@ -922,7 +922,7 @@
                 window.VergleichsWidget.open( {
                     before: before,
                     after:  after,
-                    title:  'Unterschiede: Vorher / Nachher',
+                    title:  'KI-Vorschläge',
                     onResolve: function( resolved, stats ) {
                         // resolved kommt byte-exakt aus den Eingaben zurück
                         // (Heilige Kuh, siehe vergleichswidget.js).
