@@ -308,7 +308,18 @@
 	// ────────────────────────────────────────────────────────────────────────────
 	//
 
-	var TOKEN_RE = /<\/?[a-zA-Z][^>]*>|##[^#\n]*?##|[A-Za-zÀ-ɏ0-9_]+|\s+|[^\sA-Za-zÀ-ɏ0-9_<#]/g;
+	// TOKEN_RE-Alternativen, von oben nach unten geprüft:
+	//   1. HTML-Tag
+	//   2. ##shortcode##  — Inhalt darf einzelne `#` enthalten
+	//      (z. B. `farbe="#ff7f01"` Hex-Codes); nur das `##`-Schluss-Sentinel
+	//      darf nicht im Inhalt vorkommen. Ohne dieses Detail wäre der
+	//      Tokenizer früher beim ersten Inhalt-`#` ausgestiegen und hätte
+	//      die `##`-Begrenzer komplett verschluckt — Source-Bytes weg.
+	//   3. Wort
+	//   4. Whitespace
+	//   5. einzelnes Sonderzeichen (jetzt INKLUSIVE `#`, damit verirrte
+	//      `#` nicht spurlos verschwinden, falls Pattern 2 oben nicht greift)
+	var TOKEN_RE = /<\/?[a-zA-Z][^>]*>|##(?:[^#\n]|#(?!#))*?##|[A-Za-zÀ-ɏ0-9_]+|\s+|[^\sA-Za-zÀ-ɏ0-9_<]/g;
 
 	function tokenize( text ) {
 		if( !text ) { return []; }
@@ -426,15 +437,52 @@
 	//     "Siehe auch:"-Header)
 	// Beide Blöcke landen jeweils als EIN Paragraph in der Diff-Engine,
 	// werden also als Ganzes angenommen oder verworfen.
-	var ATOMIC_BLOCK_PATTERNS = [
-		// summary_box: optional vorangestellte Leerzeilen + <br/>-Vorlauf,
-		// dann <div class="summary_box">…</div></div>. Der Vorlauf ist
-		// optional — der Block wird auch ohne <br/> als atomar erkannt.
-		/\s*(?:<br\s*\/?>\s*)*\s*<div\s+class\s*=\s*["'][^"']*\bsummary_box\b[^"']*["'][^>]*>[\s\S]*?<\/div>\s*<\/div>/gi,
-		// siehe_auch: vorangestellter Whitespace + <b>Siehe auch:</b><br/>
-		// + <div class="…siehe_auch…">…</div>
-		/\s*<b\s*>\s*Siehe auch:?\s*<\/b\s*>\s*<br\s*\/?>\s*<div\s+class\s*=\s*["'][^"']*\bsiehe_auch\b[^"']*["'][^>]*>[\s\S]*?<\/div>/gi
+	// Detektoren für bekannte WinFuture-Block-Patterns. Jeder Detektor
+	// matched zuerst eine OPENING-Sequenz (Vorlauf + erstes <div>) per
+	// Regex, danach wird das passende </div> mit find_balanced_close
+	// gesucht — damit funktionieren auch verschachtelte <div>-Strukturen
+	// wie wfv4-accordion oder summary_box mit innerem changelog_list.
+	var ATOMIC_BLOCK_DETECTORS = [
+		// summary_box mit optionalem <br/><br/>-Vorlauf.
+		{
+			name: 'summary_box',
+			open_re: /\s*(?:<br\s*\/?>\s*)*\s*<div\s+class\s*=\s*["'][^"']*\bsummary_box\b[^"']*["'][^>]*>/gi
+		},
+		// <b>Header</b> + optionaler <br/> + <div class="…changelog_list…">…</div>.
+		// Deckt sowohl `siehe_auch` als auch `colored` und alle anderen
+		// changelog_list-Klassenvarianten ab, solange ein kurzer <b>-Header
+		// direkt davor steht. Der Header-Inhalt darf keine weiteren Tags
+		// enthalten ([^<]*).
+		{
+			name: 'changelog_list_with_header',
+			open_re: /\s*<b\b[^>]*>[^<]{1,200}<\/b\s*>\s*(?:<br\s*\/?>\s*)?\s*<div\s+class\s*=\s*["'][^"']*\bchangelog_list\b[^"']*["'][^>]*>/gi
+		},
+		// FAQ-Akkordeon: <div class="wfv4-accordion"> mit verschachtelten
+		// <details>-Elementen. find_balanced_close zählt <div>-Nesting.
+		{
+			name: 'wfv4_accordion',
+			open_re: /\s*<div\s+class\s*=\s*["'][^"']*\bwfv4-accordion\b[^"']*["'][^>]*>/gi
+		}
 	];
+
+	// Sucht ab `start_pos` das passende </div> mit Nesting-Counter, sodass
+	// inner <div>…</div>-Paare das Ende NICHT vorzeitig markieren.
+	function find_balanced_div_close( text, start_pos ) {
+		var re = /<\/?div\b[^>]*>/gi;
+		re.lastIndex = start_pos;
+		var depth = 1;
+		var m;
+
+		while( ( m = re.exec( text ) ) !== null ) {
+			if( m[ 0 ].charAt( 1 ) === '/' ) {
+				depth--;
+				if( depth === 0 ) { return m.index + m[ 0 ].length; }
+			} else {
+				depth++;
+			}
+		}
+		return -1;
+	}
 
 	// Vor dem normalen Paragraph-Splitting werden bekannte Block-Patterns
 	// (siehe ATOMIC_BLOCK_PATTERNS) als geschlossene Einheiten markiert.
@@ -443,11 +491,20 @@
 	function pre_extract_atomic_blocks( text ) {
 		var hits = [];
 
-		for( var p = 0; p < ATOMIC_BLOCK_PATTERNS.length; p++ ) {
-			var re = new RegExp( ATOMIC_BLOCK_PATTERNS[ p ].source, ATOMIC_BLOCK_PATTERNS[ p ].flags );
+		for( var p = 0; p < ATOMIC_BLOCK_DETECTORS.length; p++ ) {
+			var det = ATOMIC_BLOCK_DETECTORS[ p ];
+			var re = new RegExp( det.open_re.source, det.open_re.flags );
 			var m;
 			while( ( m = re.exec( text ) ) !== null ) {
-				hits.push( { start: m.index, end: m.index + m[ 0 ].length } );
+				var open_end = m.index + m[ 0 ].length;
+				var close_end = find_balanced_div_close( text, open_end );
+
+				if( close_end === -1 ) { continue; }
+				hits.push( { start: m.index, end: close_end } );
+				// Suche im selben Detektor nach weiteren Vorkommen erst HINTER
+				// dem geschlossenen Block — sonst würden überlappende inner-Tags
+				// nochmal triggern.
+				re.lastIndex = close_end;
 			}
 		}
 
