@@ -158,7 +158,13 @@
 		// Headings: nur fett, kein Abstand zum folgenden Text (wie im HTML-
 		// Quelltext steht auch dort kein Leerzeichen dazwischen).
 		+ '.vw-mode-pseudo .vw-cell h1,.vw-mode-pseudo .vw-cell h2,.vw-mode-pseudo .vw-cell h3,.vw-mode-pseudo .vw-cell h4,.vw-mode-pseudo .vw-cell h5,.vw-mode-pseudo .vw-cell h6{font-weight:700;font-size:inherit;display:block;margin:0;}'
-		+ '.vw-mode-pseudo .vw-cell strong,.vw-mode-pseudo .vw-cell b,.vw-mode-pseudo .vw-cell em,.vw-mode-pseudo .vw-cell i,.vw-mode-pseudo .vw-cell u{font-weight:400;font-style:normal;font-size:inherit;text-decoration:inherit;margin:0;padding:0;display:inline;}'
+		// Inline-Auszeichner im Lesbar-Modus: <b>/<strong> bleiben fett,
+		// damit der Redakteur Zwischen-Überschriften wie „Siehe auch:" oder
+		// fett ausgezeichnete Header sofort erkennt. <em>/<i>/<u> werden
+		// neutralisiert — sie sind im Diff-Kontext meist nur visuelles
+		// Rauschen, das von den eigentlichen Text-Änderungen ablenkt.
+		+ '.vw-mode-pseudo .vw-cell strong,.vw-mode-pseudo .vw-cell b{font-weight:700;font-style:normal;font-size:inherit;margin:0;padding:0;display:inline;}'
+		+ '.vw-mode-pseudo .vw-cell em,.vw-mode-pseudo .vw-cell i,.vw-mode-pseudo .vw-cell u{font-weight:400;font-style:normal;font-size:inherit;text-decoration:inherit;margin:0;padding:0;display:inline;}'
 		+ '.vw-mode-pseudo .vw-cell p{margin:0;display:inline;}'
 		+ '.vw-mode-pseudo .vw-cell ul,.vw-mode-pseudo .vw-cell ol{margin:0;padding:0;list-style:none;display:inline;}'
 		+ '.vw-mode-pseudo .vw-cell li{display:inline;}'
@@ -1272,12 +1278,16 @@
 			// Headings stay — they're rendered as bold inline in CSS so the
 			// reader sees them as a clear subheading inside the paragraph row.
 			if( /^<\/?\s*h[1-6]\b/i.test( token ) ) { return render_tag( token ); }
-			// Listen-Items im Lesbar-Modus mit Bullet-Präfix, damit der
-			// Redakteur sie als Aufzählung erkennt. Der öffnende `<li>`
-			// wird zum „• "-Marker; der schließende Tag bleibt unsichtbar,
-			// die folgende Newline aus dem Source ergibt den Zeilenumbruch
-			// zwischen Items.
-			if( /^<li\b/i.test( token ) ) { return '• '; }
+			// `<b>` und `<strong>` ebenfalls als Tag durchlassen, damit das
+			// CSS sie im Lesbar-Modus fett rendert (übliche Überschriften-
+			// Auszeichnung wie „Siehe auch:" oder Zwischen-Header).
+			if( /^<\/?\s*(?:b|strong)\b/i.test( token ) ) { return render_tag( token ); }
+			// Listen-Items im Lesbar-Modus mit Bullet + Einrückung. Der
+			// führende `\n` sorgt dafür, dass jeder Punkt auf einer eigenen
+			// Zeile beginnt, das `render_text_html`-Wrapping strippt das
+			// leading newline am Anfang einer Cell wieder. Vier Leerzeichen
+			// Indent macht die Liste optisch klar erkennbar.
+			if( /^<li\b/i.test( token ) ) { return '\n    • '; }
 			// All other tags: drop. Paragraph splitting handles block flow.
 			return '';
 		}
@@ -1368,6 +1378,12 @@
 		var toks = tokenize( text );
 		var out = '';
 		var lastWasHeadingClose = false;
+		// `skipNextWs` lässt Whitespace direkt nach Listen-Strukturtags
+		// (<ul>/<ol>-Opener, </li>) fallen — so entstehen im Lesbar-Modus
+		// keine Leerzeilen zwischen Bullet-Items, die im Source nur durch
+		// Source-Formatting (Newline-Einrückung) drinstecken.
+		var skipNextWs = false;
+
 		for( var i = 0; i < toks.length; i++ ) {
 			var tk = toks[ i ];
 			// Im Lesbar-Modus die Quelltext-Newlines, die UNMITTELBAR auf ein
@@ -1378,9 +1394,32 @@
 				lastWasHeadingClose = false;
 				continue;
 			}
+
+			if( mode === 'pseudo' && skipNextWs && /^\s+$/.test( tk ) ) {
+				continue;
+			}
+
+			skipNextWs = false;
 			out += render_token_html( tk, mode );
+
 			lastWasHeadingClose = ( mode === 'pseudo' && /^<\/h[1-6]\b/i.test( tk ) );
+			// Nach `<ul>`/`<ol>`-Opener UND nach `</li>` darf das nachfolgende
+			// Source-Whitespace skipped werden — der nächste `<li>`-Marker
+			// bringt seine eigene Newline mit, und ein leerer Trenner zwischen
+			// Items wäre nur visuelles Rauschen.
+			if( mode === 'pseudo' && ( /^<(?:ul|ol)\b/i.test( tk ) || /^<\/li>/i.test( tk ) ) ) {
+				skipNextWs = true;
+			}
 		}
+
+		// Leading Newlines wegnehmen — entsteht, wenn das erste Content-
+		// Token des Paragraphs ein `<li>` ist (das rendert mit führendem
+		// `\n` zur Trennung von Inhalt davor). Ohne diesen Strip hätte
+		// jede Listen-Cell eine leere Zeile am Anfang.
+		if( mode === 'pseudo' ) {
+			out = out.replace( /^\n+/, '' );
+		}
+
 		return out;
 	}
 
