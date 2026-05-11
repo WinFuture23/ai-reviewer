@@ -1652,6 +1652,18 @@
 		this.input_is_bundle = ( opts.before && typeof opts.before === 'object' )
 			|| ( opts.after && typeof opts.after === 'object' );
 		this.rows = build_rows( opts.before || '', opts.after || '' );
+
+		// Wenn der KI-Lauf genau EINE entscheidbare Zeile produziert
+		// (1 mod/add/del), markieren wir sie schon beim Öffnen als
+		// angenommen. Der Footer-Button heißt dann "Speichern" — "Alle
+		// annehmen" wäre semantisch übertrieben, wenn es eh nur ein
+		// Element gibt. Der Redakteur kann die Auswahl per ×/✓ jederzeit
+		// umschalten.
+		var openable = this.rows.filter( function( r ) { return r.type !== 'eq'; } );
+
+		if( openable.length === 1 ) {
+			openable[ 0 ].decision = 'accept';
+		}
 	}
 
 	Widget.prototype.openable_rows = function() {
@@ -1740,18 +1752,26 @@
 		setTimeout( function() { self.close(); }, 180 );
 	};
 
-	// Footer-Button live an das Decision-Profil anpassen: Label wechselt
-	// zwischen "Alle annehmen" und "Übernehmen", die Optik bleibt gleich
-	// (grün) — der Button ist immer die Primary Action.
+	// Footer-Button live an das Decision-Profil anpassen.
+	//   * Genau eine entscheidbare Zeile → "Speichern" (egal welcher State,
+	//     "Alle annehmen" ist bei nur einem Item semantisch übertrieben).
+	//   * Mehrere Zeilen + kein × gesetzt → "✓ Alle annehmen" (grün, würde
+	//     beim Klick auch noch-undecided Zeilen auf accept zwingen).
+	//   * Mehrere Zeilen + mindestens ein × → "Übernehmen" (die manuelle
+	//     Auswahl wird unverändert committet).
 	Widget.prototype.update_footer_action = function() {
 		if( !this.root ) { return; }
 		var btn = this.root.querySelector( '[data-vw-footer-action]' );
 
 		if( !btn ) { return; }
 
+		var openable_count = this.rows.filter( function( r ) { return r.type !== 'eq'; } ).length;
 		var has_reject = this.rows.some( function( r ) { return r.decision === 'reject'; } );
 
-		if( has_reject ) {
+		if( openable_count <= 1 ) {
+			btn.innerHTML = 'Speichern';
+			btn.title = 'Mit der aktuellen ✓/×-Entscheidung speichern';
+		} else if( has_reject ) {
 			btn.innerHTML = 'Übernehmen';
 			btn.title = 'Mit den aktuellen ✓/×-Entscheidungen übernehmen';
 		} else {
