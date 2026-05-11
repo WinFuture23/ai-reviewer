@@ -450,7 +450,36 @@
 		// fett via CSS, jetzt eben in einer eigenen Zeile statt inline
 		// am Body-Anfang — das ist sogar etwas lesbarer und der Redakteur
 		// kann Heading und Body separat akzeptieren/ablehnen.
-		return merged;
+
+		// Aufeinanderfolgende Listen-Markup-Paragraphen (alle enthalten
+		// `<ul>`, `<ol>` oder `<li>`) werden zu einem Block gemergt.
+		// Damit erscheint eine neu hinzugefügte oder entfernte Liste als
+		// EINE Add/Del-Row statt N — typisch für KI-erzeugte Summary-Boxen
+		// oder Bullet-Aufzählungen, die als Ganzes angenommen oder
+		// abgelehnt werden, nicht item-by-item.
+		var list_merged = [];
+
+		for( var li_idx = 0; li_idx < merged.length; li_idx++ ) {
+			var p = merged[ li_idx ];
+			var lprev = list_merged[ list_merged.length - 1 ];
+
+			if( lprev && is_list_part( p ) && is_list_part( lprev ) ) {
+				list_merged[ list_merged.length - 1 ] = lprev + p;
+			} else {
+				list_merged.push( p );
+			}
+		}
+
+		return list_merged;
+	}
+
+	function is_list_part( text ) {
+		// Paragraph zählt zu einem Listen-Block, wenn er Listen-Markup
+		// enthält (öffnende oder schließende `<ul>`, `<ol>`, `<li>`).
+		// Andere Tags / Plain-Text-Wrapper machen ihn zu „kein Listen-Teil",
+		// sodass z. B. ein Heading direkt vor einer Liste die Liste nicht
+		// in den Heading hinein mergt.
+		return /<\/?(?:ul|ol|li)\b/i.test( text );
 	}
 
 	function is_just_heading( text ) {
@@ -464,9 +493,17 @@
 	// "Structural-only" means: nothing left after dropping all HTML tags and
 	// whitespace. So <br/><br/>, lone \n, <p></p>, <div></div> all qualify.
 	// Shortcodes like ##contentad## are NOT structural — they get their own row.
+	// Listen-Wrapper-Tags (`<ul>`, `<ol>`, `</ul>`, `</ol>`) bleiben als
+	// eigene Paragraphen erhalten, damit der spätere list_merge-Schritt
+	// sie mit den `<li>`-Items zu EINEM Block fügen kann, statt dass
+	// ein `<ul>\n` rückwärts in einen Body-Paragraph wandert und die
+	// Liste anschließend nicht mehr klar erkennbar ist.
 	function is_structural_only( text ) {
 		var stripped = text.replace( /<[^>]+>/g, '' ).replace( /\s+/g, '' );
-		return stripped.length === 0;
+
+		if( stripped.length > 0 ) { return false; }
+		if( /<\/?(?:ul|ol)\b/i.test( text ) ) { return false; }
+		return true;
 	}
 
 	// Trim leading/trailing whitespace and <br/> tags for display only. The
