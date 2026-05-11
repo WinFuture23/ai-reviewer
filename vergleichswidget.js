@@ -24,7 +24,8 @@
  *   2. Within-Paragraph-Token-Diff für Mod-Zeilen → durchgehende
  *      Inline-Highlights über Whitespace hinweg.
  *   3. 3-Spalten-Grid (Vorher | Nachher | × ✓-Buttons).
- *      Nachher-Cells sind contenteditable für Inline-Edits.
+ *      Beide Cells sind read-only — Bearbeiten erfolgt nach dem
+ *      Resolve direkt im Ziel-Editor.
  *   4. Zwei Anzeige-Modi:
  *        - 'pseudo' (Default): Plain-Text-Lesemodus, Monospace, alles
  *          außer Links versteckt, ##-Codes außer ##a## entfernt.
@@ -1161,9 +1162,9 @@
 			var row = rows[ i ];
 			var key = row.section || 'content';
 			if( !( key in bundle ) ) { key = 'content'; }
-			// For eq rows we use row.after (which equals row.before until the
-			// user edits the Nachher cell inline). That way inline edits even
-			// on unchanged paragraphs flow into the resolved result.
+			// For eq rows we use row.after — bei nicht-whitespace-Equivalenz
+			// ist das byte-gleich mit row.before, bei whitespace-only diffs
+			// gewinnt damit der Nachher-Stil (siehe build_rows_from_paras).
 			if( row.type === 'eq' ) {
 				bundle[ key ] += row.after;
 				continue;
@@ -1326,45 +1327,12 @@
 			self.render();
 		} );
 
-		// Inline edit on the Nachher-side: capture the user's free text
-		// changes into row.after so resolve_text hands back the edited version.
-		// We DON'T re-render on input — that would clobber the cursor — but
-		// the next decision-driven render will pick up the latest text.
-		this.grid.addEventListener( 'input', function( ev ) {
-			var cell = ev.target.closest && ev.target.closest( '.vw-cell-after' );
-			if( !cell ) { return; }
-			var rid = parseInt( cell.getAttribute( 'data-vw-row-id' ), 10 );
-			if( isNaN( rid ) ) { return; }
-			for( var i = 0; i < self.rows.length; i++ ) {
-				if( self.rows[ i ].id === rid ) {
-					self.rows[ i ].after = cell.innerText;
-					self.rows[ i ].after_edited = true;
-					break;
-				}
-			}
-		} );
-
-		// Don't let keyboard shortcuts trigger when typing in a contenteditable.
-		this.grid.addEventListener( 'keydown', function( ev ) {
-			if( ev.target.isContentEditable ) { ev.stopPropagation(); }
-		}, true );
-
-		// Inside contenteditable elements browsers don't navigate on link
-		// click — they just place the cursor. We intercept and open the
-		// link in a new window so the Nachher-Inline-Edit-Zellen weiter
-		// editierbar sind, Links aber trotzdem klickbar bleiben.
-		this.grid.addEventListener( 'click', function( ev ) {
-			var a = ev.target && ev.target.closest && ev.target.closest( 'a[href]' );
-			if( !a ) { return; }
-			if( !a.closest( '[contenteditable]' ) ) { return; }
-			var href = a.getAttribute( 'href' ) || '';
-			// internal anchors (#…) sind in dem Modal-Kontext nicht sinnvoll
-			// zu öffnen, also ignorieren wir sie hier.
-			if( !href || href.charAt( 0 ) === '#' ) { return; }
-			ev.preventDefault();
-			ev.stopPropagation();
-			window.open( href, '_blank', 'noopener,noreferrer' );
-		} );
+		// Inline-Edit auf der Nachher-Seite ist absichtlich nicht
+		// implementiert — der Lesbar-Modus rendert das Markup nicht,
+		// daher würde ein `innerText`-Sync den Source verlieren. Links
+		// in den read-only Cells folgen ihrem `target="_blank"` aus dem
+		// Renderer ganz normal über den Browser-Default; kein extra
+		// Click-Handler nötig.
 
 		this.search_input.addEventListener( 'input', function() {
 			self.search = self.search_input.value;
@@ -1455,13 +1423,16 @@
 			actionsHtml = this.actions_html( row );
 		}
 
-		// Nachher-Zelle ist editierbar — der Redakteur kann die finale
-		// Variante direkt inline anpassen. Vorher bleibt read-only.
-		var afterEditable = ' contenteditable="plaintext-only" spellcheck="false"';
-
+		// Beide Zellen sind read-only. Inline-Edit auf der Nachher-Seite
+		// war früher per `contenteditable="plaintext-only"` möglich, hat
+		// aber im Lesbar-Modus (HTML-Tags und ##-Shortcodes sind dort
+		// versteckt) den Source-Markup beim `innerText`-Sync verloren —
+		// Heilige-Kuh-Verletzung (siehe Sektion 3 in CLAUDE.md). Wer den
+		// Nachher-Text noch ändern will, tut das nach dem Resolve direkt
+		// im Editor.
 		return ''
 			+ '<div class="vw-cell vw-cell-before ' + rowCls + '" data-vw-row-id="' + row.id + '">' + beforeHtml + '</div>'
-			+ '<div class="vw-cell vw-cell-after ' + rowCls + '" data-vw-row-id="' + row.id + '"' + afterEditable + '>' + afterHtml + '</div>'
+			+ '<div class="vw-cell vw-cell-after ' + rowCls + '" data-vw-row-id="' + row.id + '">' + afterHtml + '</div>'
 			+ '<div class="vw-cell vw-cell-actions ' + rowCls + '" data-vw-row-id="' + row.id + '">' + actionsHtml + '</div>';
 	};
 
@@ -1476,9 +1447,8 @@
 	// Rows the user can step through with the keyboard. Always = openable
 	// rows that are actually VISIBLE in the current mode. When "Nur Änderungen"
 	// is on, that's just mod/add/del. When it's off, also the same — eq rows
-	// are skipped because there's nothing to decide on them. (Inline-Edit
-	// on eq cells is still reachable via mouse click.) This keeps a stable,
-	// predictable navigation experience across both filter states.
+	// are skipped because there's nothing to decide on them. This keeps a
+	// stable, predictable navigation experience across both filter states.
 	Widget.prototype.nav_rows = function() {
 		var visible = this.visible_rows();
 		return visible.filter( function( r ) { return r.type !== 'eq'; } );
