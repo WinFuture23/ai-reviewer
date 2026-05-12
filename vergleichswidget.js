@@ -1324,12 +1324,12 @@
 			// CSS sie im Lesbar-Modus fett rendert (übliche Überschriften-
 			// Auszeichnung wie „Siehe auch:" oder Zwischen-Header).
 			if( /^<\/?\s*(?:b|strong)\b/i.test( token ) ) { return render_tag( token ); }
-			// Listen-Items im Lesbar-Modus mit Bullet + Einrückung. Der
-			// führende `\n` sorgt dafür, dass jeder Punkt auf einer eigenen
-			// Zeile beginnt, das `render_text_html`-Wrapping strippt das
-			// leading newline am Anfang einer Cell wieder. Vier Leerzeichen
-			// Indent macht die Liste optisch klar erkennbar.
-			if( /^<li\b/i.test( token ) ) { return '\n    • '; }
+			// Listen-Items im Lesbar-Modus mit Bullet, ohne Einrückung — so
+			// passen lange Punkte eher in eine Zeile, ohne dass die Spalten
+			// zu eng werden. Der führende `\n` sorgt dafür, dass jeder Punkt
+			// auf einer eigenen Zeile beginnt; `render_text_html` strippt
+			// das leading newline am Anfang einer Cell wieder.
+			if( /^<li\b/i.test( token ) ) { return '\n• '; }
 			// All other tags: drop. Paragraph splitting handles block flow.
 			return '';
 		}
@@ -1707,6 +1707,15 @@
 	Widget.prototype.trigger_footer_action = function() {
 		if( !this.root ) { return; }
 		var has_reject = this.rows.some( function( r ) { return r.decision === 'reject'; } );
+		// Profil VOR dem (eventuellen) force-accept festhalten, damit der
+		// Caller in `stats` sieht, ob das wirklich ein "User hat nichts
+		// entschieden, einfach alle annehmen"-Klick war (verdient kurzen
+		// Buffer) oder ein "User hat schon entschieden"-Klick (sofort
+		// speichern).
+		var pending_before = this.pending_rows().length;
+
+		this._close_via_footer = true;
+		this._auto_save_delay = ( pending_before > 0 && !has_reject ) ? 1500 : 0;
 
 		if( !has_reject ) {
 			for( var i = 0; i < this.rows.length; i++ ) {
@@ -1791,7 +1800,9 @@
 		var stats = {
 			total: this.openable_rows().length,
 			accepted: this.rows.filter( function( r ) { return r.decision === 'accept'; } ).length,
-			rejected: this.rows.filter( function( r ) { return r.decision === 'reject'; } ).length
+			rejected: this.rows.filter( function( r ) { return r.decision === 'reject'; } ).length,
+			via_footer: !!this._close_via_footer,
+			auto_save_delay: this._auto_save_delay || 0
 		};
 		document.removeEventListener( 'keydown', this.key_handler, true );
 		this.root.remove();

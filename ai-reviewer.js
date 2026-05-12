@@ -937,6 +937,18 @@
 
                         const open_count = stats.total - stats.accepted - stats.rejected;
                         log_debug( `Vergleich übernommen: ${stats.accepted} angenommen, ${stats.rejected} abgelehnt, ${open_count} unverändert (Default angenommen).` );
+
+                        // Auto-Save: wenn der User über den Footer-Primary-Action-Button
+                        // geschlossen hat ("Alle annehmen" / "Übernehmen" / "Speichern"),
+                        // unmittelbar das Speichern des Formulars auslösen.
+                        // - 1,5 s Buffer, wenn niemand vorher manuell entschieden hatte
+                        //   (purer "Alle annehmen"-Klick) — damit der User die grünen
+                        //   Häkchen kurz sieht.
+                        // - 0 ms, wenn schon manuelle Entscheidungen getroffen waren.
+                        if( stats && stats.via_footer && btn_close_bottom && !btn_close_bottom.disabled ) {
+                            const delay = stats.auto_save_delay || 0;
+                            setTimeout( function() { btn_close_bottom.click(); }, delay );
+                        }
                     }
                 } );
             } catch( err ) {
