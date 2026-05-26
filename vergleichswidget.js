@@ -611,7 +611,12 @@
 	// ────────────────────────────────────────────────────────────────────────────
 	//
 
-	var BLOCK_SHORTCODE_NAMES = 'contentad|video|gallery|embed|iframe|twitter|instagram|youtube';
+	// Block-Shortcodes, die als EINE Paragraph-Einheit behandelt werden,
+	// auch wenn ihr Inhalt interne Newlines/Attribut-Zeilen enthält. Längere
+	// Namen MÜSSEN vor ihren Präfixen stehen (z. B. `produkt_widget_gruppe`
+	// vor `produkt_widget`), damit die Alternation den langen Namen zuerst
+	// matched.
+	var BLOCK_SHORTCODE_NAMES = 'contentad|video|gallery|embed|iframe|twitter|instagram|youtube|produkt_widget_gruppe|produkt_widget|citation';
 	var PARA_BOUNDARY_RE = new RegExp(
 		'\\n+'
 		+ '|<br\\s*\\/?>(?:\\s*<br\\s*\\/?>)+'
