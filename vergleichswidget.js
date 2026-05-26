@@ -349,13 +349,19 @@
 	//      darf nicht im Inhalt vorkommen. Ohne dieses Detail wäre der
 	//      Tokenizer früher beim ersten Inhalt-`#` ausgestiegen und hätte
 	//      die `##`-Begrenzer komplett verschluckt — Source-Bytes weg.
+	//      Newlines sind im Shortcode-Body ERLAUBT, damit mehrzeilige
+	//      Block-Shortcodes (z. B. ##produkt_widget_gruppe titel="..."\n
+	//      titel1="..." \n titel2="..." ##) als EIN Token tokenisiert
+	//      werden und Syntax-Highlighting bekommen. Ein verirrtes `##`
+	//      ohne Schluss-Sentinel matched durch das lazy `*?` weiterhin
+	//      nicht — kein Risiko, dass eine Paragraph-Datei verschluckt wird.
 	//   4. Wort
 	//   5. Whitespace
 	//   6. einzelnes Sonderzeichen (jetzt INKLUSIVE `#` und `<`, damit
 	//      verirrte `<` aus z. B. „a < b" oder kaputten Tag-Anfängen
 	//      nicht spurlos verschwinden — sie kommen als Single-Char-Token
 	//      durch und werden im Render byte-exact zurückgegeben).
-	var TOKEN_RE = /<!--[\s\S]*?-->|<\/?[a-zA-Z][^>]*>|##(?:[^#\n]|#(?!#))*?##|[A-Za-zÀ-ɏ0-9_]+|\s+|[^\sA-Za-zÀ-ɏ0-9_]/g;
+	var TOKEN_RE = /<!--[\s\S]*?-->|<\/?[a-zA-Z][^>]*>|##(?:[^#]|#(?!#))*?##|[A-Za-zÀ-ɏ0-9_]+|\s+|[^\sA-Za-zÀ-ɏ0-9_]/g;
 
 	function tokenize( text ) {
 		if( !text ) { return []; }
