@@ -45,7 +45,8 @@ einzelnen String zurück.
 
 `window.VergleichsWidget._internal` exportiert intern genutzte Helfer
 (`tokenize`, `diff_tokens`, `split_paragraphs`, `build_rows`,
-`resolve_text`, `render_text_html`) für Tests.
+`resolve_text`, `render_text_html`, `restore_invisible_markers`,
+`restore_soft_hyphens`, `restore_nbsp`) für Tests.
 
 ## Heilige Kuh: Source-Integrität
 
@@ -58,6 +59,17 @@ Handler, `javascript:`-URLs, `<form>`/`<input>`/`<button>`/`<textarea>`,
 byte über `onResolve` zurück. Die Entscheidung des Redakteurs bestimmt
 nur, ob für einen Absatz die Vorher- oder Nachher-Variante gewählt
 wird.
+
+**Einzige bewusste Ausnahme — `restore_invisible_markers`**: Redakteure
+setzen `&shy;` (weiche Trennzeichen, z. B. `Elektro&shy;mobilität`) und
+`&nbsp;` (geschützte Leerzeichen, z. B. `100&nbsp;km/h`) gezielt, und die
+KI strippt sie trotz Prompt-Vorgabe immer wieder. Vor dem Diff läuft
+deshalb `restore_invisible_markers( before, after )` über die `after`-
+Sektion und stellt die Marker dort wieder her, wo das umgebende Wort
+bzw. der unmittelbare Kontext im Nachher identisch ist. Wirkt
+**ausschließlich auf `after`**, nie auf `before`. Bei vollständig
+umformulierten Wörtern wird nichts restauriert — die Position wäre
+dann nur Raten. Code: Section 2.5 in `vergleichswidget.js`.
 
 **Was Sanitisierungen wo machen:**
 
@@ -332,6 +344,14 @@ Headline / Teaser / Content. Spätere Erweiterung möglich.
    console.assert( acc.headline === afterBundle.headline );
    // … gleiches für teaser, content, sowie für 'reject' → before
    ```
+
+   Caveat: Wenn `beforeBundle` `&shy;` oder `&nbsp;` enthält und
+   `afterBundle` sie verloren hat, ist `acc` **nicht** byte-gleich
+   mit `afterBundle` — sondern mit der durch
+   `restore_invisible_markers` rekonstruierten Variante. Das ist
+   die dokumentierte Ausnahme. Für reine Roundtrip-Tests
+   `beforeBundle` ohne Marker verwenden, oder direkt gegen
+   `restore_invisible_markers( before, after )` testen.
 4. **Etablierte Designentscheidungen nicht umwerfen** ohne Rücksprache.
    Die „Verworfen"-Liste oben ist *bewusst* so, nicht durch Versehen.
 5. **Bei Sicherheitsänderungen**: nie SOURCE-Bytes anfassen. Sanitisierung

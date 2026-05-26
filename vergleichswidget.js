@@ -19,6 +19,13 @@
  *   enthalten — <script>, onclick, javascript:-URLs, <form>, <input>,
  *   <button>, ##-Codes — und kommt unverändert wieder raus.
  *
+ *   EINZIGE bewusste Ausnahme: redaktionelle „unsichtbare" Marker
+ *   (`&shy;`, `&nbsp;`) werden im `after` wiederhergestellt, wenn die
+ *   KI sie entfernt hat und das umgebende Wort/der Kontext sonst
+ *   unverändert ist. Siehe Section 2.5 (`restore_invisible_markers`).
+ *   Wirkt nur auf `after`, niemals auf `before`. Bei umformulierten
+ *   Wörtern wird nichts restauriert.
+ *
  * Architektur
  *   1. Drei separate Paragraph-LCS-Diffs (Headline / Teaser / Content).
  *   2. Within-Paragraph-Token-Diff für Mod-Zeilen → durchgehende
@@ -428,6 +435,163 @@
 			else { merged.push( { op: ops[ i ].op, text: ops[ i ].text } ); }
 		}
 		return merged;
+	}
+
+	//
+	// ────────────────────────────────────────────────────────────────────────────
+	//   2.5 Restore invisible editor markers (&shy;, &nbsp;) into the AI output
+	//
+	//   Bewusste, dokumentierte Ausnahme zur Heiligen Kuh: Wir modifizieren
+	//   hier AUSSCHLIESSLICH `after` (die KI-bearbeitete Version), nie `before`.
+	//   Hintergrund: Redakteure setzen weiche Trennzeichen `&shy;` (z. B. in
+	//   `Elektro&shy;mobilität`) und geschützte Leerzeichen `&nbsp;` (z. B. in
+	//   `100&nbsp;km/h` oder `Dr.&nbsp;Müller`) bewusst — die KI strippt sie
+	//   trotz expliziter Prompt-Vorgabe regelmäßig. Statt darauf zu hoffen,
+	//   dass die KI sich an die Regel hält, restaurieren wir die Marker hier
+	//   deterministisch, bevor der Diff überhaupt läuft.
+	//
+	//   Algorithmus:
+	//   - shy: Suche im Vorher jedes Wort, das `&shy;` enthält. Wenn die
+	//     bare Form (ohne `&shy;`) als eigenständiges Wort im Nachher steht,
+	//     ersetze sie durch die Original-Form mit `&shy;`.
+	//   - nbsp: Für jedes `&nbsp;` im Vorher: nimm den unmittelbaren
+	//     Kontext (5 Zeichen links + rechts), und wenn er sich im Nachher
+	//     mit einem Leerzeichen / NBSP / `&nbsp;` dazwischen eindeutig
+	//     wiederfinden lässt, setze dort `&nbsp;` ein.
+	//
+	//   Nicht-Ziel: Bei vollständig umformulierten Wörtern (KI hat das Wort
+	//   ausgetauscht) wird nichts restauriert — die Position wäre dann nur
+	//   noch Raten. Der Redakteur entscheidet im Diff selbst.
+	//
+	//   Weitere Marker (zwj/zwnj/zwsp, &thinsp; …) sind hier theoretisch
+	//   nachrüstbar, aber in redaktionellen Texten bislang nicht beobachtet.
+	// ────────────────────────────────────────────────────────────────────────────
+	//
+
+	// Wortzeichen-Charset — identisch zum Tokenizer-Charset (TOKEN_RE).
+	var WORD_CHARS = 'A-Za-zÀ-ɏ0-9_';
+
+	function escape_regex( s ) {
+		return s.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' );
+	}
+
+	function restore_soft_hyphens( before, after ) {
+		if( before.indexOf( '&shy;' ) === -1 ) { return after; }
+
+		// Maximales Wort, das mindestens ein &shy; enthält.
+		var shy_word_re = new RegExp(
+			'[' + WORD_CHARS + ']+(?:&shy;[' + WORD_CHARS + ']+)+',
+			'g'
+		);
+		var seen = {};
+		var result = after;
+		var m;
+
+		shy_word_re.lastIndex = 0;
+		while( ( m = shy_word_re.exec( before ) ) !== null ) {
+			var shy_word = m[ 0 ];
+			if( seen[ shy_word ] ) { continue; }
+			seen[ shy_word ] = true;
+
+			var bare = shy_word.replace( /&shy;/g, '' );
+			if( bare === shy_word || bare.length === 0 ) { continue; }
+
+			// Wenn dieselbe bare Form auch ohne `&shy;` im Vorher als
+			// eigenständiges Wort vorkommt, hat der Redakteur bewusst
+			// beide Schreibweisen nebeneinander verwendet — wir können
+			// nicht raten, welches Vorkommen im Nachher welches meint.
+			// Lieber gar nicht restaurieren als falsch.
+			var bare_in_before_re = new RegExp(
+				'(?:^|[^' + WORD_CHARS + '])' + escape_regex( bare ) + '(?![' + WORD_CHARS + '])'
+			);
+			if( bare_in_before_re.test( before ) ) { continue; }
+
+			// Bare Form wortgrenzen-sicher suchen — nicht in andere Worte
+			// hineinbiegen. Vorausgesetztes Wortzeichen davor → kein Match.
+			var find_re = new RegExp(
+				'(^|[^' + WORD_CHARS + '])' + escape_regex( bare ) + '(?![' + WORD_CHARS + '])',
+				'g'
+			);
+			result = result.replace( find_re, function( match, prefix ) {
+				return prefix + shy_word;
+			} );
+		}
+
+		return result;
+	}
+
+	function restore_nbsp( before, after ) {
+		if( before.indexOf( '&nbsp;' ) === -1 ) { return after; }
+
+		var ENTITY = '&nbsp;';
+		// "Space-equivalent" im Nachher: echtes `&nbsp;`, U+00A0 NBSP, oder
+		// gewöhnliches Leerzeichen (KI ersetzt am häufigsten durch Letzteres).
+		var SP_EQUIV = '(?:&nbsp;|\\u00a0| )';
+		var CTX_LEN = 5;
+
+		var result = after;
+		var search_from = 0;
+		var safety = 0;
+
+		while( safety++ < 2000 ) {
+			var pos = before.indexOf( ENTITY, search_from );
+			if( pos === -1 ) { break; }
+			search_from = pos + ENTITY.length;
+
+			// Kontext links/rechts (skipt weitere &nbsp;/Tags absichtlich nicht
+			// — wir wollen den unmittelbaren Nachbar-Text als Anker).
+			var left_raw = before.substring( Math.max( 0, pos - CTX_LEN * 4 ), pos );
+			var right_raw = before.substring( pos + ENTITY.length, pos + ENTITY.length + CTX_LEN * 4 );
+
+			// Trim auf die ersten/letzten CTX_LEN Zeichen, die *kein*
+			// Whitespace sind — der Anker muss am &nbsp; kleben.
+			var left = '';
+			for( var i = left_raw.length - 1; i >= 0 && left.length < CTX_LEN; i-- ) {
+				var ch = left_raw.charAt( i );
+				if( /\s/.test( ch ) ) { break; }
+				left = ch + left;
+			}
+			var right = '';
+			for( var j = 0; j < right_raw.length && right.length < CTX_LEN; j++ ) {
+				var ch2 = right_raw.charAt( j );
+				if( /\s/.test( ch2 ) ) { break; }
+				right += ch2;
+			}
+
+			if( left.length < 1 || right.length < 1 ) { continue; }
+
+			// Pattern: left + space-equiv + right. Erlaube auch direkt
+			// nebeneinanderstehende Marker, falls Nachher noch &nbsp; behielt.
+			var pattern = escape_regex( left ) + SP_EQUIV + escape_regex( right );
+			var re = new RegExp( pattern, 'g' );
+
+			// Eindeutigkeit prüfen: nur ein Match → sicher.
+			var matches = [];
+			var mm;
+			while( ( mm = re.exec( result ) ) !== null ) {
+				matches.push( { idx: mm.index, len: mm[ 0 ].length } );
+				if( matches.length > 1 ) { break; }
+			}
+			if( matches.length !== 1 ) { continue; }
+
+			var hit = matches[ 0 ];
+			var mid_start = hit.idx + left.length;
+			var mid_len = hit.len - left.length - right.length;
+			// Schon ein &nbsp; an genau dieser Stelle? Dann nichts tun (idempotent).
+			if( result.substr( mid_start, ENTITY.length ) === ENTITY ) { continue; }
+
+			result = result.slice( 0, mid_start ) + ENTITY + result.slice( mid_start + mid_len );
+		}
+
+		return result;
+	}
+
+	// Sammelfunktion: weitere Marker einfach hier durchschleifen.
+	function restore_invisible_markers( before, after ) {
+		var out = after;
+		out = restore_soft_hyphens( before, out );
+		out = restore_nbsp( before, out );
+		return out;
 	}
 
 	//
@@ -851,7 +1015,10 @@
 		// appear over an empty cell, which is confusing — better to omit
 		// the whole section.
 		var b = ( before_text || '' );
-		var a = ( after_text || '' );
+		// &shy; / &nbsp;, die der Redakteur im Vorher gesetzt und die KI
+		// im Nachher entfernt hat, wiederherstellen. Siehe Section 2.5 für
+		// die Begründung dieser bewussten Ausnahme zur Heiligen Kuh.
+		var a = restore_invisible_markers( b, ( after_text || '' ) );
 		if( b.replace( /\s+/g, '' ).length === 0 && a.replace( /\s+/g, '' ).length === 0 ) {
 			return;
 		}
@@ -2164,7 +2331,10 @@
 			split_paragraphs: split_paragraphs,
 			build_rows: build_rows,
 			resolve_text: resolve_text,
-			render_text_html: render_text_html
+			render_text_html: render_text_html,
+			restore_invisible_markers: restore_invisible_markers,
+			restore_soft_hyphens: restore_soft_hyphens,
+			restore_nbsp: restore_nbsp
 		}
 	};
 
