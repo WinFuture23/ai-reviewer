@@ -12,8 +12,9 @@
  */
 (function() {
     // Allowed user IDs (wfv4uid cookie)
-    // 1 = Sebastian Kuhbach, 124363 = Witold Pryjda, 174525 = Felix Krauth
-    const ALLOWED_USERS = [1, 124363, 174525];
+    // 1 = Sebastian Kuhbach, 124363 = Witold Pryjda, 174525 = Felix Krauth,
+    // 132191 = Nadine Dressler, 157090 = Stefan Trunzik
+    const ALLOWED_USERS = [1, 124363, 174525, 132191, 157090];
 
     // Check user access before anything else
     const uid_match = document.cookie.match( /(?:^|;\s*)wfv4uid=(\d+)/ );
