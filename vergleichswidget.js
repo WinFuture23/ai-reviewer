@@ -1969,6 +1969,12 @@
 
 	Widget.prototype.close = function() {
 		if( !this.root ) { return; }
+		// DIAG (temporär, bitte später entfernen)
+		try {
+			var decs = this.rows.map( function( r ) { return ( r.type === 'eq' ? 'eq' : ( r.decision || 'undef' ) ); } );
+			console.log( '🔬 DIAG-W Widget.close() rows=' + this.rows.length + ' decisions=[' + decs.join( ',' ) + '] via_footer=' + !!this._close_via_footer );
+			console.log( '🔬 DIAG-W stack:', new Error( 'trace' ).stack );
+		} catch( e ) { /* noop */ }
 		var bundle = resolve_text( this.rows );
 		// If the caller gave us strings, hand back a single string for
 		// backward compatibility. If they gave a bundle, return a bundle.
