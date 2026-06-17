@@ -920,6 +920,11 @@
                     return;
                 }
 
+                // DIAG-4
+                console.log( '🔬 DIAG-4 after.content start:', JSON.stringify( ( after.content || '' ).slice( 0, 200 ) ) );
+                console.log( '🔬 DIAG-4 after.content end:  ', JSON.stringify( ( after.content || '' ).slice( -200 ) ) );
+                console.log( '🔬 DIAG-4 length:', ( after.content || '' ).length );
+
                 window.VergleichsWidget.open( {
                     before: before,
                     after:  after,
@@ -930,6 +935,14 @@
                         for( const key of [ 'headline', 'teaser', 'content' ] ) {
                             if( !fields[key] || typeof resolved[key] !== 'string' ) continue;
                             const current = read_field_value( fields[key] );
+
+                            // DIAG-5
+                            if( key === 'content' ) {
+                                console.log( '🔬 DIAG-5 onResolve key=content' );
+                                console.log( '🔬 DIAG-5 resolved.content len=' + resolved[key].length + ' start:', JSON.stringify( resolved[key].slice( 0, 100 ) ) );
+                                console.log( '🔬 DIAG-5 current      len=' + current.length + ' start:', JSON.stringify( current.slice( 0, 100 ) ) );
+                                console.log( '🔬 DIAG-5 equal?', resolved[key] === current );
+                            }
 
                             if( resolved[key] !== current ) {
                                 write_field_value( fields[key], resolved[key] );
@@ -1499,6 +1512,23 @@
                                 // geändert hat — die Korrektur-Box im Terminal sagt das ohnehin.
                                 if( !auto_diff_opened ) {
                                     auto_diff_opened = true;
+                                    // DIAG-WATCH: jede 250 ms für 10 s loggen, ob/wann der Editor-Inhalt sich
+                                    // unaufgefordert verändert. So sehen wir die genaue Rotation-Zeit.
+                                    ( function() {
+                                        var t0 = Date.now();
+                                        var last = read_field_value( content_info.config.fields.content );
+                                        console.log( '🔬 DIAG-WATCH t=0ms len=' + last.length + ' first50:', JSON.stringify( last.slice( 0, 50 ) ) );
+                                        var iv = setInterval( function() {
+                                            var now = read_field_value( content_info.config.fields.content );
+                                            var dt = Date.now() - t0;
+                                            if( now !== last ) {
+                                                console.log( '🔬 DIAG-WATCH t=' + dt + 'ms CHANGED! len=' + now.length + ' first50:', JSON.stringify( now.slice( 0, 50 ) ) );
+                                                console.log( '🔬 DIAG-WATCH last50:', JSON.stringify( now.slice( -50 ) ) );
+                                                last = now;
+                                            }
+                                            if( dt > 10000 ) { clearInterval( iv ); console.log( '🔬 DIAG-WATCH done' ); }
+                                        }, 250 );
+                                    } )();
                                     setTimeout( function() {
                                         // DIAG
                                         var diag3 = read_field_value( content_info.config.fields.content );
