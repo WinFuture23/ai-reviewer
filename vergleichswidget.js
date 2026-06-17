@@ -1255,6 +1255,7 @@
 		var used_d = {};
 		var used_i = {};
 		var pairs_by_del = new Array( nD );
+		var accepted = [];  // {di, ii} der bisher akzeptierten Paare, für Inversions-Check
 
 		for( var kk = 0; kk < nD; kk++ ) { pairs_by_del[ kk ] = -1; }
 
@@ -1262,9 +1263,28 @@
 			var cand = candidates[ c ];
 
 			if( used_d[ cand.di ] || used_i[ cand.ii ] ) { continue; }
+
+			// Inversions-Check: ein Paar darf KEINEN Crossover mit bereits
+			// akzeptierten Paaren erzeugen. Sonst stehen MOD-Rows später
+			// in falscher Reihenfolge (resolve_text emittiert in DEL-Order,
+			// also würde z. B. eine summary, die in before oben und in after
+			// unten steht, beim default-Accept an den Anfang des Outputs
+			// gezogen — Inhalt wäre rotiert). Wir behalten lieber die hohe-
+			// Score-Pair und verwerfen die niedrigere, die invertieren würde.
+			var inverts = false;
+			for( var pp = 0; pp < accepted.length; pp++ ) {
+				var ap = accepted[ pp ];
+				if( ( ap.di < cand.di ) !== ( ap.ii < cand.ii ) ) {
+					inverts = true;
+					break;
+				}
+			}
+			if( inverts ) { continue; }
+
 			pairs_by_del[ cand.di ] = cand.ii;
 			used_d[ cand.di ] = true;
 			used_i[ cand.ii ] = true;
+			accepted.push( cand );
 		}
 
 		// Re-emit in a stable order: walk the longer side (whichever had the
@@ -1969,12 +1989,6 @@
 
 	Widget.prototype.close = function() {
 		if( !this.root ) { return; }
-		// DIAG (temporär, bitte später entfernen)
-		try {
-			var decs = this.rows.map( function( r ) { return ( r.type === 'eq' ? 'eq' : ( r.decision || 'undef' ) ); } );
-			console.log( '🔬 DIAG-W Widget.close() rows=' + this.rows.length + ' decisions=[' + decs.join( ',' ) + '] via_footer=' + !!this._close_via_footer );
-			console.log( '🔬 DIAG-W stack:', new Error( 'trace' ).stack );
-		} catch( e ) { /* noop */ }
 		var bundle = resolve_text( this.rows );
 		// If the caller gave us strings, hand back a single string for
 		// backward compatibility. If they gave a bundle, return a bundle.
