@@ -1259,6 +1259,24 @@
                                 console.log( '🔬 DIAG-1 new_content start:', JSON.stringify( new_content.slice( 0, 200 ) ) );
                                 console.log( '🔬 DIAG-1 new_content end:  ', JSON.stringify( new_content.slice( -200 ) ) );
                                 console.log( '🔬 DIAG-1 new_content length:', new_content.length );
+                                // DIAG-ACE: ACE-Change-Listener — feuert bei JEDER Modifikation
+                                // des Editors, egal von wem. Erlaubt uns, den Verursacher der
+                                // Rotation per Stack-Trace zu identifizieren.
+                                ( function() {
+                                    try {
+                                        var ed = window[ content_info.config.fields.content.ace_var ];
+                                        if( ed && ed.session && typeof ed.session.on === 'function' && !ed._diag_listener_attached ) {
+                                            ed._diag_listener_attached = true;
+                                            ed.session.on( 'change', function( e ) {
+                                                var val = ed.getValue();
+                                                console.log( '🔬 DIAG-ACE change at ' + Date.now() + ' len=' + val.length + ' first50=' + JSON.stringify( val.slice( 0, 50 ) ) );
+                                                console.log( '🔬 DIAG-ACE delta=', JSON.stringify( e ).slice( 0, 300 ) );
+                                                console.log( '🔬 DIAG-ACE stack:', new Error( 'trace' ).stack );
+                                            } );
+                                            console.log( '🔬 DIAG-ACE listener attached to', content_info.config.fields.content.ace_var );
+                                        }
+                                    } catch( e ) { console.log( '🔬 DIAG-ACE attach failed:', e.message ); }
+                                } )();
                                 set_status( '⏳', 'Schreibe Korrekturen in Editor...', null, '#0550ae' );
 
                                 // Write corrected content back to the content field
