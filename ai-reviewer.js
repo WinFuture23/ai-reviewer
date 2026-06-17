@@ -920,11 +920,6 @@
                     return;
                 }
 
-                // DIAG-4
-                console.log( '🔬 DIAG-4 after.content start:', JSON.stringify( ( after.content || '' ).slice( 0, 200 ) ) );
-                console.log( '🔬 DIAG-4 after.content end:  ', JSON.stringify( ( after.content || '' ).slice( -200 ) ) );
-                console.log( '🔬 DIAG-4 length:', ( after.content || '' ).length );
-
                 window.VergleichsWidget.open( {
                     before: before,
                     after:  after,
@@ -935,14 +930,6 @@
                         for( const key of [ 'headline', 'teaser', 'content' ] ) {
                             if( !fields[key] || typeof resolved[key] !== 'string' ) continue;
                             const current = read_field_value( fields[key] );
-
-                            // DIAG-5
-                            if( key === 'content' ) {
-                                console.log( '🔬 DIAG-5 onResolve key=content' );
-                                console.log( '🔬 DIAG-5 resolved.content len=' + resolved[key].length + ' start:', JSON.stringify( resolved[key].slice( 0, 100 ) ) );
-                                console.log( '🔬 DIAG-5 current      len=' + current.length + ' start:', JSON.stringify( current.slice( 0, 100 ) ) );
-                                console.log( '🔬 DIAG-5 equal?', resolved[key] === current );
-                            }
 
                             if( resolved[key] !== current ) {
                                 write_field_value( fields[key], resolved[key] );
@@ -1255,41 +1242,12 @@
                                 if (!new_content) throw new Error('Erfolg gemeldet, aber kein Text gespeichert.');
 
                                 new_content = clean_ai_content( new_content );
-                                // DIAG (temporär, bitte später entfernen) — siehe Bug-Untersuchung summary_box-Rotation
-                                console.log( '🔬 DIAG-1 new_content start:', JSON.stringify( new_content.slice( 0, 200 ) ) );
-                                console.log( '🔬 DIAG-1 new_content end:  ', JSON.stringify( new_content.slice( -200 ) ) );
-                                console.log( '🔬 DIAG-1 new_content length:', new_content.length );
-                                // DIAG-ACE: ACE-Change-Listener — feuert bei JEDER Modifikation
-                                // des Editors, egal von wem. Erlaubt uns, den Verursacher der
-                                // Rotation per Stack-Trace zu identifizieren.
-                                ( function() {
-                                    try {
-                                        var ed = window[ content_info.config.fields.content.ace_var ];
-                                        if( ed && ed.session && typeof ed.session.on === 'function' && !ed._diag_listener_attached ) {
-                                            ed._diag_listener_attached = true;
-                                            ed.session.on( 'change', function( e ) {
-                                                var val = ed.getValue();
-                                                console.log( '🔬 DIAG-ACE change at ' + Date.now() + ' len=' + val.length + ' first50=' + JSON.stringify( val.slice( 0, 50 ) ) );
-                                                console.log( '🔬 DIAG-ACE delta=', JSON.stringify( e ).slice( 0, 300 ) );
-                                                console.log( '🔬 DIAG-ACE stack:', new Error( 'trace' ).stack );
-                                            } );
-                                            console.log( '🔬 DIAG-ACE listener attached to', content_info.config.fields.content.ace_var );
-                                        }
-                                    } catch( e ) { console.log( '🔬 DIAG-ACE attach failed:', e.message ); }
-                                } )();
                                 set_status( '⏳', 'Schreibe Korrekturen in Editor...', null, '#0550ae' );
 
                                 // Write corrected content back to the content field
                                 if( !write_field_value( content_info.config.fields.content, new_content ) ) {
                                     throw new Error( 'Editor zum Zurückschreiben wurde nicht gefunden.' );
                                 }
-                                // DIAG
-                                ( function() {
-                                    var diag2 = read_field_value( content_info.config.fields.content );
-                                    console.log( '🔬 DIAG-2 ace.getValue() start:', JSON.stringify( diag2.slice( 0, 200 ) ) );
-                                    console.log( '🔬 DIAG-2 ace.getValue() end:  ', JSON.stringify( diag2.slice( -200 ) ) );
-                                    console.log( '🔬 DIAG-2 length:', diag2.length, '| matches new_content?', diag2 === new_content );
-                                } )();
 
                                 // Write corrected headline back if provided
                                 if( data.headline && content_info.config.fields.headline ) {
@@ -1530,31 +1488,7 @@
                                 // geändert hat — die Korrektur-Box im Terminal sagt das ohnehin.
                                 if( !auto_diff_opened ) {
                                     auto_diff_opened = true;
-                                    // DIAG-WATCH: jede 250 ms für 10 s loggen, ob/wann der Editor-Inhalt sich
-                                    // unaufgefordert verändert. So sehen wir die genaue Rotation-Zeit.
-                                    ( function() {
-                                        var t0 = Date.now();
-                                        var last = read_field_value( content_info.config.fields.content );
-                                        console.log( '🔬 DIAG-WATCH t=0ms len=' + last.length + ' first50:', JSON.stringify( last.slice( 0, 50 ) ) );
-                                        var iv = setInterval( function() {
-                                            var now = read_field_value( content_info.config.fields.content );
-                                            var dt = Date.now() - t0;
-                                            if( now !== last ) {
-                                                console.log( '🔬 DIAG-WATCH t=' + dt + 'ms CHANGED! len=' + now.length + ' first50:', JSON.stringify( now.slice( 0, 50 ) ) );
-                                                console.log( '🔬 DIAG-WATCH last50:', JSON.stringify( now.slice( -50 ) ) );
-                                                last = now;
-                                            }
-                                            if( dt > 10000 ) { clearInterval( iv ); console.log( '🔬 DIAG-WATCH done' ); }
-                                        }, 250 );
-                                    } )();
-                                    setTimeout( function() {
-                                        // DIAG
-                                        var diag3 = read_field_value( content_info.config.fields.content );
-                                        console.log( '🔬 DIAG-3 editor 350ms after write, start:', JSON.stringify( diag3.slice( 0, 200 ) ) );
-                                        console.log( '🔬 DIAG-3 editor 350ms after write, end:  ', JSON.stringify( diag3.slice( -200 ) ) );
-                                        console.log( '🔬 DIAG-3 length:', diag3.length );
-                                        open_diff_modal( { auto: true } );
-                                    }, 350 );
+                                    setTimeout( function() { open_diff_modal( { auto: true } ); }, 350 );
                                 }
                             }
                         }
