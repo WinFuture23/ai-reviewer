@@ -221,6 +221,17 @@ Sektion:
 - Gepaarte Del-+Ins-Runs werden via Jaccard-Ähnlichkeit (Schwelle 0.2)
   zu **Mod-Zeilen** zusammengeführt, damit minimal abweichende Absätze
   in derselben Grid-Zeile landen.
+- **Inversions-Check beim Pairing** (`pair_similar`): Kandidaten-Pairs
+  werden nach Score sortiert, aber nur akzeptiert, wenn sie die
+  Reihenfolge gegen bereits akzeptierte Pairs erhalten (kein
+  Crossover der (di, ii)-Indizes). Ohne diesen Check konnte z. B.
+  eine `summary_box`, die in `before` oben und in `after` unten
+  steht, mit der neuen summary_box gepaart werden — die resultierende
+  Mod-Zeile landete an der Vorher-Position (oben), und
+  `resolve_text` beim Default-Accept lieferte den Inhalt rotiert
+  zurück (summary vor body). Mit dem Check wird so eine
+  Lang-Distanz-Pair verworfen, die summary wird zu Del oben +
+  Add unten — Reihenfolge bleibt korrekt.
 - Mod-Zeilen, deren `before_display` und `after_display` nach
   Whitespace-Trim identisch sind, werden zu Eq-Zeilen umgewidmet
   (reiner Whitespace-Diff, der nichts hervorrufen darf).
