@@ -6,6 +6,7 @@ on:
     paths:
       - 'ai-reviewer.js'
       - 'vergleichswidget.js'
+      - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
 
 concurrency:
@@ -13,26 +14,34 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
+  contents: read
   pages: write
   id-token: write
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Prepare deployment (ai-reviewer.js + vergleichswidget.js)
         run: |
           mkdir _site
           cp ai-reviewer.js vergleichswidget.js _site/
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: _site
 
+  # Separate job: after a Pages timeout, "Re-run failed jobs" then only
+  # re-runs the deploy without uploading a second "github-pages" artifact
+  # into the same run (deploy-pages aborts on duplicate artifact names).
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
