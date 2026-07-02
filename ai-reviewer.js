@@ -553,9 +553,23 @@
 
     // --- UTILITY FUNCTIONS ---
 
-    /** Append a timestamped message to the debug log and browser console. */
+    /**
+     * Append a timestamped message to the debug log and browser console.
+     * Consecutive identical messages (e.g. "Frage Status ab..." on every
+     * poll) are collapsed into a single entry with a repeat counter; the
+     * console only gets the first occurrence at log level, repeats go to
+     * console.debug (visible with the "Verbose" filter).
+     */
+    let last_log = null; // { msg, count, first_time } of newest debug_log entry
     function log_debug(msg) {
         const time = new Date().toLocaleTimeString('de-DE');
+        if (last_log && last_log.msg === msg && debug_log.length > 0) {
+            last_log.count++;
+            debug_log[debug_log.length - 1] = `[${last_log.first_time}] ${msg} (${last_log.count}×, zuletzt ${time})`;
+            console.debug(`🤖 AI-Reviewer [${time}]: ${msg} (${last_log.count}×)`);
+            return;
+        }
+        last_log = { msg: msg, count: 1, first_time: time };
         debug_log.push(`[${time}] ${msg}`);
         console.log(`🤖 AI-Reviewer [${time}]: ${msg}`);
     }
