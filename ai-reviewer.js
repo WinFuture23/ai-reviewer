@@ -1054,7 +1054,7 @@
                 }
 
                 let elapsed_seconds = 0; 
-                const TIMEOUT_MAX = 900; // 15 Minuten
+                const TIMEOUT_MAX = 300; // 5 Minuten
                 
                 set_status('⏳', `Artikel wird verarbeitet... (0 Sekunden)`, `Geschätzte Dauer: ca. 2 - 3 Minuten`, '#b45309', true);
                 const start_time = Date.now();

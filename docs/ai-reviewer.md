@@ -107,7 +107,7 @@ um Tabs im Hintergrund nicht abzuhängen:
    kann von außen aufgeweckt werden, sodass ein Tab-Return-Poll
    unmittelbar gegen die gecachte Antwort iteriert.
 
-Timeout: 15 Minuten. Nach Ablauf wird ein letzter Poll versucht,
+Timeout: 5 Minuten. Nach Ablauf wird ein letzter Poll versucht,
 und wenn auch der kein Ergebnis liefert, wird der Lauf abgebrochen.
 
 ## Auth
