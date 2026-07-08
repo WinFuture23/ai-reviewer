@@ -1249,9 +1249,7 @@
                                 let new_content = data.content || null;
                                 const fixes_text = data.fixes || '';
                                 
-                                const korrektor_match = fixes_text.match(/<korrektor>([\s\S]*?)<\/korrektor>/i);
                                 const verlinker_match = fixes_text.match(/<verlinker>([\s\S]*?)<\/verlinker>/i);
-                                let korrektor_text = korrektor_match ? korrektor_match[1].trim() : null;
                                 const verlinker_text = verlinker_match ? verlinker_match[1].trim() : null;
 
                                 if (!new_content) throw new Error('Erfolg gemeldet, aber kein Text gespeichert.');
@@ -1276,93 +1274,6 @@
 
                                 set_status('✅', `Erfolgreich aktualisiert! (Dauer: ${final_duration_str})`, null, '#176c1f');
                                 btn_diff.style.display = 'flex'; btn_undo.style.display = 'flex'; btn_close_bottom.style.display = 'flex';
-
-                                if (korrektor_text) {
-                                    const korr_box = document.createElement('div');
-                                    Object.assign(korr_box.style, { backgroundColor: '#fafbfc', padding: '14px 16px', borderRadius: '8px', border: '1px solid #e5e7eb' });
-
-                                    // Title-Zeile: Icon + Label, dezenter Underline-Separator
-                                    const k_title = document.createElement('div');
-                                    Object.assign(k_title.style, { display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', paddingBottom: '10px', borderBottom: '1px solid #e5e7eb' });
-                                    k_title.innerHTML = '<span style="font-size:15px;">📝</span><span style="color:#1f2328; font-weight:600; font-size:13px; letter-spacing:.2px;">Text- &amp; Shortcode-Korrekturen</span>';
-                                    korr_box.appendChild(k_title);
-
-                                    // Server liefert nummerierte Items, durch Leerzeilen getrennt:
-                                    //   "1. Heading: Body...\n\n2. Heading: Body..."
-                                    // Wir splitten primaer an Doppel-Newlines; als Fallback an
-                                    // Zeilenanfaengen mit nummeriertem/bullet-Prefix.
-                                    let raw_items = korrektor_text.split(/\n\s*\n/).map(s => s.trim()).filter(s => s.length > 0);
-
-                                    if (raw_items.length === 1) {
-                                        raw_items = korrektor_text.split(/\n(?=\s*(?:\d+[.)]|[-*•])\s)/).map(s => s.trim()).filter(s => s.length > 0);
-                                    }
-
-                                    const items_wrap = document.createElement('div');
-                                    Object.assign(items_wrap.style, { display: 'flex', flexDirection: 'column', gap: '8px' });
-
-                                    raw_items.forEach(raw => {
-                                        // Leading "1." / "1)" / "-" / "*" / "•" / "#" abschneiden
-                                        const stripped = raw.replace(/^\s*(?:\d+[.)]\s*|[-*•#]\s*)/, '').trim();
-
-                                        if (!stripped) return;
-
-                                        // Heading vor erstem ":", Body danach — nur wenn der
-                                        // Doppelpunkt in der ersten Zeile UND vor Position 80 steht.
-                                        let heading = null;
-                                        let body = stripped;
-                                        const first_line_end = stripped.indexOf('\n');
-                                        const colon_idx = stripped.indexOf(':');
-
-                                        if (colon_idx > 0 && colon_idx <= 80 && (first_line_end === -1 || colon_idx < first_line_end)) {
-                                            heading = stripped.slice(0, colon_idx).trim();
-                                            body = stripped.slice(colon_idx + 1).trim();
-                                        }
-
-                                        // Status: "Keine Aenderungen" / "nicht erforderlich" / etc.
-                                        const body_lower = body.toLowerCase();
-                                        const is_no_change = /^keine\s+(änderung|korrek|anpassung)/.test(body_lower)
-                                            || /^nicht\s+(erforderlich|notwendig|nötig)/.test(body_lower)
-                                            || body_lower.startsWith('keine ')
-                                            || body_lower === 'keine.';
-
-                                        const accent_color = is_no_change ? '#176c1f' : '#0550ae';
-                                        const icon = is_no_change ? '✓' : 'ℹ';
-
-                                        const item = document.createElement('div');
-                                        Object.assign(item.style, {
-                                            borderLeft: `3px solid ${accent_color}`,
-                                            border: '1px solid #e5e7eb',
-                                            borderLeftWidth: '3px',
-                                            borderLeftColor: accent_color,
-                                            padding: '10px 12px',
-                                            backgroundColor: '#fff',
-                                            borderRadius: '0 6px 6px 0'
-                                        });
-
-                                        let html = '';
-
-                                        if (heading) {
-                                            html += `<div style="color:#1f2328; font-weight:600; font-size:13px; line-height:1.4; display:flex; align-items:baseline; gap:6px; margin-bottom:${body ? '4px' : '0'};">`
-                                                + `<span style="color:${accent_color}; font-weight:700;">${icon}</span>`
-                                                + `<span>${escape_html(heading)}</span>`
-                                                + `</div>`;
-                                        }
-
-                                        if (body) {
-                                            const body_color = heading ? '#3a3f46' : '#1f2328';
-                                            const inline_icon = heading
-                                                ? ''
-                                                : `<span style="color:${accent_color}; font-weight:700; margin-right:6px;">${icon}</span>`;
-                                            html += `<div style="color:${body_color}; font-size:13px; line-height:1.55; white-space:pre-line;">${inline_icon}${escape_html(body)}</div>`;
-                                        }
-
-                                        item.innerHTML = html;
-                                        items_wrap.appendChild(item);
-                                    });
-
-                                    korr_box.appendChild(items_wrap);
-                                    results_area.appendChild(korr_box);
-                                }
 
                                 verl_block: {
                                     const lines = verlinker_text ? verlinker_text.split('\n').map(l => l.trim()).filter(l => l.length > 0) : [];
