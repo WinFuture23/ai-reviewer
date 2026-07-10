@@ -907,7 +907,12 @@
 	// `<a>` (Link), `<h1>`–`<h6>` (Überschrift), `<p>`, `<div>` etc.
 	// bleiben für den Vergleich erhalten, damit echte Struktur-Änderungen
 	// sichtbar werden.
-	var EQ_INLINE_TAGS = /<\/?(?:br|b|i|em|strong|u|s|strike|sub|sup|small|big|tt|mark|nobr|span)\s*[^>]*?\/?>/gi;
+	// Der Lookahead nach dem Tag-Namen erzwingt eine Namensgrenze — ohne
+	// ihn würde `[^>]*?` den Rest längerer Tag-Namen auffressen und z. B.
+	// <img> über 'i', <ul> über 'u', <section> über 's' oder <embed> über
+	// 'em' fälschlich als Inline-Wrapper strippen. Solche Content-Tags
+	// sind ECHTE Änderungen und dürfen im Vergleich nie verschwinden.
+	var EQ_INLINE_TAGS = /<\/?(?:br|b|i|em|strong|u|s|strike|sub|sup|small|big|tt|mark|nobr|span)(?=[\s\/>])[^>]*?\/?>/gi;
 
 	// Kanonische Form für VERGLEICHE — Inline-Wrapper und Whitespace
 	// auf ein Space kollabieren. `trim_display` strippt nur außen,
@@ -925,6 +930,27 @@
 			.replace( EQ_INLINE_TAGS, ' ' )
 			.replace( /\s+/g, ' ' )
 			.trim();
+	}
+
+	// True, wenn sich zwei Display-Texte NUR durch <h1>-<h6>-Markup (plus
+	// Inline-Wrapper/Whitespace, siehe compare_norm) unterscheiden — z. B.
+	// eine Plain-Text-Zwischenüberschrift, die die KI in <h2> gesetzt hat.
+	// Solche Mod-Rows sind im Nur-Text-Modus keine inhaltliche Änderung
+	// und werden dort wie eq behandelt (siehe row_suppressed / row_html).
+	//
+	// Streng: Jede Seite muss ENTWEDER komplett heading-frei sein ODER ein
+	// reines Heading (is_just_heading). Damit fallen Rows raus, in denen
+	// das Heading nur ein Teil der Änderung ist (Heading + Body/Media in
+	// einer Row) oder in denen das Heading auf ANDEREN Text gewandert ist
+	// ("<h2>A</h2> B" → "A <h2>B</h2>") — beides echte Änderungen, die
+	// auch der Nur-Text-Modus zeigen muss.
+	function differs_only_by_heading( bt, at ) {
+		function strip( s ) { return s.replace( /<\/?h[1-6]\b[^>]*>/gi, ' ' ); }
+		function plain_or_pure_heading( s ) {
+			return is_just_heading( s ) || !/<h[1-6]\b/i.test( s );
+		}
+		return plain_or_pure_heading( bt ) && plain_or_pure_heading( at )
+			&& compare_norm( strip( bt ) ) === compare_norm( strip( at ) );
 	}
 
 	//
@@ -1096,19 +1122,38 @@
 				idx++;
 			}
 
-			var pairs = pair_similar( dels, ins );
+			// Asymmetrische Heading-Merges vor dem Pairing wieder auftrennen,
+			// damit eine neu in <h2> gesetzte Zwischenüberschrift ihre alte
+			// Plain-Text-Zeile als Mod-Partner auf gleicher Höhe findet
+			// (siehe split_absorbed_headings).
+			var pairs = pair_similar(
+				split_absorbed_headings( dels, ins ),
+				split_absorbed_headings( ins, dels )
+			);
 			for( var p = 0; p < pairs.length; p++ ) {
 				var pr = pairs[ p ];
 				if( pr.before != null && pr.after != null ) {
 					var bt = trim_display( pr.before );
 					var at = trim_display( pr.after );
-					// Skip mod-rows that only differ in whitespace (incl. inner
-					// `\n+`, `<br>` etc.) — that's noise from heading merges and
-					// KI-Reformatierungen, nichts was der Redakteur entscheiden
-					// soll. Both raw values are kept; we treat the row as eq
-					// for display and pick the NACHHER raw on resolve so
-					// "accept all" stays byte-exact with the new version.
-					if( compare_norm( bt ) === compare_norm( at ) ) {
+					// Mod-rows, die sich nur im Whitespace unterscheiden (inkl.
+					// innerem `\n+`) sind Rausch aus Heading-Merges und KI-
+					// Reformatierungen, nichts was der Redakteur entscheiden
+					// soll: Row wird als eq behandelt, auf resolve gewinnt der
+					// NACHHER-Stil ("accept all" bleibt byte-exakt).
+					//
+					// Unterscheiden sich die Seiten darüber hinaus nur in der
+					// POSITION von Inline-Wrappern (compare_norm-gleich, aber
+					// nicht whitespace-gleich — z. B. ein <b>, das die KI auf
+					// ein anderes Wort geschoben hat, oder <br/> → \n), ist
+					// das eine ECHTE Markup-Änderung: Sie bleibt eine Mod-Row
+					// mit inline_only-Flag — im Nur-Text-Modus unterdrückt wie
+					// heading_only (row_suppressed), im HTML-Code-Modus
+					// sichtbar und entscheidbar. Nur so bleibt reject
+					// byte-exakt (frühere eq-Konvertierung verwarf die
+					// Vorher-Bytes unwiderruflich).
+					var norm_equal = compare_norm( bt ) === compare_norm( at );
+
+					if( norm_equal && bt.replace( /\s+/g, ' ' ) === at.replace( /\s+/g, ' ' ) ) {
 						rows.push( {
 							id: rowId++, type: 'eq',
 							before: pr.after, after: pr.after,
@@ -1122,6 +1167,8 @@
 							before: pr.before, after: pr.after,
 							before_display: bt, after_display: at,
 							decision: null,
+							heading_only: !norm_equal && differs_only_by_heading( bt, at ),
+							inline_only: norm_equal,
 							inner_ops: diff_tokens( tokenize( bt ), tokenize( at ) )
 						} );
 					}
@@ -1214,6 +1261,77 @@
 		return out;
 	}
 
+	// Wenn die KI eine bestehende Plain-Text-Zwischenüberschrift in <h2>
+	// setzt, macht der Heading-Body-Merge (split_paragraphs) die Seiten
+	// asymmetrisch: Nachher wird `<h2>…</h2>` mit dem Folgeabsatz zu EINEM
+	// Paragraphen verschmolzen, Vorher bleibt die Plain-Zeile eigenständig.
+	// Das Pairing sieht dann 2 Dels vs 1 Ins — die alte Überschrift endet
+	// als eigene "entfernt"-Zeile, die neue steckt im Folgeblock (Add/Mod).
+	//
+	// Fix: Beginnt ein Item mit einem Heading, dessen sichtbarer Text dem
+	// KOMPLETTEN sichtbaren Text eines Items der Gegenseite entspricht,
+	// wird es wieder in [Heading, Rest] getrennt — mehrfach, falls mehrere
+	// gemergte Headings aufeinander folgen (z. B. <h2> + <h3>-Stack). Die
+	// Konkatenation bleibt byte-identisch (Heilige Kuh), es ändern sich
+	// nur die Pairing-Grenzen: similarity() paart danach Überschrift↔
+	// Überschrift und Body↔Body auf gleicher Höhe. Wirkt in beide
+	// Richtungen (H2 gesetzt / H2 entfernt).
+	//
+	// Zwei Guards in can_split_heading verhindern falsche Splits:
+	//  1. Das Match-Item der Gegenseite muss heading-FREI sein (eine echte
+	//     Plain-Text-Zeile). Würde das Heading gegen ein fast identisches
+	//     Heading der Gegenseite matchen (z. B. allein stehendes Schluss-
+	//     <h2>), entstünde ein Whitespace-only-Pair, das der eq-Zweig in
+	//     build_rows_from_paras verschluckt — reject wäre danach nicht
+	//     mehr byte-exakt.
+	//  2. Der Rest hinter dem Heading muss zur FORTSETZUNG der Gegenseite
+	//     hinter der Match-Zeile passen. Sonst splitten wir eine komplett
+	//     NEUE Sektion auseinander, die zufällig den Titel einer
+	//     bestehenden Zeile trägt, oder erzeugen ein kreuzendes 1.0-Pair
+	//     (Heading wurde umpositioniert), dessen Inversions-Check das
+	//     restliche Pairing kippt — Del/Add-Lawine statt Mod-Zeilen.
+	var LEADING_HEADING_RE = /^(\s*<h[1-6]\b[^>]*>[\s\S]*?<\/h[1-6]>\s*)([\s\S]+)$/i;
+
+	// Mindest-Similarity für Pair-Kandidaten — gilt für pair_similar und
+	// die Fortsetzungs-Prüfung in can_split_heading.
+	var SIM_THRESHOLD = 0.2;
+
+	function split_absorbed_headings( items, other_items ) {
+		var other_vis = other_items.map( visible_text );
+		var out = [];
+
+		for( var i = 0; i < items.length; i++ ) {
+			var remaining = items[ i ];
+			var m;
+
+			while( ( m = LEADING_HEADING_RE.exec( remaining ) ) !== null
+				&& can_split_heading( m[ 1 ], m[ 2 ], other_items, other_vis ) ) {
+				out.push( m[ 1 ] );
+				remaining = m[ 2 ];
+			}
+
+			out.push( remaining );
+		}
+
+		return out;
+	}
+
+	function can_split_heading( head_chunk, rest, other_items, other_vis ) {
+		var head_vis = visible_text( head_chunk );
+		var rest_vis = visible_text( rest );
+
+		if( head_vis.length === 0 || rest_vis.length === 0 ) { return false; }
+
+		for( var j = 0; j < other_vis.length; j++ ) {
+			if( other_vis[ j ] !== head_vis ) { continue; }
+			if( /<h[1-6]\b/i.test( other_items[ j ] ) ) { continue; }
+			if( similarity( rest_vis, other_vis.slice( j + 1 ).join( ' ' ) ) <= SIM_THRESHOLD ) { continue; }
+			return true;
+		}
+
+		return false;
+	}
+
 	// Pair removed and added paragraphs using Jaccard similarity on the
 	// visible text. The aim is: paragraphs that differ only slightly (typical
 	// edit) end up on the same row; brand-new paragraphs and fully-removed
@@ -1233,7 +1351,6 @@
 		// zur Ressourcen-Bremse für besser passende spätere dels — der
 		// im pair_by_d-Greedy häufige Effekt, dass ein "okay" Pair einem
 		// "perfekten" Pair gleich daneben den Slot wegschnappt.
-		var SIM_THRESHOLD = 0.2;
 		var candidates = [];
 
 		for( var di = 0; di < nD; di++ ) {
@@ -1851,24 +1968,58 @@
 			|| ( opts.after && typeof opts.after === 'object' );
 		this.rows = build_rows( opts.before || '', opts.after || '' );
 
-		// Wenn der KI-Lauf genau EINE entscheidbare Zeile produziert
-		// (1 mod/add/del), markieren wir sie schon beim Öffnen als
-		// angenommen. Der Footer-Button heißt dann "Speichern" — "Alle
-		// annehmen" wäre semantisch übertrieben, wenn es eh nur ein
-		// Element gibt. Der Redakteur kann die Auswahl per ×/✓ jederzeit
-		// umschalten.
+		// Besteht der KI-Lauf AUSSCHLIESSLICH aus heading_only-/inline_only-
+		// Änderungen, wäre die Default-Ansicht (Nur Text + "Nur Änderungen")
+		// komplett leer: Grid ohne Zeilen, Zähler "0 / 0", aber ein aktiver
+		// Footer-Button. Dann direkt im HTML-Code-Modus öffnen (only_changes
+		// aus, analog zum manuellen Moduswechsel), wo die Änderungen
+		// sichtbar und entscheidbar sind.
 		var openable = this.rows.filter( function( r ) { return r.type !== 'eq'; } );
 
-		if( openable.length === 1 ) {
-			openable[ 0 ].decision = 'accept';
+		if( this.mode === 'pseudo' && openable.length > 0 && openable.every( function( r ) { return !!r.heading_only || !!r.inline_only; } ) ) {
+			this.mode = 'editor';
+			this.only_changes = false;
+		}
+
+		// Wenn der KI-Lauf genau EINE im aktuellen Modus entscheidbare
+		// Zeile produziert (1 mod/add/del), markieren wir sie schon beim
+		// Öffnen als angenommen. Der Footer-Button heißt dann "Speichern"
+		// — "Alle annehmen" wäre semantisch übertrieben, wenn es eh nur
+		// ein Element gibt. Der Redakteur kann die Auswahl per ×/✓
+		// jederzeit umschalten.
+		var decidable = this.rows.filter( function( r ) {
+			return r.type !== 'eq' && !this.row_suppressed( r );
+		}.bind( this ) );
+
+		if( decidable.length === 1 ) {
+			decidable[ 0 ].decision = 'accept';
 		}
 	}
+
+	// Eine heading_only- oder inline_only-Mod-Row wird im Nur-Text-Modus
+	// wie eq behandelt: kein Highlight, keine Buttons, kein Nav-Stopp, vom
+	// "Nur Änderungen"-Filter ausgeblendet und nicht im offen/fertig-
+	// Zähler — SOLANGE sie unentschieden und unberührt ist. Sobald der
+	// Redakteur sie (im HTML-Code-Modus) angefasst hat, bleibt sie in
+	// BEIDEN Modi sichtbar und umschaltbar — sonst wäre z. B. eine
+	// Ablehnung nach dem Wechsel zu Nur Text unsichtbar und nicht mehr
+	// zurücknehmbar.
+	Widget.prototype.row_suppressed = function( row ) {
+		return row.type === 'mod' && ( !!row.heading_only || !!row.inline_only )
+			&& this.mode === 'pseudo' && !row.decision && !row.touched;
+	};
 
 	Widget.prototype.openable_rows = function() {
 		return this.rows.filter( function( r ) { return r.type !== 'eq'; } );
 	};
 	Widget.prototype.pending_rows = function() {
-		return this.rows.filter( function( r ) { return r.type !== 'eq' && !r.decision; } );
+		// Unterdrückte heading_only-Rows zählen nicht als "offen" — sie
+		// sind im aktuellen Modus weder sichtbar noch entscheidbar, der
+		// Zähler würde sonst dauerhaft "· N offen" zeigen (und nie
+		// "· fertig"), obwohl keine erreichbare Zeile unentschieden ist.
+		return this.rows.filter( function( r ) {
+			return r.type !== 'eq' && !r.decision && !this.row_suppressed( r );
+		}.bind( this ) );
 	};
 
 	Widget.prototype.open = function() {
@@ -1972,7 +2123,14 @@
 
 		if( !btn ) { return; }
 
-		var openable_count = this.rows.filter( function( r ) { return r.type !== 'eq'; } ).length;
+		// Mode-aware zählen: im Nur-Text-Modus unterdrückte heading_only-
+		// Rows sind für den Redakteur keine Entscheidungen — sonst stünde
+		// da "Alle annehmen", obwohl nur EINE Zeile sichtbar ist.
+		// has_reject bleibt bewusst mode-blind: ein irgendwo gesetztes ×
+		// muss den Button immer auf "Übernehmen" schalten.
+		var openable_count = this.rows.filter( function( r ) {
+			return r.type !== 'eq' && !this.row_suppressed( r );
+		}.bind( this ) ).length;
 		var has_reject = this.rows.some( function( r ) { return r.decision === 'reject'; } );
 
 		if( openable_count <= 1 ) {
@@ -2189,14 +2347,21 @@
 
 	Widget.prototype.row_html = function( row ) {
 		var beforeHtml, afterHtml, actionsHtml;
-		var rowCls = 'vw-row vw-row-' + row.type;
+		var mode = this.mode;
+		// Unterdrückte heading_only-Mods (siehe row_suppressed) werden wie
+		// eq dargestellt: kein Highlight, keine Buttons, kein Änderungs-
+		// Akzent. Im HTML-Code-Modus bleiben sie normale Mod-Rows, dort
+		// ist die Tag-Änderung sichtbar und entscheidbar.
+		var as_eq = row.type === 'eq' || this.row_suppressed( row );
+		var rowCls = 'vw-row vw-row-' + ( as_eq ? 'eq' : row.type );
 		if( row.section ) { rowCls += ' vw-row-' + row.section; }
 		if( row.section_start ) { rowCls += ' vw-section-start'; }
-		if( row.decision === 'accept' ) { rowCls += ' vw-row-resolved'; }
-		else if( row.decision === 'reject' ) { rowCls += ' vw-row-rejected'; }
+		if( !as_eq ) {
+			if( row.decision === 'accept' ) { rowCls += ' vw-row-resolved'; }
+			else if( row.decision === 'reject' ) { rowCls += ' vw-row-rejected'; }
+		}
 
-		var mode = this.mode;
-		if( row.type === 'eq' ) {
+		if( as_eq ) {
 			beforeHtml = render_cell( row.before_display, 'before', null, mode );
 			afterHtml = render_cell( row.after_display, 'after', null, mode );
 			actionsHtml = '';
@@ -2242,12 +2407,22 @@
 	// stable, predictable navigation experience across both filter states.
 	Widget.prototype.nav_rows = function() {
 		var visible = this.visible_rows();
-		return visible.filter( function( r ) { return r.type !== 'eq'; } );
+		return visible.filter( function( r ) {
+			if( r.type === 'eq' ) { return false; }
+			// Unterdrückte heading_only-Mods werden wie eq gerendert —
+			// dort gibt es nichts zu entscheiden, also auch kein Nav-Stopp
+			// und kein Eintrag im Änderungs-Zähler.
+			if( this.row_suppressed( r ) ) { return false; }
+			return true;
+		}.bind( this ) );
 	};
 
 	Widget.prototype.visible_rows = function() {
 		return this.rows.filter( function( r ) {
 			if( this.only_changes && r.type === 'eq' ) { return false; }
+			// Unterdrückte heading_only-Mods sind im Nur-Text-Modus keine
+			// inhaltliche Änderung — der Filter behandelt sie wie eq.
+			if( this.only_changes && this.row_suppressed( r ) ) { return false; }
 			return is_row_renderable( r, this.mode );
 		}.bind( this ) );
 	};
@@ -2296,6 +2471,11 @@
 			if( this.rows[ i ].id === rowId ) { row = this.rows[ i ]; break; }
 		}
 		if( !row ) { return; }
+		// Merken, dass der Redakteur die Row angefasst hat — eine im
+		// HTML-Modus behandelte heading_only-Row bleibt dadurch auch im
+		// Nur-Text-Modus sichtbar (siehe row_suppressed), selbst wenn die
+		// Entscheidung per Toggle wieder auf null zurückspringt.
+		row.touched = true;
 		// Toggle off if same decision again
 		if( row.decision === action ) { row.decision = null; }
 		else { row.decision = action; }
