@@ -7,8 +7,8 @@
  * tokens injected by the PHP integration class (wfv4_model_aireviewer::render).
  *
  * @author  mesios
- * @version 3 2026-04-22
- * @see     docs/winfuture-integration.php
+ * @version 4 2026-08-20
+ * @see     wfv4_model_aireviewer (aireviewer.class.php, im CMS gepflegt)
  */
 (function() {
     // Allowed user IDs (wfv4uid cookie)
@@ -975,7 +975,7 @@
         ok:     { label: '✓ Geprüft',   bg: '#176c1f' },
         markup: { label: '✓ Geprüft*',  bg: '#4d6b1f' },
         stale:  { label: '⚠ Veraltet',  bg: '#b45309' },
-        none:   { label: '– Ungeprüft', bg: '#6b7280' }
+        none:   { label: '⚠️ Ungeprüft', bg: '#6b7280' }
     };
 
     /** Status-Badge in der Lasche anhand des aktuellen Editor-Stands aktualisieren. */
@@ -2063,6 +2063,13 @@
         };
 
         document.body.appendChild( tab );
+
+        // Ungeprueft/veraltet vor der Freischaltung geht in der Lasche leicht
+        // unter — Panel dann direkt aufklappen. "Verbergen" bleibt moeglich.
+        if( status && ( status.state === 'none' || status.state === 'stale' ) ) {
+            tab.style.display = 'none';
+            build_panel();
+        }
     }
 
     // Start immediately if DOM is ready, otherwise wait for DOMContentLoaded
