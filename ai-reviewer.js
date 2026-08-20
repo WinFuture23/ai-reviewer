@@ -1103,7 +1103,7 @@
         // Header
         const header = document.createElement('div');
         Object.assign(header.style, { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', backgroundColor: '#f8f9fb', borderBottom: '1px solid #e5e7eb', color: '#1f2328', fontSize: '13px', fontWeight: '600', letterSpacing: '.2px', userSelect: 'none' });
-        header.innerHTML = '<span>🤖 KI-Korrektor & Verlinker</span>';
+        header.innerHTML = '<span>🤖 KI-Korrektor</span>';
 
         const header_right = document.createElement('div'); Object.assign(header_right.style, { display: 'flex', gap: '14px', alignItems: 'center' });
 
