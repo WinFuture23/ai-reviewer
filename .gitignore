@@ -4,3 +4,6 @@
 
 # Claude Code (lokale Session-Daten)
 .claude/
+
+# Live-CMS-Datei, nicht veroeffentlichen (kasbah)
+aireviewer.class.php
