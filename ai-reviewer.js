@@ -17,6 +17,13 @@
     // 76 = Roland Quandt, 105382 = Thomas Zick, 63721 = Sebastian Kasparek
     const ALLOWED_USERS = [1, 124363, 174525, 132191, 157090, 99800, 76, 105382, 63721];
 
+    // Anzeigenamen fuer die Status-UI (im Marker selbst steht nur die numerische ID)
+    const USER_NAMES = {
+        1: 'Sebastian Kuhbach', 124363: 'Witold Pryjda', 174525: 'Felix Krauth',
+        132191: 'Nadine Dressler', 157090: 'Stefan Trunzik', 99800: 'Christian Kahle',
+        76: 'Roland Quandt', 105382: 'Thomas Zick', 63721: 'Sebastian Kasparek'
+    };
+
     // Check user access before anything else
     const uid_match = document.cookie.match( /(?:^|;\s*)wfv4uid=(\d+)/ );
     if( !uid_match || !ALLOWED_USERS.includes( Number( uid_match[1] ) ) ) return;
@@ -285,11 +292,17 @@
     // --- MODULE STATE ---
     let terminal_container = null;  // Main overlay DOM element
     let launcher_tab = null;        // Bottom-right launcher tab
+    let tab_label_el = null;        // Erster <span> der Lasche (Haupt-Label)
+    let tab_badge_el = null;        // Status-Badge in der Lasche (Pruef-Stand)
     let poll_active = false;        // True while a job is being polled
     let debug_log = [];             // Debug messages (copyable via header button)
     let backup_data = null;         // All field values before AI modification (for undo)
     let btn_check = null;           // "Artikel überprüfen" button reference
     let content_info = null;        // Detected content type { type, id, config }
+    let marker_stamp_done = false;  // Pro Lauf: wurde der Pruef-Marker schon gestempelt?
+    let run_marker_history = [];    // Marker-Historie aus dem Feld VOR dem Lauf (Roh-Zeilen)
+    let run_last_stamp = null;      // Zuletzt in DIESEM Lauf gestempelte Zeile (Ersatz statt Doppel-Eintrag)
+    let maybe_autostart_fn = null;  // Dedupe-Vorabcheck + ggf. Auto-Start (gesetzt in build_terminal)
 
     // --- CONFIGURATION ---
     // Val.town proxy endpoints
@@ -337,7 +350,20 @@
             const s = document.createElement( 'script' );
             s.src = companion;
             s.async = true;
-            s.onload = function() { resolve(); };
+            // Explizites charset: die CMS-Seiten sind ISO-8859-1 — ohne Attribut
+            // wuerde ein Server ohne charset-Header das UTF-8-Script im
+            // Seiten-Charset parsen (Mojibake bis Parse-Error).
+            s.charset = 'utf-8';
+            s.onload = function() {
+                // onload feuert auch bei Parse-Fehlern — explizit pruefen,
+                // ob das Widget wirklich da ist (fail-open mit klarer Meldung).
+                if( window.VergleichsWidget && typeof window.VergleichsWidget.open === 'function' ) {
+                    resolve();
+                } else {
+                    vw_load_promise = null;
+                    reject( new Error( 'VergleichsWidget geladen, aber nicht initialisiert (Parse-Fehler?).' ) );
+                }
+            };
             s.onerror = function() {
                 vw_load_promise = null; // allow retry on next click
                 reject( new Error( 'VergleichsWidget konnte nicht geladen werden (' + companion + ').' ) );
@@ -517,7 +543,14 @@
         };
 
         for( const key in ci.config.fields ) {
-            const value = read_field_value( ci.config.fields[key] );
+            let value = read_field_value( ci.config.fields[key] );
+
+            // Pruef-Marker gehen NICHT mit zur KI: das Modell wuerde sie
+            // umschreiben oder entfernen (Praezedenzfall &shy;/&nbsp;).
+            // Nach dem Lauf wird clientseitig frisch gestempelt.
+            if( key === 'content' ) {
+                try { value = marker_strip( value ); } catch( e ) { /* fail-open */ }
+            }
 
             if( value ) {
                 data[key] = value;
@@ -550,6 +583,241 @@
         const trimmed = raw.trim().substring( 0, 50 );
         return /^[a-zA-ZäöüÄÖÜß0-9 ]+$/.test( trimmed ) ? trimmed : '';
     }
+
+    // --- PRUEF-MARKER (KI-Korrektor-Nachweis im Artikeltext) ---
+    // Pro KI-Lauf wird eine einzeilige, rein-ASCII HTML-Kommentar-Zeile ans
+    // Ende des Content-Felds gehaengt (Historie, neuester Eintrag zuletzt):
+    //   <!-- ki-korrektor v1 ts=2026-08-19T21:19:08Z uid=76 result=changed hash=a1b2c3d4 th=5e6f7a8b algo=1 -->
+    // - result: clean (keine sichtbaren Unterschiede) | changed (Diff gezeigt) | unknown
+    // - hash:   FNV-1a ueber Headline+Teaser+Text, byte-nah (exakte Dedupe-Bremse)
+    // - th:     FNV-1a ueber die Text-Projektion (Tags/Shortcodes/Entities raus,
+    //           Whitespace kollabiert) — tolerant gegen Markup-only-Aenderungen
+    // Kein '>' und kein '--' im Kommentar-Body, einzeilig — sonst zerlegen
+    // Paragraph-Splitter/Tokenizer des VergleichsWidgets den Marker.
+    const MARKER_VERSION = 1;
+    const MARKER_ALGO = 1;
+    const MARKER_MAX_ENTRIES = 10;
+    const MARKER_LINE_RE = /<!-- ki-korrektor v\d+[^>]*-->/g;
+    const MARKER_STRIP_RE = /[ \t]*<!-- ki-korrektor v\d+[^>]*-->[ \t]*\r?\n?/g;
+
+    /** FNV-1a 32-Bit-Hash ueber die UTF-16-Code-Units, als 8 Hex-Zeichen. */
+    function marker_fnv1a( str ) {
+        let h = 0x811c9dc5;
+
+        for( let i = 0; i < str.length; i++ ) {
+            h ^= str.charCodeAt( i );
+            h = ( h + ( ( h << 1 ) + ( h << 4 ) + ( h << 7 ) + ( h << 8 ) + ( h << 24 ) ) ) >>> 0;
+        }
+        return ( '0000000' + h.toString( 16 ) ).slice( -8 );
+    }
+
+    /** Alle Marker-Zeilen aus einem Text entfernen (inkl. umgebender Leerzeichen/Zeilenumbruch). */
+    function marker_strip( text ) {
+        if( !text ) return text || '';
+        return text.replace( MARKER_STRIP_RE, '' ).replace( /\s+$/, '' );
+    }
+
+    /**
+     * Alle Marker-Eintraege aus einem Text parsen.
+     * @return {Array<{raw: string, v: number, ts: string, uid: number, result: string, hash: string, th: string, algo: number}>}
+     */
+    function marker_parse( text ) {
+        const entries = [];
+        if( !text ) return entries;
+        const matches = text.match( MARKER_LINE_RE ) || [];
+
+        matches.forEach( function( raw ) {
+            const entry = { raw: raw };
+            const v_match = raw.match( /ki-korrektor v(\d+)/ );
+            entry.v = v_match ? parseInt( v_match[1], 10 ) : 0;
+            let m;
+            const field_re = /(\w+)=([^\s>]+)/g;
+
+            while( ( m = field_re.exec( raw ) ) !== null ) {
+                entry[m[1]] = m[1] === 'uid' || m[1] === 'algo' ? parseInt( m[2], 10 ) : m[2];
+            }
+            entries.push( entry );
+        });
+        return entries;
+    }
+
+    /** Roh-Normalisierung (algo=1): Zeilenenden vereinheitlichen, Trailing-Whitespace trimmen. */
+    function marker_norm_raw( text ) {
+        return ( text || '' ).replace( /\r\n?/g, '\n' ).replace( /\s+$/, '' );
+    }
+
+    /**
+     * Text-Projektion (algo=1): Kommentare, ##Shortcodes## und Tags entfernen,
+     * Entities dekodieren, &shy;/&nbsp; neutralisieren, Whitespace kollabieren.
+     * Ergebnis ist im Editor (Rohfelder) und auf der Pending-Seite identisch
+     * berechenbar, solange der sichtbare Text uebereinstimmt.
+     */
+    function marker_text_projection( text ) {
+        if( !text ) return '';
+        let t = text
+            .replace( /<!--[\s\S]*?-->/g, ' ' )
+            .replace( /##(?:[^#]|#(?!#))*?##/g, ' ' )
+            .replace( /<[^>]*>/g, ' ' );
+
+        // Entities dekodieren (Textarea-Trick: parst nur Text, keine Elemente)
+        if( t.indexOf( '&' ) !== -1 ) {
+            const ta = document.createElement( 'textarea' );
+            ta.innerHTML = t;
+            t = ta.value;
+        }
+        return t
+            .replace( /\u00AD/g, '' )
+            .replace( /\u00A0/g, ' ' )
+            .replace( /\s+/g, ' ' )
+            .replace( /^\s+|\s+$/g, '' );
+    }
+
+    /**
+     * Beide Versions-Hashes ueber Headline+Teaser+Content berechnen.
+     * @param {object} f { headline, teaser, content } — content darf Marker enthalten (werden entfernt)
+     * @return {{hash: string, th: string}}
+     */
+    function marker_version_hashes( f ) {
+        const content_clean = marker_strip( f.content || '' );
+        const raw_material = marker_norm_raw( f.headline ) + '\u0001'
+            + marker_norm_raw( f.teaser ) + '\u0001'
+            + marker_norm_raw( content_clean );
+        const text_material = marker_text_projection( f.headline ) + '\u0001'
+            + marker_text_projection( f.teaser ) + '\u0001'
+            + marker_text_projection( content_clean );
+        return { hash: marker_fnv1a( raw_material ), th: marker_fnv1a( text_material ) };
+    }
+
+    /** Aktuelle Feldwerte des Editors als {headline, teaser, content} lesen. */
+    function marker_read_fields( ci ) {
+        const f = {};
+
+        for( const key of [ 'headline', 'teaser', 'content' ] ) {
+            f[key] = ci.config.fields[key] ? read_field_value( ci.config.fields[key] ) : '';
+        }
+        return f;
+    }
+
+    /**
+     * Pruef-Status fuer einen Feldsatz ermitteln (Editor UND Pending-Seite).
+     * @param {object} f { headline, teaser, content }
+     * @return {object} { state: 'ok'|'markup'|'stale'|'none', entry, entries, hashes }
+     *   ok:     exakt diese Version wurde geprueft (Roh-Hash-Treffer)
+     *   markup: sichtbarer Text unveraendert, nur Markup geaendert (th-Treffer)
+     *   stale:  frueher geprueft, Inhalt seither geaendert
+     *   none:   nie geprueft
+     */
+    function marker_status_for( f ) {
+        const entries = marker_parse( f.content || '' );
+        const hashes = marker_version_hashes( f );
+
+        // Neueste Treffer zuerst suchen
+        for( let i = entries.length - 1; i >= 0; i-- ) {
+            if( entries[i].hash === hashes.hash ) {
+                return { state: 'ok', entry: entries[i], entries: entries, hashes: hashes };
+            }
+        }
+
+        for( let i = entries.length - 1; i >= 0; i-- ) {
+            if( entries[i].th === hashes.th ) {
+                return { state: 'markup', entry: entries[i], entries: entries, hashes: hashes };
+            }
+        }
+
+        if( entries.length > 0 ) {
+            return { state: 'stale', entry: entries[entries.length - 1], entries: entries, hashes: hashes };
+        }
+        return { state: 'none', entry: null, entries: entries, hashes: hashes };
+    }
+
+    /** ISO-Timestamp (Sekunden-Genauigkeit) fuer den Marker. */
+    function marker_now_ts() {
+        return new Date().toISOString().replace( /\.\d{3}Z$/, 'Z' );
+    }
+
+    /** Marker-Timestamp fuer die UI formatieren ("19.08.26, 23:19 Uhr", lokale Zeit). */
+    function marker_format_ts( iso ) {
+        if( !iso ) return 'unbekannt';
+        const d = new Date( iso );
+        if( isNaN( d ) ) return iso;
+        const dd = String( d.getDate() ).padStart( 2, '0' );
+        const mm = String( d.getMonth() + 1 ).padStart( 2, '0' );
+        const yy = String( d.getFullYear() ).slice( -2 );
+        const min = String( d.getMinutes() ).padStart( 2, '0' );
+        return `${dd}.${mm}.${yy}, ${d.getHours()}:${min} Uhr`;
+    }
+
+    /** Ergebnis-Bit fuer die UI uebersetzen. */
+    function marker_format_result( result ) {
+        if( result === 'clean' ) return 'keine sichtbaren Änderungen';
+        if( result === 'changed' ) return 'Änderungen vorgeschlagen';
+        return 'Ergebnis unbekannt';
+    }
+
+    /**
+     * Neuen Marker-Eintrag stempeln: alte Historie erhalten (Cap), neuen
+     * Eintrag mit aktuellem Versions-Hash anhaengen, Content-Feld schreiben.
+     * @param {object} ci content_info
+     * @param {string} result 'clean' | 'changed' | 'unknown'
+     */
+    function marker_stamp( ci, result ) {
+        // Fail-open: das Widget ist Hilfe, nie Stopper — ein Fehler beim
+        // Stempeln darf Speichern/Workflow niemals blockieren.
+        try {
+            marker_stamp_unsafe( ci, result );
+        } catch( e ) {
+            log_debug( `Pruef-Marker konnte nicht gestempelt werden: ${e.message}` );
+        }
+    }
+
+    function marker_stamp_unsafe( ci, result ) {
+        if( !ci || !ci.config.fields.content ) return;
+        const f = marker_read_fields( ci );
+        const hashes = marker_version_hashes( f );
+        let history = marker_parse( f.content ).map( function( e ) { return e.raw; } );
+
+        // Nach dem KI-Write-back ist das Feld markerfrei (Marker gehen nie zur
+        // KI) — die Historie frueherer Laeufe lebt dann nur noch im Snapshot
+        // von vor dem Lauf. Von dort uebernehmen, damit sie nicht verloren geht.
+        if( history.length === 0 && run_marker_history.length > 0 ) {
+            history = run_marker_history.slice();
+        }
+
+        // Wird im selben Lauf erneut gestempelt (z. B. Diff nochmal geoeffnet
+        // und anders entschieden), ersetzt der neue Eintrag den alten.
+        if( run_last_stamp && history.length > 0 && history[history.length - 1] === run_last_stamp ) {
+            history.pop();
+        }
+        const entry = '<!-- ki-korrektor v' + MARKER_VERSION
+            + ' ts=' + marker_now_ts()
+            + ' uid=' + Number( uid_match[1] )
+            + ' result=' + result
+            + ' hash=' + hashes.hash
+            + ' th=' + hashes.th
+            + ' algo=' + MARKER_ALGO + ' -->';
+
+        history.push( entry );
+        run_last_stamp = entry;
+        const capped = history.slice( -MARKER_MAX_ENTRIES );
+        const new_content = marker_strip( f.content ) + '\n' + capped.join( '\n' );
+
+        if( new_content !== f.content ) {
+            write_field_value( ci.config.fields.content, new_content );
+        }
+        log_debug( `Pruef-Marker gestempelt: result=${result} hash=${hashes.hash} th=${hashes.th} (${capped.length} Eintraege).` );
+        update_tab_status( true );
+    }
+
+    // Diagnose-/Test-Zugriff auf die Marker-Utilities (read-only, keine Secrets —
+    // analog zu VergleichsWidget._internal). Wird u. a. von Tests und ggf. vom
+    // CMS genutzt, um den Pruef-Status unabhaengig nachzurechnen.
+    window.wfv4_ki_marker = {
+        strip: marker_strip,
+        parse: marker_parse,
+        hashes: marker_version_hashes,
+        projection: marker_text_projection,
+        status_for: marker_status_for
+    };
 
     // --- UTILITY FUNCTIONS ---
 
@@ -697,6 +965,64 @@
         log_debug( 'Editor-Felder freigegeben.' );
     }
 
+    // --- STATUS-BADGE IN DER LAUNCHER-LASCHE ---
+    // Die Lasche zeigt neben dem Namen den aktuellen Pruef-Stand des Artikels:
+    //   ✓ Geprueft (gruen)      — exakt diese Version lief durch den KI-Korrektor
+    //   ✓ Markup geaendert      — sichtbarer Text unveraendert, nur Markup anders
+    //   ⚠ Veraltet (orange)     — geprueft, aber Inhalt seither geaendert
+    //   – Ungeprueft (grau)     — kein Pruef-Marker vorhanden
+    const TAB_BADGE_STATES = {
+        ok:     { label: '✓ Geprüft',   bg: '#176c1f' },
+        markup: { label: '✓ Geprüft*',  bg: '#4d6b1f' },
+        stale:  { label: '⚠ Veraltet',  bg: '#b45309' },
+        none:   { label: '– Ungeprüft', bg: '#6b7280' }
+    };
+
+    /** Status-Badge in der Lasche anhand des aktuellen Editor-Stands aktualisieren. */
+    let tab_status_last_calc = 0;
+    function update_tab_status( force ) {
+        // Throttle: Hover-Refreshes rechnen hoechstens alle 1,5 s neu — bei
+        // sehr grossen Artikeln (100 KB+) kostet die Projektion sonst spuerbar.
+        if( !force && Date.now() - tab_status_last_calc < 1500 ) return;
+        tab_status_last_calc = Date.now();
+
+        // Fail-open: Badge ist reine Info — Fehler hier still schlucken.
+        try {
+            update_tab_status_unsafe();
+        } catch( e ) {
+            if( tab_badge_el ) tab_badge_el.style.display = 'none';
+        }
+    }
+
+    function update_tab_status_unsafe() {
+        if( !tab_badge_el ) return;
+
+        if( poll_active ) {
+            tab_badge_el.style.display = 'none';
+            return;
+        }
+        const ci = content_info || detect_content_info();
+
+        if( !ci ) {
+            tab_badge_el.style.display = 'none';
+            return;
+        }
+        const status = marker_status_for( marker_read_fields( ci ) );
+        const cfg = TAB_BADGE_STATES[status.state] || TAB_BADGE_STATES.none;
+        tab_badge_el.textContent = cfg.label;
+        tab_badge_el.style.backgroundColor = cfg.bg;
+        tab_badge_el.style.display = 'inline-block';
+
+        if( status.entry ) {
+            const who = USER_NAMES[status.entry.uid] || ( 'User ' + status.entry.uid );
+            tab_badge_el.title = `Zuletzt geprüft: ${marker_format_ts( status.entry.ts )} von ${who} — ${marker_format_result( status.entry.result )}`
+                + ( status.state === 'markup' ? '\nSeitdem nur Markup-Änderungen (sichtbarer Text identisch).' : '' )
+                + ( status.state === 'stale' ? '\nDer Inhalt wurde seit der Prüfung geändert.' : '' );
+        } else {
+            tab_badge_el.title = 'Dieser Artikel wurde noch nicht durch den KI-Korrektor geprüft.';
+        }
+    }
+
     // --- WIDGET INITIALISATION (LAUNCHER TAB) ---
     /** Create and attach the bottom-right launcher tab. Terminal is built lazily on first click. */
     function init_widget() {
@@ -710,8 +1036,16 @@
             transition: 'background-color 0.2s', display: 'flex', alignItems: 'center', gap: '8px'
         });
         launcher_tab.innerHTML = '<span>🤖 KI-Korrektor</span>';
+        tab_label_el = launcher_tab.querySelector( 'span' );
+        tab_badge_el = document.createElement( 'span' );
+        Object.assign( tab_badge_el.style, {
+            fontSize: '11px', fontWeight: '600', padding: '2px 8px', borderRadius: '10px',
+            backgroundColor: '#6b7280', color: '#fff', display: 'none', letterSpacing: '.2px',
+            lineHeight: '1.5', whiteSpace: 'nowrap'
+        });
+        launcher_tab.appendChild( tab_badge_el );
 
-        launcher_tab.onmouseover = () => launcher_tab.style.backgroundColor = '#3a3f46';
+        launcher_tab.onmouseover = () => { launcher_tab.style.backgroundColor = '#3a3f46'; update_tab_status(); };
         launcher_tab.onmouseout = () => launcher_tab.style.backgroundColor = '#1f2328';
 
         launcher_tab.onclick = () => {
@@ -721,11 +1055,22 @@
             } else {
                 terminal_container.style.display = 'flex'; // Zeigt das versteckte Terminal wieder
             }
-            // Artikel-Prüfung direkt auslösen (Button ist initial hidden, nur bei Fehler sichtbar)
-            requestAnimationFrame(() => setTimeout(() => { if (btn_check && !btn_check.disabled) btn_check.click(); }, 100));
+            // Dedupe-Vorabcheck: startet die Pruefung automatisch, ausser exakt
+            // diese Version wurde bereits geprueft — dann Abraten-Screen.
+            // Bewusst OHNE requestAnimationFrame: rAF feuert in Hintergrund-Tabs
+            // nicht (Chrome-Throttling) — der Start wuerde bis zur Tab-Rueckkehr haengen.
+            setTimeout(() => { if (maybe_autostart_fn) maybe_autostart_fn(); }, 120);
         };
 
         document.body.appendChild(launcher_tab);
+
+        // Initialen Pruef-Status anzeigen, sobald die ACE-Editoren bereit sind
+        setTimeout( update_tab_status, 800 );
+
+        // Sprung von der Pending-Seite: #ki-check startet die Pruefung sofort
+        if( location.hash === '#ki-check' ) {
+            setTimeout( () => launcher_tab.click(), 400 );
+        }
     }
 
     // --- MAIN TERMINAL (OVERLAY UI) ---
@@ -776,7 +1121,11 @@
         const close_header_btn = document.createElement('span'); close_header_btn.innerHTML = '▼ Verbergen';
         Object.assign(close_header_btn.style, { cursor: 'pointer', fontWeight: '500', fontSize: '12px', color: '#3a3f46', transition: 'color 0.2s' });
         close_header_btn.onmouseover = () => close_header_btn.style.color = '#1f2328'; close_header_btn.onmouseout = () => close_header_btn.style.color = '#3a3f46';
-        close_header_btn.onclick = () => { terminal_container.style.display = 'none'; launcher_tab.style.display = 'flex'; wfv4_link_preview.destroy(); };
+        close_header_btn.onclick = () => {
+            terminal_container.style.display = 'none'; launcher_tab.style.display = 'flex'; wfv4_link_preview.destroy();
+            // Lasche zeigt wieder Standard-Label + Status-Badge (statt "KI Fertig")
+            if( !poll_active && tab_label_el ) { tab_label_el.innerText = '🤖 KI-Korrektor'; update_tab_status( true ); }
+        };
 
         header_right.appendChild(debug_btn); header_right.appendChild(close_header_btn);
         header.appendChild(header_right);
@@ -818,6 +1167,28 @@
         Object.assign(btn_close_bottom.style, ACTION_BTN_STYLE, { backgroundColor: '#176c1f', color: '#fff', border: '1px solid #176c1f', fontWeight: '600' });
         btn_close_bottom.onmouseover = () => btn_close_bottom.style.backgroundColor = '#125a18'; btn_close_bottom.onmouseout = () => btn_close_bottom.style.backgroundColor = '#176c1f';
         btn_close_bottom.onclick = () => {
+            // Safety-Net: Falls nach einem KI-Lauf noch kein Pruef-Marker
+            // gestempelt wurde (z. B. Speichern-Klick bevor der Auto-Diff-
+            // Pre-Check nach 350 ms lief), hier nachholen. Verdict per
+            // Roh-Vergleich Backup vs. aktueller Stand (marker-bereinigt).
+            if( content_info && backup_data && !marker_stamp_done ) {
+                marker_stamp_done = true;
+
+                // Fail-open: das Speichern darf ein Marker-Problem nie blockieren.
+                try {
+                    const now_f = marker_read_fields( content_info );
+                    const before_f = {
+                        headline: backup_data.headline || '',
+                        teaser: backup_data.teaser || '',
+                        content: backup_data.content || ''
+                    };
+                    const same = marker_version_hashes( now_f ).hash === marker_version_hashes( before_f ).hash;
+                    marker_stamp( content_info, same ? 'clean' : 'changed' );
+                } catch( e ) {
+                    log_debug( `Marker-Safety-Net übersprungen: ${e.message}` );
+                }
+            }
+
             // Content-type-specific form submission
             if( content_info ) {
                 const type_id = content_info.type;
@@ -835,6 +1206,13 @@
                 }
             }
             terminal_container.style.display = 'none';
+
+            // Lasche wieder anbieten (Widget ist Hilfe, nie weg): beim klassischen
+            // Form-Submit laedt die Seite ohnehin neu, aber falls der Submit die
+            // Seite nicht verlaesst, bleibt das Widget erreichbar.
+            launcher_tab.style.display = 'flex';
+            if( tab_label_el ) tab_label_el.innerText = '🤖 KI-Korrektor';
+            update_tab_status( true );
         };
 
         footer.appendChild(btn_check); footer.appendChild(btn_diff); footer.appendChild(btn_undo); footer.appendChild(btn_close_bottom);
@@ -874,6 +1252,7 @@
             [ btn_diff, btn_undo ].forEach( function( btn ) {
                 if( !btn ) return;
                 btn.disabled = true;
+                btn._locked_disabled = true; // verhindert Re-Enable im finally von open_diff_modal
                 btn.style.opacity = '.5';
                 btn.style.cursor = 'not-allowed';
                 btn.title = reason;
@@ -881,6 +1260,22 @@
                 btn.onmouseover = null;
                 btn.onmouseout = null;
             });
+        }
+
+        /** Gegenstueck zu disable_diff_buttons: Zustand fuer einen neuen Lauf zuruecksetzen. */
+        function enable_diff_buttons() {
+            [ btn_diff, btn_undo ].forEach( function( btn ) {
+                if( !btn ) return;
+                btn.disabled = false;
+                btn._locked_disabled = false;
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+                btn.title = '';
+            });
+            btn_diff.onmouseover = () => btn_diff.style.backgroundColor = '#f1f3f6';
+            btn_diff.onmouseout = () => btn_diff.style.backgroundColor = '#fff';
+            btn_undo.onmouseover = () => btn_undo.style.backgroundColor = '#ffe1e1';
+            btn_undo.onmouseout = () => btn_undo.style.backgroundColor = '#fff';
         }
 
         async function open_diff_modal( opts ) {
@@ -911,6 +1306,15 @@
                     if( !fields[key] ) continue;
                     before[key] = ( backup_data && typeof backup_data[key] === 'string' ) ? backup_data[key] : '';
                     after[key]  = read_field_value( fields[key] ) || '';
+
+                    // Pruef-Marker aus beiden Bundles entfernen: sie sind kein
+                    // Inhalt und wuerden sonst Phantom-Diff-Zeilen erzeugen bzw.
+                    // den "keine Unterschiede"-Pre-Check verfaelschen. Nach dem
+                    // onResolve-Write-back wird frisch gestempelt.
+                    if( key === 'content' ) {
+                        before[key] = marker_strip( before[key] );
+                        after[key] = marker_strip( after[key] );
+                    }
                 }
 
                 // Pre-Check: Diff-Engine vorab laufen lassen. Wenn keine
@@ -923,6 +1327,13 @@
 
                 if( !has_changes ) {
                     log_debug( 'Vergleich: keine Textunterschiede gefunden.' );
+
+                    // Ergebnis-Bit: keine sichtbaren Unterschiede, der Redakteur
+                    // kann direkt speichern — result=clean stempeln.
+                    if( !marker_stamp_done ) {
+                        marker_stamp_done = true;
+                        marker_stamp( content_info, 'clean' );
+                    }
 
                     // Buttons ausgrauen, wenn die KI nichts angefasst hat —
                     // dann gibt es nichts zu vergleichen oder rückgängig zu
@@ -954,6 +1365,13 @@
                         const open_count = stats.total - stats.accepted - stats.rejected;
                         log_debug( `Vergleich übernommen: ${stats.accepted} angenommen, ${stats.rejected} abgelehnt, ${open_count} unverändert (Default angenommen).` );
 
+                        // Ergebnis-Bit: die KI hatte Aenderungen, das Diff wurde
+                        // gezeigt — result=changed stempeln (unabhaengig davon,
+                        // was der Redakteur angenommen hat). Synchron VOR dem
+                        // Auto-Save-setTimeout, damit der Marker mitgespeichert wird.
+                        marker_stamp_done = true;
+                        marker_stamp( content_info, 'changed' );
+
                         // Auto-Save: wenn der User über den Footer-Primary-Action-Button
                         // geschlossen hat ("Alle annehmen" / "Übernehmen" / "Speichern"),
                         // unmittelbar das Speichern des Formulars auslösen.
@@ -971,12 +1389,20 @@
                 // Sicherheitsrichtlinie §12: Details nur ins Debug-Log, nicht an den User
                 log_debug( `VergleichsWidget-Fehler: ${err.message}` );
 
+                // Ohne Diff-Engine gibt es kein Verdict — der Lauf selbst wird
+                // trotzdem dokumentiert (result=unknown), damit "geprueft am/von"
+                // nicht verloren geht.
+                if( is_auto && !marker_stamp_done && backup_data ) {
+                    marker_stamp_done = true;
+                    marker_stamp( content_info, 'unknown' );
+                }
+
                 if( !is_auto ) {
                     add_message( '<b>Hinweis:</b> Konnte das Vergleichs-Widget nicht laden.', 'warning' );
                 }
             } finally {
                 btn_diff.innerHTML = old_btn_text;
-                btn_diff.disabled = false;
+                btn_diff.disabled = !!btn_diff._locked_disabled;
             }
         }
 
@@ -994,15 +1420,71 @@
                 }
             }
             add_message( '<b>Hinweis:</b> Originaltext wurde wiederhergestellt.', 'warning' ); log_debug( 'Originaltext wiederhergestellt.' );
+            update_tab_status( true ); // Undo entfernt auch den frischen Pruef-Marker
+        };
+
+        // --- DEDUPE-VORABCHECK (statt bedingungslosem Auto-Start) ---
+        // Wird beim Oeffnen des Widgets aufgerufen. Ist exakt die aktuelle
+        // Version (Headline+Teaser+Text) bereits geprueft, wird von einem
+        // erneuten Lauf abgeraten — transparent begruendet, aber der Mensch
+        // entscheidet ("Trotzdem erneut pruefen"). Sonst startet die Pruefung
+        // automatisch wie bisher.
+        maybe_autostart_fn = function() {
+            if( poll_active || !btn_check || btn_check.disabled ) return;
+
+            // Fail-open: schlaegt der Vorabcheck fehl, startet die Pruefung
+            // wie bisher automatisch — das Widget ist Hilfe, nie Stopper.
+            try {
+            const ci = detect_content_info();
+
+            if( ci ) {
+                const status = marker_status_for( marker_read_fields( ci ) );
+
+                if( status.state === 'ok' && status.entry ) {
+                    content_info = ci;
+                    const who = USER_NAMES[status.entry.uid] || ( 'User ' + status.entry.uid );
+                    const runs_note = status.entries.length > 1
+                        ? ` Insgesamt ${status.entries.length} dokumentierte Prüf-Läufe.` : '';
+
+                    set_status( '✅', 'Exakt diese Version wurde bereits geprüft.', 'Eine erneute Prüfung ist nicht nötig — du entscheidest.', '#176c1f' );
+                    add_message(
+                        `<b>Geprüft am:</b> ${escape_html( marker_format_ts( status.entry.ts ) )} von <b>${escape_html( who )}</b><br>`
+                        + `<b>Ergebnis damals:</b> ${marker_format_result( status.entry.result )}<br><br>`
+                        + `<b>Warum wird abgeraten?</b> Headline, Teaser und Text sind unverändert gegenüber der bereits geprüften Version `
+                        + `(Prüf-Nachweis im Artikeltext, Hash <code>${escape_html( status.entry.hash )}</code>). `
+                        + `Ein erneuter KI-Lauf kostet Zeit und Geld und liefert bei identischem Text erwartbar dasselbe Ergebnis.${runs_note}`,
+                        'info'
+                    );
+                    btn_check.innerHTML = '🔁 Trotzdem erneut prüfen';
+                    btn_check.style.display = 'block';
+                    btn_check.disabled = false;
+                    log_debug( `Dedupe-Vorabcheck: exakter Treffer (hash=${status.entry.hash}) — Auto-Start unterdrückt.` );
+                    return;
+                }
+
+                if( status.state === 'markup' && status.entry ) {
+                    log_debug( `Dedupe-Vorabcheck: Text unverändert, nur Markup geändert seit ${status.entry.ts} (th=${status.entry.th}) — Prüfung startet normal.` );
+                }
+            }
+            } catch( e ) {
+                log_debug( `Dedupe-Vorabcheck fehlgeschlagen (${e.message}) — starte Prüfung normal.` );
+            }
+
+            if( !btn_check.disabled ) btn_check.click();
         };
 
         // --- HAUPT-POLLING LOGIK ---
         btn_check.addEventListener('click', async () => {
             btn_check.disabled = true; btn_check.style.display = 'none'; results_area.innerHTML = ''; debug_log = []; auto_diff_opened = false;
+            marker_stamp_done = false;
+            run_last_stamp = null;
+            btn_check.innerHTML = '🚀 Artikel überprüfen'; // ggf. "Trotzdem erneut prüfen" zurücksetzen
+            enable_diff_buttons(); // ggf. Sperre aus vorherigem "keine Unterschiede"-Lauf aufheben
 
             log_debug('Starte Überprüfungsprozess...');
             let timer_interval;
             poll_active = true;
+            if( tab_badge_el ) tab_badge_el.style.display = 'none';
             launcher_tab.querySelector('span').innerText = '⏳ KI arbeitet...';
 
             let manual_poll_area = null;
@@ -1024,6 +1506,10 @@
                 for( const key in content_info.config.fields ) {
                     backup_data[key] = read_field_value( content_info.config.fields[key] );
                 }
+
+                // Marker-Historie von vor dem Lauf sichern — das Feld wird beim
+                // Write-back mit der markerfreien KI-Version ueberschrieben.
+                run_marker_history = marker_parse( backup_data.content || '' ).map( function( e ) { return e.raw; } );
 
                 lock_editor();
 
@@ -1255,6 +1741,10 @@
                                 if (!new_content) throw new Error('Erfolg gemeldet, aber kein Text gespeichert.');
 
                                 new_content = clean_ai_content( new_content );
+                                // Defensiv: sollte die KI trotz Payload-Stripping einen
+                                // (halluzinierten) Pruef-Marker zurueckgeben, entfernen —
+                                // gestempelt wird ausschliesslich clientseitig.
+                                new_content = marker_strip( new_content );
                                 set_status( '⏳', 'Schreibe Korrekturen in Editor...', null, '#0550ae' );
 
                                 // Write corrected content back to the content field
@@ -1444,11 +1934,155 @@
         });
     }
 
+    // --- PENDING-MODUS (Freischaltseite /admin/news/<id>/pending/) ---
+    // Auf der Pending-Seite gibt es keine Editor-Felder — das Widget zeigt
+    // dort nur den Pruef-Status der aktuellen Artikel-Version an. Die Seite
+    // muss die Rohfelder bereitstellen (CMS-Kontrakt):
+    //   window.wfv4_ki_raw = { headline: '...', teaser: '...', content: '...' }
+    // Optional: window.wfv4_content = { type, id, mode: 'pending' }.
+
+    /** Erkennen, ob wir auf einer Pending-/Freischaltseite laufen. */
+    function detect_pending_mode() {
+        if( window.wfv4_content && window.wfv4_content.mode === 'pending' ) return true;
+        return /\/admin\/news\/\d+\/pending\//.test( location.pathname );
+    }
+
+    /** News-ID auf der Pending-Seite ermitteln (Kontrakt, CMS-Global oder URL). */
+    function detect_pending_id() {
+        if( window.wfv4_content && parseInt( window.wfv4_content.id, 10 ) > 0 ) {
+            return parseInt( window.wfv4_content.id, 10 );
+        }
+
+        if( typeof window.comments_content_id !== 'undefined' && parseInt( window.comments_content_id, 10 ) > 0 ) {
+            return parseInt( window.comments_content_id, 10 );
+        }
+        const url_match = location.pathname.match( /\/admin\/news\/(\d+)\/pending\// );
+        return url_match ? parseInt( url_match[1], 10 ) : 0;
+    }
+
+    /** Status-Lasche + Info-Panel fuer die Pending-Seite aufbauen. */
+    function init_pending_widget() {
+        const raw = window.wfv4_ki_raw || null;
+        const news_id = detect_pending_id();
+        const status = raw ? marker_status_for( raw ) : null;
+
+        const PENDING_STATES = {
+            ok:     { icon: '✅', badge: TAB_BADGE_STATES.ok,     title: 'KI-geprüft — Version aktuell' },
+            markup: { icon: '🟡', badge: TAB_BADGE_STATES.markup, title: 'KI-geprüft — seither nur Markup-Änderungen' },
+            stale:  { icon: '⚠️', badge: TAB_BADGE_STATES.stale,  title: 'KI-geprüft, aber Inhalt seither geändert' },
+            none:   { icon: '🔴', badge: TAB_BADGE_STATES.none,   title: 'Nicht KI-geprüft' }
+        };
+        const state_cfg = status ? PENDING_STATES[status.state] : null;
+
+        // Lasche (gleicher Look wie im Editor)
+        const tab = document.createElement( 'div' );
+        tab.id = 'ai-reviewer-launcher';
+        Object.assign( tab.style, {
+            position: 'fixed', bottom: '0', right: '40px', backgroundColor: '#1f2328', color: '#fff',
+            padding: '10px 20px', borderTopLeftRadius: '8px', borderTopRightRadius: '8px',
+            cursor: 'pointer', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif', fontWeight: '600',
+            fontSize: '13px', letterSpacing: '.2px', zIndex: '999999', boxShadow: '0 -2px 14px rgba(0,0,0,.12)',
+            transition: 'background-color 0.2s', display: 'flex', alignItems: 'center', gap: '8px'
+        });
+        const badge_cfg = state_cfg ? state_cfg.badge : { label: 'Status n/a', bg: '#6b7280' };
+        tab.innerHTML = '<span>🤖 KI-Korrektor</span>'
+            + `<span style="font-size:11px; font-weight:600; padding:2px 8px; border-radius:10px; background-color:${badge_cfg.bg}; color:#fff; letter-spacing:.2px; line-height:1.5; white-space:nowrap;">${badge_cfg.label}</span>`;
+        tab.onmouseover = () => tab.style.backgroundColor = '#3a3f46';
+        tab.onmouseout = () => tab.style.backgroundColor = '#1f2328';
+
+        // Info-Panel (lazy aufgebaut, Toggle per Klick auf die Lasche)
+        let panel = null;
+
+        function build_panel() {
+            panel = document.createElement( 'div' );
+            Object.assign( panel.style, {
+                position: 'fixed', bottom: '20px', right: '20px', width: '460px', maxWidth: 'calc(100vw - 40px)',
+                backgroundColor: '#fff', color: '#1f2328', border: '1px solid #d0d4dc', borderRadius: '10px',
+                zIndex: '999999', boxShadow: '0 20px 50px rgba(0,0,0,.18)', fontSize: '13px', overflow: 'hidden',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif'
+            });
+
+            let body_html;
+
+            if( !raw ) {
+                body_html = '<div style="font-weight:600; margin-bottom:8px;">Prüf-Status nicht verfügbar</div>'
+                    + '<div style="color:#3a3f46; line-height:1.5;">Diese Seite stellt die Artikel-Rohdaten nicht bereit '
+                    + '(<code>window.wfv4_ki_raw</code> fehlt). Der Prüf-Status kann hier nicht berechnet werden.</div>';
+            } else {
+                const e = status.entry;
+                const who = e ? ( USER_NAMES[e.uid] || ( 'User ' + e.uid ) ) : null;
+                const detail = e
+                    ? `<div style="color:#3a3f46; line-height:1.6;">Zuletzt geprüft: <b>${escape_html( marker_format_ts( e.ts ) )}</b> von <b>${escape_html( who )}</b><br>`
+                        + `Ergebnis: <b>${marker_format_result( e.result )}</b></div>`
+                    : '<div style="color:#3a3f46; line-height:1.6;">Für diesen Artikel existiert kein Prüf-Nachweis im Artikeltext.</div>';
+
+                const reason = {
+                    ok:     'Headline, Teaser und Text sind unverändert gegenüber der geprüften Version. <b>Nichts zu tun.</b>',
+                    markup: 'Der sichtbare Text ist unverändert, seit der Prüfung wurde nur Markup angepasst (z. B. Links oder Formatierung). Eine erneute Prüfung ist in der Regel nicht nötig.',
+                    stale:  'Der Inhalt wurde nach der letzten Prüfung geändert — die aktuelle Version ist <b>nicht</b> geprüft.',
+                    none:   'Dieser Artikel ist noch nie durch den KI-Korrektor gelaufen.'
+                }[status.state];
+
+                const history_html = status.entries.length > 0
+                    ? '<div style="margin-top:10px; font-size:11px; color:#94979d;">'
+                        + status.entries.slice( -5 ).reverse().map( function( h ) {
+                            const h_who = USER_NAMES[h.uid] || ( 'User ' + h.uid );
+                            return `• ${escape_html( marker_format_ts( h.ts ) )} — ${escape_html( h_who )} — ${marker_format_result( h.result )}`;
+                        }).join( '<br>' )
+                        + '</div>'
+                    : '';
+
+                const action_html = ( status.state === 'stale' || status.state === 'none' || status.state === 'markup' ) && news_id
+                    ? `<a href="/admin/news/${news_id}/edit/#ki-check" style="display:inline-block; margin-top:14px; padding:8px 16px; background-color:#176c1f; color:#fff; border-radius:6px; text-decoration:none; font-weight:600;">🚀 Im Editor prüfen</a>`
+                        + '<div style="font-size:11px; color:#94979d; margin-top:6px;">Öffnet den Artikel-Editor — die KI-Prüfung startet dort automatisch.</div>'
+                    : '';
+
+                body_html = `<div style="font-weight:600; font-size:14px; margin-bottom:10px;">${state_cfg.icon} ${state_cfg.title}</div>`
+                    + detail
+                    + `<div style="margin-top:10px; color:#1f2328; line-height:1.5;">${reason}</div>`
+                    + action_html
+                    + history_html;
+            }
+
+            panel.innerHTML = '<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background-color:#f8f9fb; border-bottom:1px solid #e5e7eb; font-weight:600;">'
+                + '<span>🤖 KI-Korrektor — Prüf-Status</span>'
+                + '<span data-ki-close style="cursor:pointer; font-weight:500; font-size:12px; color:#3a3f46;">▼ Verbergen</span>'
+                + '</div>'
+                + `<div style="padding:14px 16px;">${body_html}</div>`;
+            panel.querySelector( '[data-ki-close]' ).onclick = function() {
+                panel.style.display = 'none';
+                tab.style.display = 'flex';
+            };
+            document.body.appendChild( panel );
+        }
+
+        tab.onclick = function() {
+            tab.style.display = 'none';
+            if( !panel ) build_panel();
+            else panel.style.display = 'block';
+        };
+
+        document.body.appendChild( tab );
+    }
+
     // Start immediately if DOM is ready, otherwise wait for DOMContentLoaded
+    function init_by_mode() {
+        // Fail-open: ein Widget-Fehler darf die CMS-Seite nie beeintraechtigen.
+        try {
+            if( detect_pending_mode() ) {
+                init_pending_widget();
+            } else {
+                init_widget();
+            }
+        } catch( e ) {
+            console.error( '🤖 AI-Reviewer: Initialisierung fehlgeschlagen —', e );
+        }
+    }
+
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init_widget);
+        document.addEventListener('DOMContentLoaded', init_by_mode);
     } else {
-        init_widget();
+        init_by_mode();
     }
 
 })();
