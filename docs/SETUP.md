@@ -14,7 +14,7 @@ auf Rechtschreibung, Grammatik und Verlinkungen pruefen laesst. Er besteht aus:
 
 | Datei | Zweck |
 |-------|-------|
-| `winfuture-integration.php` | PHP-Klasse `wfv4_ai_reviewer` — einmalig ins Projekt einbinden |
+| `winfuture-integration.php` | PHP-Klasse `wfv4_model_aireviewer` — einmalig ins Projekt einbinden |
 
 ## Schritt 1: Secret ablegen
 
@@ -41,7 +41,7 @@ define( 'WFV4_AI_REVIEWER_SECRET', '<secret-hier-eintragen>' );
 
 ## Schritt 2: PHP-Klasse einbinden
 
-Die Datei `winfuture-integration.php` enthaelt die Klasse `wfv4_ai_reviewer`.
+Die Datei `winfuture-integration.php` enthaelt die Klasse `wfv4_model_aireviewer`.
 Diese Datei muss einmalig ins Projekt eingebunden werden (require/autoload),
 passend zur bestehenden Paketstruktur.
 
@@ -51,7 +51,7 @@ An der Stelle, wo der Artikel-Editor gerendert wird, **nur fuer eingeloggte
 Redakteure**, folgenden Aufruf einfuegen:
 
 ```php
-wfv4_ai_reviewer::render( WFV4_AI_REVIEWER_SECRET );
+wfv4_model_aireviewer::render( WFV4_AI_REVIEWER_SECRET );
 ```
 
 Das ist alles. Der Aufruf gibt zwei Script-Tags aus:

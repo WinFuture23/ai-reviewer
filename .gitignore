@@ -1,3 +1,6 @@
 # Umgebung
 .env
 *.env.*
+
+# Claude Code (lokale Session-Daten)
+.claude/

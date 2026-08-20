@@ -20,7 +20,7 @@ Das Widget startet nur, wenn beide Bedingungen erfüllt sind:
    Witold Pryjda, Felix Krauth, Nadine Dressler, Stefan Trunzik,
    Christian Kahle, Roland Quandt, Thomas Zick, Sebastian Kasparek).
 2. Das CMS hat den Script-Tag ausgegeben — d. h. die PHP-Klasse
-   `wfv4_ai_reviewer::render()` wurde aufgerufen (siehe
+   `wfv4_model_aireviewer::render()` wurde aufgerufen (siehe
    [winfuture-integration.php](winfuture-integration.php)).
 
 Schlägt eine der beiden Prüfungen fehl, returnt die IIFE silent, ohne

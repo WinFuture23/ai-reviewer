@@ -47,7 +47,7 @@ Browser (CMS-Editor)
 |---|---|
 | `ai-reviewer.js` | Frontend-Widget, GitHub Pages |
 | `vergleichswidget.js` | Frontend-Diff-Modal, GitHub Pages |
-| [`docs/winfuture-integration.php`](docs/winfuture-integration.php) | PHP-Klasse `wfv4_ai_reviewer::render()` für die Auth-Token-Generierung im CMS |
+| [`docs/winfuture-integration.php`](docs/winfuture-integration.php) | PHP-Klasse `wfv4_model_aireviewer::render()` für die Auth-Token-Generierung im CMS |
 | Val.town Proxy | Leitet HMAC-authentifizierte Start-Requests an Make.com weiter |
 | Val.town Poller-DB | SQLite-API, in der Make.com das KI-Ergebnis ablegt und das Widget es abholt |
 | Make.com Worker | Orchestriert die KI-Agenten (Korrektor + Verlinker) |
@@ -70,7 +70,7 @@ DOM-Element existiert, nimmt das Widget News an.
 In einem Editor-Template, nur für eingeloggte Redakteure:
 
 ```php
-wfv4_ai_reviewer::render( WFV4_AI_REVIEWER_SECRET, $content_type, $content_id );
+wfv4_model_aireviewer::render( WFV4_AI_REVIEWER_SECRET, $content_type, $content_id );
 ```
 
 Das gibt zwei `<script>`-Tags aus:
@@ -130,11 +130,11 @@ Umgebungsvariablen auf [val.town](https://www.val.town/settings/environment-vari
 
 ### 4. PHP-Klasse einbinden
 
-`docs/winfuture-integration.php` enthält `wfv4_ai_reviewer`. Im
+`docs/winfuture-integration.php` enthält `wfv4_model_aireviewer`. Im
 Editor-Template:
 
 ```php
-wfv4_ai_reviewer::render( WFV4_AI_REVIEWER_SECRET, $content_type, $content_id );
+wfv4_model_aireviewer::render( WFV4_AI_REVIEWER_SECRET, $content_type, $content_id );
 ```
 
 ## Dateien
