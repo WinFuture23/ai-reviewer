@@ -47,7 +47,7 @@ Browser (CMS-Editor)
 |---|---|
 | `ai-reviewer.js` | Frontend-Widget, GitHub Pages |
 | `vergleichswidget.js` | Frontend-Diff-Modal, GitHub Pages |
-| [`docs/winfuture-integration.php`](docs/winfuture-integration.php) | PHP-Klasse `wfv4_model_aireviewer::render()` für die Auth-Token-Generierung im CMS |
+| PHP-Klasse `wfv4_model_aireviewer` | Auth-Token-Generierung im CMS (`aireviewer.class.php`, wird intern im CMS gepflegt — nicht Teil dieses Repos) |
 | Val.town Proxy | Leitet HMAC-authentifizierte Start-Requests an Make.com weiter |
 | Val.town Poller-DB | SQLite-API, in der Make.com das KI-Ergebnis ablegt und das Widget es abholt |
 | Make.com Worker | Orchestriert die KI-Agenten (Korrektor + Verlinker) |
@@ -130,11 +130,14 @@ Umgebungsvariablen auf [val.town](https://www.val.town/settings/environment-vari
 
 ### 4. PHP-Klasse einbinden
 
-`docs/winfuture-integration.php` enthält `wfv4_model_aireviewer`. Im
+Die Klasse `wfv4_model_aireviewer` wird intern im CMS gepflegt
+(`aireviewer.class.php`) und ist nicht Teil dieses Repos. Im
 Editor-Template:
 
 ```php
 wfv4_model_aireviewer::render( WFV4_AI_REVIEWER_SECRET, $content_type, $content_id );
+// Pending-Seite (read-only Pruef-Status, ohne Auth-Token):
+wfv4_model_aireviewer::render_pending( $news_id, $headline, $teaser, $content );
 ```
 
 ## Dateien
@@ -152,7 +155,6 @@ KI Korrektor/
 │   ├── SETUP.md                 PHP-Setup-Anleitung
 │   ├── Programmierstil.md       WinFuture Coding-Richtlinien
 │   ├── Sicherheitsrichtlinie.md WinFuture Sicherheitsrichtlinien
-│   ├── winfuture-integration.php  PHP-Klasse fürs CMS
 │   ├── townie-prompt-proxy.md   Townie-Prompt für Val.town Proxy
 │   ├── townie-prompt-poller-db.md  Townie-Prompt für Poller-DB
 │   ├── townie-update-proxy.md   Update-Prompt für Proxy (v3)

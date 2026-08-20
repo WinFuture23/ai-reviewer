@@ -7,3 +7,6 @@
 
 # Live-CMS-Datei, nicht veroeffentlichen (kasbah)
 aireviewer.class.php
+
+# CMS-Screenshots, nicht veroeffentlichen
+gfx/

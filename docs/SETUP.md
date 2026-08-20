@@ -14,7 +14,7 @@ auf Rechtschreibung, Grammatik und Verlinkungen pruefen laesst. Er besteht aus:
 
 | Datei | Zweck |
 |-------|-------|
-| `winfuture-integration.php` | PHP-Klasse `wfv4_model_aireviewer` — einmalig ins Projekt einbinden |
+| `aireviewer.class.php` (im CMS) | PHP-Klasse `wfv4_model_aireviewer` — wird intern im CMS gepflegt, nicht Teil dieses Repos |
 
 ## Schritt 1: Secret ablegen
 
@@ -41,9 +41,9 @@ define( 'WFV4_AI_REVIEWER_SECRET', '<secret-hier-eintragen>' );
 
 ## Schritt 2: PHP-Klasse einbinden
 
-Die Datei `winfuture-integration.php` enthaelt die Klasse `wfv4_model_aireviewer`.
-Diese Datei muss einmalig ins Projekt eingebunden werden (require/autoload),
-passend zur bestehenden Paketstruktur.
+Die Klasse `wfv4_model_aireviewer` liegt im CMS (`aireviewer.class.php`,
+Autoloading nach wfv4-Konvention) und wird dort gepflegt — sie ist nicht
+Teil dieses Repos.
 
 ## Schritt 3: Aufruf im Editor-Template
 
@@ -51,7 +51,7 @@ An der Stelle, wo der Artikel-Editor gerendert wird, **nur fuer eingeloggte
 Redakteure**, folgenden Aufruf einfuegen:
 
 ```php
-wfv4_model_aireviewer::render( WFV4_AI_REVIEWER_SECRET );
+wfv4_model_aireviewer::render( WFV4_AI_REVIEWER_SECRET, $content_type, $content_id );
 ```
 
 Das ist alles. Der Aufruf gibt zwei Script-Tags aus:
