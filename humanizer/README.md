@@ -163,12 +163,99 @@ Ehrliche Antwort aus dieser Messung: **nicht bestimmbar.** Drei Gründe, jeder f
 
 Was sich mit dem Paper-Instrument sagen lässt: Der Artikel unterscheidet sich in den 304 narrativen Merkmalen nicht messbar von einem menschlichen WinFuture-Artikel der Vor-ChatGPT-Zeit. Ob er von einer KI stammt, müsste man mit einem stilometrischen Detektor (die Text-Baselines des Papers, 99,7–99,9 % auf Erzählungen) oder mit Redaktionswissen klären, nicht mit narrativen Merkmalen. Das ist kein Nebenbefund, sondern deckt sich mit der Einschränkung im Paper selbst: Die Merkmale brauchen lange Texte („~5,000 words, enabling extraction of fine-grained narrative features that shorter texts cannot support").
 
+## 9. Der VW-Artikel: Endfassung, Lesertest, Änderungen
+
+**Kann der Text verbessert werden?** Ja, in dem Sinn, dass Leser ihn lieber lesen, und ohne dass das Paper-Instrument das messen könnte (§ 3–4). Vorgehen: drei neue Umschriften mit `humanize_final.md` (alle Faktentreue 100), zusammen mit den sechs faktentreuen Umschriften aus v2–v4 und dem Original als zehn blinde Fassungen (A–J, zufällig gemischt) an fünf Leser-Personas (Stammleser, Autojournalist:in, Schlussredakteur:in, Kaufinteressentin, Linguist:in; Sprachmodelle in diesen Rollen, kein Ersatz für echte Leser, siehe § 10). Jede Persona bewertete jede Fassung 1–10 in Lesbarkeit, Fluss und Reihenfolge, Natürlichkeit, Vertrauen und Gesamteindruck.
+
+**Ergebnis:** Fassung B (Final-Prompt, Probe 2) gewinnt bei allen fünf Lesern; das Original landet auf Platz 6 von 10, mit dem schlechtesten Wert für Natürlichkeit (4,0) und dem wiederkehrenden Urteil „Pressemappen-Ton": generische Zwischenzeilen, „markiert eine Abkehr", die Floskel „muss sich allerdings zeigen" im Vorspann.
+
+| Fassung (blind) | ist | Gesamt | Lesbarkeit | Fluss/Reihenfolge | Natürlichkeit | Vertrauen/Klarheit | Platz 1 (von 5) |
+|---|---|---|---|---|---|---|---|
+| B | Final-Prompt, Probe 2 (Gewinner) | **8.00** | 8.00 | 7.80 | 8.00 | 7.80 | 5 |
+| A | v2, Probe 1 | **6.80** | 7.00 | 6.40 | 6.00 | 7.40 | 0 |
+| E | v4, Probe 1 | **6.40** | 6.80 | 6.40 | 6.40 | 6.40 | 0 |
+| J | final, Probe 3 | **6.40** | 7.00 | 6.00 | 6.80 | 6.80 | 0 |
+| C | final, Probe 1 | **6.40** | 7.20 | 6.20 | 7.00 | 6.60 | 0 |
+| G | Original (WinFuture, 27.09.2026) | **5.40** | 7.00 | 6.20 | 4.00 | 6.60 | 0 |
+| D | v4, Probe 2 | **5.40** | 6.00 | 4.80 | 5.40 | 6.00 | 0 |
+| I | v3, Probe 2 | **5.20** | 5.80 | 4.20 | 6.60 | 6.00 | 0 |
+| F | v3, Probe 1 | **4.20** | 5.60 | 3.00 | 4.80 | 5.40 | 0 |
+| H | v2, Probe 2 | **4.20** | 5.80 | 3.40 | 5.40 | 5.20 | 0 |
+
+- Leser 1: Top 3 B (final_s2) > E (v4_s1) > A (v2_s1). Wie von einem Menschen: Fassung B - sie bündelt Termine und Technik so, wie man es einem Bekannten erzählen würde, streut mit 'Beim ID.4 hatte eine Ziffer gereicht' und 'Falls ihr euch über die berührungsempfindlichen Schieberegler geärgert habt' echte Haltung ein und verzichtet auf Ausblick-Floskeln wi
+  Schwächen der besten Fassung: Komma-Splice im zweiten Absatz: 'Ende 2026 soll im Werk Emden die Serienproduktion beginnen, das teilt Volkswagen mit.' - besser 'wie Volkswagen mitteilt'. | Unklarer Bezug: 'Auch äußerlich soll sie sich mit einer kantigeren Karosserie stärker an ihm orientieren.' - 'ihm' meint den Verbrenner-Tiguan, der aber zwei Sä | Schwacher Schluss: der letzte Sachabsatz vor der Leserfrage ist 'An der Hinterachse bleiben Trommelbremsen vorgesehen.' - der Text endet auf einer technischen F
+- Leser 2: Top 3 B (final_s2) > A (v2_s1) > C (final_s1). Wie von einem Menschen: B - weil sie nicht nur Fakten stapelt, sondern mit kleinen Scharniersaetzen wie (Zu sehen gibt es das Elektro-SUV schon vorher) und (Beim ID.4 hatte eine Ziffer gereicht) den Leser durch den Text fuehrt, die Leseransprache dort setzt, wo sie ein echtes Aergernis trifft (die Schie
+  Schwächen der besten Fassung: Unklarer Bezug: (Auch aeusserlich soll sie sich mit einer kantigeren Karosserie staerker an ihm orientieren) - das (ihm) muss der Leser ueber zwei Saetze zuruec | Der Schluss haengt in der Luft: (An der Hinterachse bleiben Trommelbremsen vorgesehen. Bei Elektroautos erfolgt die Verzoegerung ueberwiegend ueber Rekuperation | Falsche Verknuepfung: (Die Preise fuer das Basismodell sollen laut Hersteller bei rund 42.000 Euro beginnen. Daneben plant Volkswagen eine R-Line ...) - das (Da
+- Leser 3: Top 3 B (final_s2) > A (v2_s1) > E (v4_s1). Wie von einem Menschen: Fassung B: Ihre Einschübe entstehen aus dem Stoff statt draufgesetzt zu sein ("Beim ID.4 hatte eine Ziffer gereicht.", die Ansprache an alle, die sich über die Schieberegler geärgert haben), die Satzlängen wechseln, und die Zwischentitel arbeiten mit Zahlen statt mit Kategorien; 
+  Schwächen der besten Fassung: Zweiter Absatz: "Ende 2026 soll im Werk Emden die Serienproduktion beginnen, das teilt Volkswagen mit." ist eine holprige Attribution (Kommasatz), und der Produ | Schluss: "An der Hinterachse bleiben Trommelbremsen vorgesehen. Bei Elektroautos erfolgt die Verzögerung überwiegend über Rekuperation." ist ein losgelöster Zwe | Absatz "1650 Liter, 2300 Kilogramm": "Auch äußerlich soll sie sich mit einer kantigeren Karosserie stärker an ihm orientieren." zwingt zum Rückwärtslesen (sie =
+- Leser 4: Top 3 B (final_s2) > C (final_s1) > J (final_s3). Wie von einem Menschen: Fassung B: Sie ordnet die Fakten wie jemand, der weiß, was Leser zuerst fragen (wann, was ändert sich, was steckt drunter), verbindet Absätze mit echten Überleitungen ('Zu sehen gibt es das Elektro-SUV schon vorher', 'Falls ihr euch über die berührungsempfindlichen Schieberegler 
+  Schwächen der besten Fassung: Der Satz 'Beim ID.4 hatte eine Ziffer gereicht.' hängt am Ende des Nutzwert-Absatzes in der Luft; er gehört zur Namensdiskussion im Vorspann, nicht zwischen Kof | Der Preis, für eine Käuferin die wichtigste Zahl, steht erst im vorletzten Sachabsatz und wird sofort mit der R-Line vermischt ('Die Preise für das Basismodell  | Die Trommelbremsen kommen als isolierter Zweizeiler nach dem Preis ('An der Hinterachse bleiben Trommelbremsen vorgesehen.'), ohne Anschluss an den Technikblock
+- Leser 5: Top 3 B (final_s2) > A (v2_s1) > C (final_s1). Wie von einem Menschen: Fassung B: Sie ordnet die Termine so, wie ein Mensch sie im Kopf hat (Produktion, Marktstart, 'zu sehen gibt es das Auto schon vorher'), bringt mit 'Beim ID.4 hatte eine Ziffer gereicht' einen beilaeufigen, wertenden Nebensatz, den kein Zusammenfassungs-Reflex produziert, und spr
+  Schwächen der besten Fassung: Preis und R-Line sind ohne inneren Zusammenhang in einen Absatz gepackt: 'Die Preise fuer das Basismodell sollen laut Hersteller bei rund 42.000 Euro beginnen.  | Der Text endet mit einem verwaisten Zwei-Satz-Absatz, der wie ein Rest wirkt: 'An der Hinterachse bleiben Trommelbremsen vorgesehen. Bei Elektroautos erfolgt di | Die Pronomenkette im Nutzwert-Absatz zwingt zum Zurueckblaettern: 'Auch aeusserlich soll sie sich mit einer kantigeren Karosserie staerker an ihm orientieren.' 
+
+Die drei von den Lesern genannten Schwächen der Gewinnerfassung (Komma-Splice „…, das teilt Volkswagen mit", unklares „ihm", Schluss auf der Trommelbremsen-Fußnote) habe ich redaktionell behoben; die Faktenprüfung der Endfassung ergibt erneut 100 (nichts erfunden, verändert, weggelassen). 404 statt 426 Wörter.
+
+### Endfassung
+
+VW ID. Tiguan: Premiere im Oktober beendet die ID.4-Ära
+
+Volkswagen verabschiedet sich beim neuen ID. Tiguan wieder von reinen Ziffern im Namen und bringt physische Tasten zurück ins Cockpit.
+
+Ende 2026 soll im Werk Emden die Serienproduktion beginnen, wie Volkswagen mitteilt. Die Markteinführung ist für das erste Quartal 2027 vorgesehen. Zu sehen gibt es das Elektro-SUV schon vorher: Am 9. Oktober 2026 will Volkswagen den ID. Tiguan vorstellen. Er löst den ID.4 ab.
+
+1650 Liter, 2300 Kilogramm
+
+Der Verbrenner-Tiguan bietet bis zu 1650 Liter Kofferraumvolumen bei umgeklappter Rückbank und eine Anhängelast von bis zu 2300 Kilogramm. Die Elektrovariante soll ähnliche Nutzwerte erreichen. Auch äußerlich soll sie sich mit einer kantigeren Karosserie stärker am Verbrenner-Tiguan orientieren. Mit dem Namen Tiguan richtet sich Volkswagen an die Stammkundschaft des bisherigen SUV. Beim ID.4 hatte eine Ziffer gereicht.
+
+Falls ihr euch über die berührungsempfindlichen Schieberegler geärgert habt: Sie sollen im Innenraum durch Tasten am Lenkrad und an der Mittelkonsole ersetzt werden. Geplant sind außerdem klassische Türgriffe und ein auf zehn Zoll vergrößertes Instrumentendisplay.
+
+400 Volt
+
+Unter der Karosserie steckt die Plattform MEB+ (Modularer E-Antriebs-Baukasten), und mit ihr weiterhin die bekannte 400-Volt-Technik. Anders als zunächst gedacht ist ein 800-Volt-System für schnelleres Laden nicht vorgesehen.
+
+Als Basis ist ein Akku mit 58 Kilowattstunden Kapazität und LFP-Zellchemie vorgesehen. Für höhere Reichweiten soll es eine Variante mit 77 Kilowattstunden und 210 Kilowatt Leistung geben, Allradmodelle mit bis zu 250 Kilowatt Systemleistung sollen das Angebot ergänzen. Per Software-Update soll sich das Auto mit nur einem Pedal fahren lassen.
+
+An der Hinterachse bleiben Trommelbremsen vorgesehen. Bei Elektroautos erfolgt die Verzögerung überwiegend über Rekuperation.
+
+Die Preise für das Basismodell sollen laut Hersteller bei rund 42.000 Euro beginnen. Daneben plant Volkswagen eine R-Line, die sich unter anderem durch vertikale Leuchten an der Front, größere Leichtmetallfelgen und eine aerodynamisch veränderte Heckschürze abheben soll.
+
+Was haltet ihr von der Rückkehr zu echten Tasten und dem neuen Namen für das Elektro-SUV? Teilt eure Meinung und Erwartungen an den ID. Tiguan gerne unten in den Kommentaren mit uns!
+
+Zusammenfassung
+
+- VW stellt das neue Elektro-SUV ID. Tiguan am 9. Oktober 2026 offiziell vor
+- Der elektrische Nachfolger des ID.4 basiert auf der MEB-Plus-Plattform
+- Im Innenraum kehren wieder klassische Tasten statt Schieberegler zurück
+- Die Serienproduktion des neuen SUV startet Ende 2026 im Werk in Emden
+- Basisakku bietet 58 kWh Kapazität, stärkste Allradversion hat 250 kW
+- Der Marktstart ist für Anfang 2027 ab etwa 42.000 Euro Basispreis geplant
+
+### Was sich gegenüber dem Original geändert hat (Executive Summary)
+
+- **Einstieg:** Der Vorspann endet nicht mehr mit der Ausblick-Floskel („Wie genau der Verzicht auf das 800-Volt-System den Erfolg … prägen wird, muss sich allerdings zeigen"), sondern nach der Nachricht. Danach kommen sofort die drei Termine (Produktion Ende 2026 in Emden, Markteinführung Q1 2027, Premiere 9. Oktober 2026) statt der Premiere allein.
+- **Erklärsätze gestrichen:** „markiert eine Abkehr von der bisherigen Namensstrategie" und die Zwischenzeile „Namenswechsel als neue Strategie" sind weg; die Namensentscheidung steht als Fakt („Beim ID.4 hatte eine Ziffer gereicht") neben dem Stammkundschafts-Satz.
+- **Zwischenzeilen konkret statt zusammenfassend:** „1650 Liter, 2300 Kilogramm" und „400 Volt" statt „Produktion und Antriebsvarianten" und „Namenswechsel als neue Strategie".
+- **Reihenfolge nach Leserinteresse statt nach Pressemappe:** Nutzwerte und Karosserie, dann Cockpit, dann Technik, dann Preis und R-Line. Die 800-Volt-Absage steht im Technikabsatz, wo sie hingehört, nicht als Spannungsbogen im Vorspann.
+- **Leseransprache im Text, nicht nur am Ende:** „Falls ihr euch über die berührungsempfindlichen Schieberegler geärgert habt: …"
+- **Quelle beim Namen:** „laut Hersteller" bleibt dort, wo das Original es hat; „wie Volkswagen mitteilt" steht jetzt beim Produktionsstart, auf den es sich bezieht.
+- **Schluss:** Der letzte Sachabsatz ist Preis und R-Line, nicht die Trommelbremse; Leserfrage und Zusammenfassungsblock bleiben unverändert (Haus-Elemente).
+- **Unverändert:** Überschrift, alle Zahlen, Daten, Namen und Zuschreibungen; kein neuer Fakt, keine Aussage über den Wissensstand.
+
+## 10. Wie es weitergehen kann
+
+1. **Prompt in den KI-Korrektor einbauen, aber hinter einer Faktenschranke.** `humanize_final.md` als optionaler Schritt im Make.com-Worker (nach Korrektor, vor Verlinker), Ausgabe nur, wenn der Faktenprüfer 100 meldet; sonst zurück an den Redakteur mit der Liste der Abweichungen. Das Vorher/Nachher-Diff-Modal des Widgets zeigt die Umschrift absatzweise, der Redakteur nimmt an oder verwirft.
+2. **Ein Messinstrument für Nachrichten bauen, weil das Paper-Instrument hier blind ist.** Der Spiegelkorpus (15 + 30 Texte) ist der Anfang: auf 150 menschliche WinFuture-Artikel von 2015–2021 ausbauen, Spiegel von GPT, Gemini und DeepSeek dazunehmen (nicht nur Claude), und dann zwei Detektorfamilien prüfen: die Text-Baselines des Papers (Stilometrie, TF-IDF, ModernBERT) und die 304 Merkmale erneut mit größerem n. Erst mit diesem Instrument lässt sich sagen, ob eine Umschrift für Nachrichten „menschlicher" ist.
+3. **Echte Leser statt Leser-Personas.** Der Blind-Test in § 9 nutzt Sprachmodelle als Leser. Der nächste Schritt ist ein kleiner A/B-Test in der Redaktion oder mit Stammlesern (zehn Artikelpaare, je Paar Original und Umschrift, blind, drei Fragen: verständlicher, glaubwürdiger, eher von einem Menschen).
+4. **Das Streuungsproblem operativ lösen.** Bei Erzähltexten drei Umschriften erzeugen, dreimal annotieren, den besten Mittelwert nehmen; bei Nachrichten reicht die Faktenprüfung als Gate. Kosten pro Artikel derzeit etwa 3–5 US-Dollar mit Opus als Rewriter; ein Test mit Sonnet 5 als Rewriter steht noch aus.
+5. **Die Gemini-Lücke verstehen.** Eine der drei Test-Stories widersteht jeder Prompt-Version (Logit −10 → −1, aber nie positiv). Ihr Muster (Rahmenerzählung, Ich-Erzähler mit Rückblick, Epilog) verdient eine eigene Prompt-Variante für Rahmenerzählungen, getestet an zehn statt einer Story.
+6. **Nichts davon verändert die Regel des Hauses:** Ein Text, der als menschlich erscheinen soll, muss faktentreu bleiben. Der Prompt kann Struktur, nicht Wahrheit.
+
 ## 8. Reproduktion
 
 Alles liegt in `humanizer/`:
 
 ```
-prompts/humanize_v1.md … humanize_vN.md   die Prompt-Versionen (die letzte ist die empfohlene)
+prompts/humanize_final.md                  der empfohlene Prompt; humanize_v1..v4.md die getesteten Versionen
 scripts/ss_lib.py                          Taxonomie, Kodierung (paper-treu), Normalisierung wie im Repo
 scripts/ss_train.py                        Klassifikator + LDA + Seltenheit auf den Paper-Daten
 scripts/ss_annotate.py                     Zehn-Dimensionen-Annotation per `claude -p` + Scorer
@@ -177,7 +264,8 @@ scripts/diagnose.py, build_diag.py         SHAP-Diagnose je Text, Aggregation je
 scripts/gen_ai_news.py, news_domain.py     News-Spiegelkorpus und Domänentest
 scripts/ss_plots.py, evaluate_all.py       Abbildungen und Ergebnistabelle
 scripts/prompt_panel.js                    Workflow: drei Vorschläge + Synthese für die nächste Version
-results/                                   Metriken, Ergebnistabelle, Abbildungen, alle Umschriften
+results/                                   Metriken, Ergebnistabellen, Abbildungen, alle Umschriften, Lesertest (lesertest_vw.md), Spiegelkorpus
+Bericht.pdf                                dieser Bericht als PDF
 ```
 
 Ablauf für einen neuen Text: `python3 scripts/ss_humanize.py prompts/humanize_vN.md text.txt out/ --samples 2` (setzt `claude` CLI voraus; Modelle über `--rewriter`, Annotator über `SS_ANNOT_MODEL`). Voraussetzung einmalig: `git clone https://github.com/jenna-russell/storyscope` nach `/home/user/jenna-russell/storyscope` (oder Pfad in `ss_lib.py` anpassen) und `python3 scripts/ss_train.py --variant narrative --exclude scripts/style_flagged_8.json --out scripts/out_narrative`. Kosten: eine Annotation kostet etwa 0,6–1,1 US-Dollar (10 Aufrufe Sonnet 5), eine Umschrift mit Opus 5.5 etwa 1–3 US-Dollar.

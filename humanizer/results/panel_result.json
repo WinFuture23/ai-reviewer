@@ -1,0 +1,798 @@
+{
+  "summary": "Blind reader test: five reader personas rank the original WinFuture article against humanized candidates; one editor verifies facts of the winner",
+  "agentCount": 5,
+  "logs": [
+    "readers: 5; top: B (8)"
+  ],
+  "result": {
+    "table": [
+      {
+        "label": "B",
+        "n": 5,
+        "overall": 8,
+        "readability": 8,
+        "flow": 7.8,
+        "natural": 8,
+        "trust": 7.8,
+        "firsts": 5
+      },
+      {
+        "label": "A",
+        "n": 5,
+        "overall": 6.8,
+        "readability": 7,
+        "flow": 6.4,
+        "natural": 6,
+        "trust": 7.4,
+        "firsts": 0
+      },
+      {
+        "label": "E",
+        "n": 5,
+        "overall": 6.4,
+        "readability": 6.8,
+        "flow": 6.4,
+        "natural": 6.4,
+        "trust": 6.4,
+        "firsts": 0
+      },
+      {
+        "label": "J",
+        "n": 5,
+        "overall": 6.4,
+        "readability": 7,
+        "flow": 6,
+        "natural": 6.8,
+        "trust": 6.8,
+        "firsts": 0
+      },
+      {
+        "label": "C",
+        "n": 5,
+        "overall": 6.4,
+        "readability": 7.2,
+        "flow": 6.2,
+        "natural": 7,
+        "trust": 6.6,
+        "firsts": 0
+      },
+      {
+        "label": "G",
+        "n": 5,
+        "overall": 5.4,
+        "readability": 7,
+        "flow": 6.2,
+        "natural": 4,
+        "trust": 6.6,
+        "firsts": 0
+      },
+      {
+        "label": "D",
+        "n": 5,
+        "overall": 5.4,
+        "readability": 6,
+        "flow": 4.8,
+        "natural": 5.4,
+        "trust": 6,
+        "firsts": 0
+      },
+      {
+        "label": "I",
+        "n": 5,
+        "overall": 5.2,
+        "readability": 5.8,
+        "flow": 4.2,
+        "natural": 6.6,
+        "trust": 6,
+        "firsts": 0
+      },
+      {
+        "label": "F",
+        "n": 5,
+        "overall": 4.2,
+        "readability": 5.6,
+        "flow": 3,
+        "natural": 4.8,
+        "trust": 5.4,
+        "firsts": 0
+      },
+      {
+        "label": "H",
+        "n": 5,
+        "overall": 4.2,
+        "readability": 5.8,
+        "flow": 3.4,
+        "natural": 5.4,
+        "trust": 5.2,
+        "firsts": 0
+      }
+    ],
+    "readers": [
+      {
+        "ranking": [
+          "B",
+          "E",
+          "A",
+          "J",
+          "C",
+          "G",
+          "I",
+          "D",
+          "F",
+          "H"
+        ],
+        "scores": [
+          {
+            "label": "B",
+            "readability": 8,
+            "flow_and_order": 8,
+            "naturalness_human_feel": 8,
+            "trust_and_clarity": 8,
+            "overall": 8,
+            "one_line_verdict": "Termine gebündelt, Technik gebündelt, zwei echte Leser-Anspielungen ('Beim ID.4 hatte eine Ziffer gereicht') - liest sich wie erzählt, nicht wie abgearbeitet."
+          },
+          {
+            "label": "E",
+            "readability": 7,
+            "flow_and_order": 7,
+            "naturalness_human_feel": 7,
+            "trust_and_clarity": 7,
+            "overall": 7,
+            "one_line_verdict": "Gute Übergänge ('Unter dem Blech bleibt mehr beim Alten'), aber Floskel im Vorspann ('muss sich allerdings zeigen') und der Preis versteckt sich hinter den Trommelbremsen."
+          },
+          {
+            "label": "A",
+            "readability": 7,
+            "flow_and_order": 6,
+            "naturalness_human_feel": 6,
+            "trust_and_clarity": 7,
+            "overall": 7,
+            "one_line_verdict": "Sauber und verständlich, aber der eingeschobene Halbsatz bei den Trommelbremsen holpert und das 800-Volt-Thema hängt als letzter Absatz nach dem Preis in der Luft."
+          },
+          {
+            "label": "J",
+            "readability": 7,
+            "flow_and_order": 6,
+            "naturalness_human_feel": 7,
+            "trust_and_clarity": 7,
+            "overall": 7,
+            "one_line_verdict": "Starker Einstieg über die Schieberegler und der Preis früh - aber ID.4-Ablösung und der Premierentermin aus der Überschrift kommen erst in der Mitte, und die Zwischenzeile 'Werk Emden' steht über einem Akku-Absatz."
+          },
+          {
+            "label": "C",
+            "readability": 7,
+            "flow_and_order": 6,
+            "naturalness_human_feel": 7,
+            "trust_and_clarity": 6,
+            "overall": 6,
+            "one_line_verdict": "'Dafür gibt es ... kein 800-Volt-System' im Vorspann klingt wie ein Preis-Leistungs-Witz, den ich erst beim zweiten Lesen verstehe; danach ordentlich, ID.4-Ablösung aber zu spät."
+          },
+          {
+            "label": "G",
+            "readability": 7,
+            "flow_and_order": 6,
+            "naturalness_human_feel": 4,
+            "trust_and_clarity": 7,
+            "overall": 6,
+            "one_line_verdict": "Aufgeräumt, aber Pressemappen-Ton: generische Zwischenzeilen ('Namenswechsel als neue Strategie'), 'markiert eine Abkehr', 800-Volt-Floskel im Vorspann ohne Kontext - klingt nach Maschine."
+          },
+          {
+            "label": "I",
+            "readability": 6,
+            "flow_and_order": 4,
+            "naturalness_human_feel": 7,
+            "trust_and_clarity": 6,
+            "overall": 5,
+            "one_line_verdict": "Klingt nach Mensch ('ihr habt richtig gelesen: Trommeln'), aber zerhackt: Marktstart als Einzelsatz, Preis als Einzelsatz, Plattform ganz am Ende - Informationen sind verstreut."
+          },
+          {
+            "label": "D",
+            "readability": 6,
+            "flow_and_order": 5,
+            "naturalness_human_feel": 5,
+            "trust_and_clarity": 6,
+            "overall": 5,
+            "one_line_verdict": "Kofferraum und Anhängelast schon im zweiten Absatz mit erzwungener Anhänger-Anrede, Termine und Karosserie in einem Absatz vermischt, dazu die Floskel 'muss sich zeigen' - wirkt zusammengeschoben."
+          },
+          {
+            "label": "F",
+            "readability": 6,
+            "flow_and_order": 4,
+            "naturalness_human_feel": 5,
+            "trust_and_clarity": 6,
+            "overall": 5,
+            "one_line_verdict": "Einstieg über das Werk Emden, zweite Zwischenzeile 'Trommelbremsen' - die Nebensachen stehen vorn, die Tasten aus dem Titel kommen erst im siebten Absatz; 'Bei dessen Nachfolger' ist sperrig."
+          },
+          {
+            "label": "H",
+            "readability": 6,
+            "flow_and_order": 4,
+            "naturalness_human_feel": 6,
+            "trust_and_clarity": 5,
+            "overall": 4,
+            "one_line_verdict": "Der Artikel beginnt mit Trommelbremsen an der Hinterachse - als Vorspann eine Fehlentscheidung; 800 Volt kommt als Nachklapp mit doppelter Plattform-Nennung ganz am Schluss."
+          }
+        ],
+        "which_reads_like_a_human_journalist": "Fassung B - sie bündelt Termine und Technik so, wie man es einem Bekannten erzählen würde, streut mit 'Beim ID.4 hatte eine Ziffer gereicht' und 'Falls ihr euch über die berührungsempfindlichen Schieberegler geärgert habt' echte Haltung ein und verzichtet auf Ausblick-Floskeln wie 'muss sich zeigen'.",
+        "weaknesses_of_best": [
+          "Komma-Splice im zweiten Absatz: 'Ende 2026 soll im Werk Emden die Serienproduktion beginnen, das teilt Volkswagen mit.' - besser 'wie Volkswagen mitteilt'.",
+          "Unklarer Bezug: 'Auch äußerlich soll sie sich mit einer kantigeren Karosserie stärker an ihm orientieren.' - 'ihm' meint den Verbrenner-Tiguan, der aber zwei Sätze zuvor stand; ich musste zurücklesen.",
+          "Schwacher Schluss: der letzte Sachabsatz vor der Leserfrage ist 'An der Hinterachse bleiben Trommelbremsen vorgesehen.' - der Text endet auf einer technischen Fußnote statt auf Preis oder Termin; auch 'Ein 800-Volt-System ... ist nicht vorgesehen, anders als zunächst gedacht.' ist nachgeklappt formuliert."
+        ]
+      },
+      {
+        "ranking": [
+          "B",
+          "A",
+          "C",
+          "J",
+          "E",
+          "G",
+          "D",
+          "I",
+          "H",
+          "F"
+        ],
+        "scores": [
+          {
+            "label": "B",
+            "readability": 8,
+            "flow_and_order": 8,
+            "naturalness_human_feel": 8,
+            "trust_and_clarity": 8,
+            "overall": 8,
+            "one_line_verdict": "Knapper Einstieg, Termine sofort danach, 800 Volt sauber unter der eigenen Zwischenzeile eingebettet, dazu kleine menschliche Verbindungssaetze (Beim ID.4 hatte eine Ziffer gereicht) - die einzige Fassung, die wie aus einem Guss gebaut wirkt."
+          },
+          {
+            "label": "A",
+            "readability": 7,
+            "flow_and_order": 7,
+            "naturalness_human_feel": 6,
+            "trust_and_clarity": 8,
+            "overall": 7,
+            "one_line_verdict": "Klassischer, sauberer Nachrichtenaufbau (Name, Cockpit, Plattform, Akku, Werk, Nutzwerte, Preis), aber die 800-Volt-Absage haengt als Nachklapp am Ende und der Bremsen-Einschub (falls ihr euch das beim Blick auf die Leistungswerte gefragt habt) ist bemueht."
+          },
+          {
+            "label": "C",
+            "readability": 7,
+            "flow_and_order": 6,
+            "naturalness_human_feel": 7,
+            "trust_and_clarity": 6,
+            "overall": 6,
+            "one_line_verdict": "Preis-Einstieg ist mutig, aber der Satz (Dafuer gibt es ... kein 800-Volt-System) liest sich als Logikfehler, und dass der Wagen den ID.4 abloest, erfaehrt man erst im fuenften Absatz; die Technik-Haelfte ist dagegen gut sortiert."
+          },
+          {
+            "label": "J",
+            "readability": 7,
+            "flow_and_order": 6,
+            "naturalness_human_feel": 7,
+            "trust_and_clarity": 7,
+            "overall": 6,
+            "one_line_verdict": "Der Aufmacher (Die Schieberegler sollen verschwinden) ist der beste Einstiegssatz des Feldes, danach springt der Text aber zwischen 800 Volt, Preis, Werk plus Akku und erst dann Premiere und ID.4-Abloesung hin und her."
+          },
+          {
+            "label": "E",
+            "readability": 6,
+            "flow_and_order": 6,
+            "naturalness_human_feel": 5,
+            "trust_and_clarity": 6,
+            "overall": 6,
+            "one_line_verdict": "Schoene Ueberleitung (Unter dem Blech bleibt mehr beim Alten), aber die Leerformel (muss sich allerdings zeigen) steht schon im Vorspann, und der Preis klebt am Ende an den Trommelbremsen - zwei Saetze ohne jeden Zusammenhang."
+          },
+          {
+            "label": "G",
+            "readability": 6,
+            "flow_and_order": 6,
+            "naturalness_human_feel": 4,
+            "trust_and_clarity": 6,
+            "overall": 5,
+            "one_line_verdict": "Pressemitteilungs-Ton mit generischen Zwischenzeilen; unter (Namenswechsel als neue Strategie) stehen Kofferraum, One-Pedal, R-Line und Preis, und der Vorspann endet in der Floskel (muss sich allerdings zeigen)."
+          },
+          {
+            "label": "D",
+            "readability": 6,
+            "flow_and_order": 5,
+            "naturalness_human_feel": 5,
+            "trust_and_clarity": 6,
+            "overall": 5,
+            "one_line_verdict": "Die Verbrenner-Nutzwerte kommen im zweiten Absatz, bevor man etwas ueber das E-Auto weiss; die Apposition (des Tiguan, den Volkswagen heute verkauft, des Verbrenners) stolpert, und der Absatz Werk-Premiere-Karosserie mischt drei Themen."
+          },
+          {
+            "label": "I",
+            "readability": 6,
+            "flow_and_order": 4,
+            "naturalness_human_feel": 6,
+            "trust_and_clarity": 6,
+            "overall": 5,
+            "one_line_verdict": "Zerhackt in Ein-Satz-Absaetze (Markteinfuehrung, Preis stehen isoliert), Plattform und 400 Volt erst ganz am Schluss; die Klammer (ihr habt richtig gelesen: Trommeln) ist der einzige Moment mit Stimme."
+          },
+          {
+            "label": "H",
+            "readability": 5,
+            "flow_and_order": 3,
+            "naturalness_human_feel": 5,
+            "trust_and_clarity": 5,
+            "overall": 4,
+            "one_line_verdict": "Ein Artikel ueber ein neues Elektro-SUV, der mit Trommelbremsen an der Hinterachse aufmacht - danach kann kein Absatz mehr retten, was der Vorspann verschenkt hat; Zwischenzeilen (Emden, 1650 Liter) sind bloss Stichwoerter."
+          },
+          {
+            "label": "F",
+            "readability": 5,
+            "flow_and_order": 3,
+            "naturalness_human_feel": 4,
+            "trust_and_clarity": 5,
+            "overall": 4,
+            "one_line_verdict": "Einstieg mit dem Werk Emden, zweiter Absatz mit eigener Zwischenzeile fuer die Trommelbremsen, Innenraum erst nach den Kofferraumwerten: die Gewichtung ist auf dem Kopf, die Formulierung (Bei dessen Nachfolger) holpert."
+          }
+        ],
+        "which_reads_like_a_human_journalist": "B - weil sie nicht nur Fakten stapelt, sondern mit kleinen Scharniersaetzen wie (Zu sehen gibt es das Elektro-SUV schon vorher) und (Beim ID.4 hatte eine Ziffer gereicht) den Leser durch den Text fuehrt, die Leseransprache dort setzt, wo sie ein echtes Aergernis trifft (die Schieberegler), und die 800-Volt-Absage an die Stelle stellt, an der sie inhaltlich hingehoert, statt sie irgendwo anzuhaengen.",
+        "weaknesses_of_best": [
+          "Unklarer Bezug: (Auch aeusserlich soll sie sich mit einer kantigeren Karosserie staerker an ihm orientieren) - das (ihm) muss der Leser ueber zwei Saetze zurueck zum Verbrenner-Tiguan zurueckverfolgen, und (sie) ist die Elektrovariante; beim schnellen Lesen kippt der Satz.",
+          "Der Schluss haengt in der Luft: (An der Hinterachse bleiben Trommelbremsen vorgesehen. Bei Elektroautos erfolgt die Verzoegerung ueberwiegend ueber Rekuperation.) steht als zweizeiliger Absatz nach Preis und R-Line ohne jede Ueberleitung - der Text hoert auf, statt zu enden.",
+          "Falsche Verknuepfung: (Die Preise fuer das Basismodell sollen laut Hersteller bei rund 42.000 Euro beginnen. Daneben plant Volkswagen eine R-Line ...) - das (Daneben) stellt eine Ausstattungslinie neben einen Preis, als waere sie eine Alternative dazu; ausserdem loest der Vorspann die Tasten im Cockpit erst im vierten Absatz ein, nach den Kofferraumwerten.",
+          "(Ein 800-Volt-System ... ist nicht vorgesehen, anders als zunaechst gedacht.) - wer hat das zunaechst gedacht? Ohne Quelle (Geruechte, VW selbst, fruehere Berichte) bleibt der Nachsatz eine Behauptung ohne Absender."
+        ]
+      },
+      {
+        "ranking": [
+          "B",
+          "A",
+          "E",
+          "C",
+          "J",
+          "I",
+          "D",
+          "G",
+          "H",
+          "F"
+        ],
+        "scores": [
+          {
+            "label": "B",
+            "readability": 8,
+            "flow_and_order": 7,
+            "naturalness_human_feel": 8,
+            "trust_and_clarity": 7,
+            "overall": 8,
+            "one_line_verdict": "Klarer Einstieg, sinnvolle Blöcke (Termine, Nutzwerte, Cockpit, Technik), lockere aber begründete Leseransprache; nur der Trommelbremsen-Nachklapp am Ende und die holprige Attribution im zweiten Absatz stören."
+          },
+          {
+            "label": "A",
+            "readability": 7,
+            "flow_and_order": 6,
+            "naturalness_human_feel": 6,
+            "trust_and_clarity": 7,
+            "overall": 7,
+            "one_line_verdict": "Sauber und nüchtern von Cockpit über Plattform zu Akku, aber Termin und Preis kommen erst im vorletzten Absatz, der 800-Volt-Satz hängt als Waise am Schluss, und die Leseransprache bei den Bremsen (\"falls ihr euch das beim Blick auf die Leistungswerte gefragt habt\") ist aufgesetzt."
+          },
+          {
+            "label": "E",
+            "readability": 7,
+            "flow_and_order": 7,
+            "naturalness_human_feel": 7,
+            "trust_and_clarity": 6,
+            "overall": 7,
+            "one_line_verdict": "Gute Dramaturgie mit echter Überleitung (\"Unter dem Blech bleibt mehr beim Alten\"), aber der Lead verplempert einen Satz mit Spekulation (\"muss sich allerdings zeigen\") und der Preis wird im letzten Absatz an die Trommelbremsen geklebt."
+          },
+          {
+            "label": "C",
+            "readability": 7,
+            "flow_and_order": 6,
+            "naturalness_human_feel": 7,
+            "trust_and_clarity": 6,
+            "overall": 6,
+            "one_line_verdict": "Preis-Lead ist legitim, doch \"Dafür gibt es ... kein 800-Volt-System\" liest sich unfreiwillig ironisch, und die Kernnachricht (löst den ID.4 ab) taucht erst im fünften Absatz auf."
+          },
+          {
+            "label": "J",
+            "readability": 7,
+            "flow_and_order": 6,
+            "naturalness_human_feel": 7,
+            "trust_and_clarity": 6,
+            "overall": 6,
+            "one_line_verdict": "Mutiger Einstieg über die Schieberegler und gute Reizwort-Zwischentitel, aber Premiere-Datum und ID.4-Ablösung sind zu tief vergraben und die Bremsen enden wieder als Einzelsatz."
+          },
+          {
+            "label": "I",
+            "readability": 6,
+            "flow_and_order": 5,
+            "naturalness_human_feel": 7,
+            "trust_and_clarity": 6,
+            "overall": 6,
+            "one_line_verdict": "Punchy Sätze (\"Die Schieberegler sollen raus.\"), aber zerhackte Ein-Satz-Absätze, Markteinführung als Waise, Plattform/400 Volt erst ganz am Ende und der Bremsen-Einschub (\"ihr habt richtig gelesen: Trommeln\") kippt ins Flapsige."
+          },
+          {
+            "label": "D",
+            "readability": 6,
+            "flow_and_order": 5,
+            "naturalness_human_feel": 6,
+            "trust_and_clarity": 6,
+            "overall": 6,
+            "one_line_verdict": "Anhängelast-Zahlen im zweiten Absatz vor allem anderen, umständliche Apposition (\"des Tiguan, den Volkswagen heute verkauft, des Verbrenners\"), Spekulationsfüller beim 800-Volt-Verzicht; Einzelinformationen ohne roten Faden."
+          },
+          {
+            "label": "G",
+            "readability": 7,
+            "flow_and_order": 6,
+            "naturalness_human_feel": 4,
+            "trust_and_clarity": 6,
+            "overall": 5,
+            "one_line_verdict": "Ordentlich gegliedert, aber Pressemappen-Ton (\"markiert eine Abkehr von der bisherigen Namensstrategie\"), Spekulation im Lead, generische Zwischentitel und ein Titel \"Namenswechsel als neue Strategie\" über einem Absatz, in dem es um Kofferraum und One-Pedal geht."
+          },
+          {
+            "label": "H",
+            "readability": 6,
+            "flow_and_order": 4,
+            "naturalness_human_feel": 6,
+            "trust_and_clarity": 5,
+            "overall": 5,
+            "one_line_verdict": "Der Artikel beginnt mit Trommelbremsen an der Hinterachse, das ist Nebensache als Aufmacher; danach passable Blöcke, aber der 800-Volt-Satz mit redundanter Plattform-Wiederholung baumelt am Ende."
+          },
+          {
+            "label": "F",
+            "readability": 5,
+            "flow_and_order": 3,
+            "naturalness_human_feel": 5,
+            "trust_and_clarity": 5,
+            "overall": 4,
+            "one_line_verdict": "Werk Emden im Lead, Trommelbremsen als erster Zwischentitel, Premiere-Datum irgendwo in der Mitte, Name und 400 Volt am Schluss: die Reihenfolge wirkt zufällig und der Leser muss sich die Nachricht selbst zusammensuchen."
+          }
+        ],
+        "which_reads_like_a_human_journalist": "Fassung B: Ihre Einschübe entstehen aus dem Stoff statt draufgesetzt zu sein (\"Beim ID.4 hatte eine Ziffer gereicht.\", die Ansprache an alle, die sich über die Schieberegler geärgert haben), die Satzlängen wechseln, und die Zwischentitel arbeiten mit Zahlen statt mit Kategorien; nichts darin klingt nach Pressemitteilung oder Gliederungsschema.",
+        "weaknesses_of_best": [
+          "Zweiter Absatz: \"Ende 2026 soll im Werk Emden die Serienproduktion beginnen, das teilt Volkswagen mit.\" ist eine holprige Attribution (Kommasatz), und der Produktionsstart steht vor dem eigentlichen Nachrichtenkern, der Premiere am 9. Oktober; die Reihenfolge Produktion, Markteinführung, dann erst Premiere ist gegen die Chronologie gebaut.",
+          "Schluss: \"An der Hinterachse bleiben Trommelbremsen vorgesehen. Bei Elektroautos erfolgt die Verzögerung überwiegend über Rekuperation.\" ist ein losgelöster Zwei-Satz-Absatz nach dem Preis; er gehört in den Technikblock unter \"400 Volt\", so endet der Text auf einer Fußnote.",
+          "Absatz \"1650 Liter, 2300 Kilogramm\": \"Auch äußerlich soll sie sich mit einer kantigeren Karosserie stärker an ihm orientieren.\" zwingt zum Rückwärtslesen (sie = Elektrovariante, ihm = Verbrenner-Tiguan); außerdem klebt später der Preis-Satz ohne Übergang vor der R-Line (\"Die Preise ... Daneben plant Volkswagen eine R-Line\"), zwei Informationen, die nichts miteinander zu tun haben."
+        ]
+      },
+      {
+        "ranking": [
+          "B",
+          "C",
+          "J",
+          "E",
+          "A",
+          "D",
+          "G",
+          "I",
+          "H",
+          "F"
+        ],
+        "scores": [
+          {
+            "label": "B",
+            "readability": 8,
+            "flow_and_order": 8,
+            "naturalness_human_feel": 8,
+            "trust_and_clarity": 8,
+            "overall": 8,
+            "one_line_verdict": "Sauber nach Themen gruppiert (Termine, Nutzwert, Cockpit, Technik), Übergänge wie 'Zu sehen gibt es das Elektro-SUV schon vorher' wirken redaktionell; der Preis kommt mir als Käuferin aber zu spät und hängt am R-Line-Absatz."
+          },
+          {
+            "label": "C",
+            "readability": 8,
+            "flow_and_order": 7,
+            "naturalness_human_feel": 7,
+            "trust_and_clarity": 8,
+            "overall": 7,
+            "one_line_verdict": "Preis und Marktstart im ersten Satz sind genau das, was ich wissen will, und der Technikblock ist gut gebündelt; 'Dafür gibt es wieder Tasten' klingt aber nach schiefem Tauschgeschäft, und der Absatz 'Den ID.4 löst das neue Modell ab' steht verloren mitten im Text."
+          },
+          {
+            "label": "J",
+            "readability": 7,
+            "flow_and_order": 7,
+            "naturalness_human_feel": 7,
+            "trust_and_clarity": 7,
+            "overall": 7,
+            "one_line_verdict": "Starker Einstieg mit den verschwindenden Schiebereglern und Preis schon im dritten Absatz; dass der Akku unter der Überschrift 'Werk Emden, Ende 2026' steht und der ID.4-Bezug erst spät kommt, stört die Orientierung, 'Slider' ist unnötiges Denglisch."
+          },
+          {
+            "label": "E",
+            "readability": 7,
+            "flow_and_order": 6,
+            "naturalness_human_feel": 7,
+            "trust_and_clarity": 6,
+            "overall": 6,
+            "one_line_verdict": "'Unter dem Blech bleibt mehr beim Alten' ist die beste Überleitung aller Fassungen, aber der Preis ist im Trommelbremsen-Absatz vergraben und das 'muss sich allerdings zeigen' im Vorspann ist Füllstoff, der mir nichts sagt."
+          },
+          {
+            "label": "A",
+            "readability": 7,
+            "flow_and_order": 6,
+            "naturalness_human_feel": 6,
+            "trust_and_clarity": 7,
+            "overall": 6,
+            "one_line_verdict": "Solide, klassische Reihenfolge, aber das 800-Volt-Thema wird nach Preis und Termin als Nachklapp angehängt, und 'falls ihr euch das beim Blick auf die Leistungswerte gefragt habt' ist ein bemühter Einschub, der die Trommelbremsen nicht erklärt."
+          },
+          {
+            "label": "D",
+            "readability": 6,
+            "flow_and_order": 5,
+            "naturalness_human_feel": 6,
+            "trust_and_clarity": 6,
+            "overall": 6,
+            "one_line_verdict": "Kofferraum und Anhängelast schon im zweiten Absatz vor Termin und Technik sind für mich die falsche Priorität; 'den Volkswagen heute verkauft, des Verbrenners' ist eine holprige Nachstellung und der 'muss sich zeigen'-Satz reine Verlegenheit."
+          },
+          {
+            "label": "G",
+            "readability": 7,
+            "flow_and_order": 6,
+            "naturalness_human_feel": 4,
+            "trust_and_clarity": 6,
+            "overall": 5,
+            "one_line_verdict": "Zwischenüberschriften wie 'Namenswechsel als neue Strategie' und Formeln wie 'markiert eine Abkehr von der bisherigen Namensstrategie' klingen nach Pressemappe oder Textgenerator, Ein-Pedal-Fahren landet im Namens-Kapitel, der Preis erst im letzten Satz."
+          },
+          {
+            "label": "I",
+            "readability": 5,
+            "flow_and_order": 4,
+            "naturalness_human_feel": 6,
+            "trust_and_clarity": 6,
+            "overall": 5,
+            "one_line_verdict": "Zerhackt in Ein-Satz-Absätze ('Die Markteinführung ist für das erste Quartal 2027 vorgesehen.' steht allein), Karosserie und Preis tauchen am Ende zusammenhanglos auf, und '(ihr habt richtig gelesen: Trommeln)' ist mir eine Spur zu flapsig."
+          },
+          {
+            "label": "H",
+            "readability": 6,
+            "flow_and_order": 3,
+            "naturalness_human_feel": 5,
+            "trust_and_clarity": 5,
+            "overall": 4,
+            "one_line_verdict": "Ein Artikel über ein neues E-SUV, der mit Trommelbremsen an der Hinterachse beginnt, hat seine Prioritäten verloren; 800 Volt wird ganz am Ende noch einmal mit doppeltem 'Plattform MEB+' nachgereicht."
+          },
+          {
+            "label": "F",
+            "readability": 6,
+            "flow_and_order": 3,
+            "naturalness_human_feel": 5,
+            "trust_and_clarity": 5,
+            "overall": 4,
+            "one_line_verdict": "Erst das Werk Emden, dann als erste Zwischenüberschrift 'Trommelbremsen an der Hinterachse', Cockpit und Name erst nach der Hälfte, Preis am Schluss: die Informationen liegen in fast umgekehrter Wichtigkeit."
+          }
+        ],
+        "which_reads_like_a_human_journalist": "Fassung B: Sie ordnet die Fakten wie jemand, der weiß, was Leser zuerst fragen (wann, was ändert sich, was steckt drunter), verbindet Absätze mit echten Überleitungen ('Zu sehen gibt es das Elektro-SUV schon vorher', 'Falls ihr euch über die berührungsempfindlichen Schieberegler geärgert habt') und setzt die Leser-Ansprache dort, wo sie zum Inhalt passt, statt sie beliebig einzustreuen.",
+        "weaknesses_of_best": [
+          "Der Satz 'Beim ID.4 hatte eine Ziffer gereicht.' hängt am Ende des Nutzwert-Absatzes in der Luft; er gehört zur Namensdiskussion im Vorspann, nicht zwischen Kofferraum und Stammkundschaft.",
+          "Der Preis, für eine Käuferin die wichtigste Zahl, steht erst im vorletzten Sachabsatz und wird sofort mit der R-Line vermischt ('Die Preise für das Basismodell sollen laut Hersteller bei rund 42.000 Euro beginnen. Daneben plant Volkswagen eine R-Line ...'), sodass unklar bleibt, ob 42.000 Euro auch für die R-Line gelten.",
+          "Die Trommelbremsen kommen als isolierter Zweizeiler nach dem Preis ('An der Hinterachse bleiben Trommelbremsen vorgesehen.'), ohne Anschluss an den Technikblock, wo sie hingehört hätten; ebenso wirkt 'ist nicht vorgesehen, anders als zunächst gedacht' mit dem nachgestellten Halbsatz verdreht."
+        ]
+      },
+      {
+        "ranking": [
+          "B",
+          "A",
+          "C",
+          "E",
+          "G",
+          "J",
+          "I",
+          "D",
+          "H",
+          "F"
+        ],
+        "scores": [
+          {
+            "label": "B",
+            "readability": 8,
+            "flow_and_order": 8,
+            "naturalness_human_feel": 8,
+            "trust_and_clarity": 8,
+            "overall": 8,
+            "one_line_verdict": "Knapper Lead, dann die Termine sauber in einem Absatz sortiert ('Zu sehen gibt es das Elektro-SUV schon vorher'), die Leseransprache folgt aus der Nachricht statt eingeschoben zu sein, und 'Beim ID.4 hatte eine Ziffer gereicht' ist ein echter Redakteurssatz."
+          },
+          {
+            "label": "A",
+            "readability": 7,
+            "flow_and_order": 7,
+            "naturalness_human_feel": 6,
+            "trust_and_clarity": 8,
+            "overall": 7,
+            "one_line_verdict": "Solide, klassische Reihenfolge (Name/Tasten, Innenraum, Plattform, Akku, Werk, Nutzwerte, Termine), aber der Einschub 'An der Hinterachse bleiben, falls ihr euch das beim Blick auf die Leistungswerte gefragt habt, Trommelbremsen vorgesehen' zerreisst den Satz, und das 800-Volt-Thema haengt als Nachklapp ganz am Ende."
+          },
+          {
+            "label": "C",
+            "readability": 7,
+            "flow_and_order": 6,
+            "naturalness_human_feel": 7,
+            "trust_and_clarity": 7,
+            "overall": 7,
+            "one_line_verdict": "Der Preis-Lead mit dem trockenen 'Dafuer gibt es wieder Tasten ... und kein 800-Volt-System' hat Stimme, doch die eigentliche Nachricht (Namenswechsel, ID.4-Abloesung) taucht erst im fuenften Absatz auf, und 'Falls ihr da stutzt' bei den Trommelbremsen wirkt bemueht."
+          },
+          {
+            "label": "E",
+            "readability": 7,
+            "flow_and_order": 6,
+            "naturalness_human_feel": 6,
+            "trust_and_clarity": 7,
+            "overall": 6,
+            "one_line_verdict": "Gute Uebergaenge ('Unter dem Blech bleibt mehr beim Alten'), aber der Lead endet mit dem KI-typischen Hedge 'muss sich allerdings zeigen', 'Falls ihr heute einen Tiguan mit Verbrennungsmotor fahrt: Der aktuelle Verbrenner' verdoppelt sich, und der Preis versteckt sich hinter den Trommelbremsen im vorletzten Absatz."
+          },
+          {
+            "label": "G",
+            "readability": 8,
+            "flow_and_order": 7,
+            "naturalness_human_feel": 4,
+            "trust_and_clarity": 8,
+            "overall": 6,
+            "one_line_verdict": "Am aufgeraeumtesten und am klarsten, aber genau deshalb am generiertesten: erklaerende Zwischentitel ('Namenswechsel als neue Strategie', 'Produktion und Antriebsvarianten'), Floskeln wie 'markiert eine Abkehr von der bisherigen Namensstrategie' und ein Einordnungs-Hedge schon im Lead."
+          },
+          {
+            "label": "J",
+            "readability": 7,
+            "flow_and_order": 5,
+            "naturalness_human_feel": 6,
+            "trust_and_clarity": 7,
+            "overall": 6,
+            "one_line_verdict": "Der Einstieg 'Die Schieberegler sollen verschwinden' ist konkret und 'Wer von euch es auffaelliger mag' sitzt, aber der Premierentermin, der eigentliche Aufhaenger der Schlagzeile, steht erst im fuenften Absatz, und unter 'Werk Emden, Ende 2026' folgt unvermittelt die Akku-Aufzaehlung."
+          },
+          {
+            "label": "I",
+            "readability": 6,
+            "flow_and_order": 4,
+            "naturalness_human_feel": 7,
+            "trust_and_clarity": 6,
+            "overall": 5,
+            "one_line_verdict": "Die menschlichste Stimme im Feld ('Die Schieberegler sollen raus', '(ihr habt richtig gelesen: Trommeln)'), aber die Reihenfolge ist zerhackt: der Marktstart als verwaister Ein-Satz-Absatz, die kantigere Karosserie nach der R-Line, Preis und 400 Volt lose am Schluss."
+          },
+          {
+            "label": "D",
+            "readability": 6,
+            "flow_and_order": 4,
+            "naturalness_human_feel": 5,
+            "trust_and_clarity": 6,
+            "overall": 5,
+            "one_line_verdict": "Die Kofferraumwerte des Verbrenners direkt nach dem Lead sind zu frueh, die Apposition 'des Tiguan, den Volkswagen heute verkauft, des Verbrenners' stolpert, 'Die Karosserie soll kantiger ausfallen' haengt grundlos am Produktionsabsatz, und 'Wie genau dieser Verzicht ... praegen wird, muss sich zeigen' ist reiner Generator-Reflex."
+          },
+          {
+            "label": "H",
+            "readability": 6,
+            "flow_and_order": 3,
+            "naturalness_human_feel": 5,
+            "trust_and_clarity": 6,
+            "overall": 4,
+            "one_line_verdict": "Ein Lead, der mit Trommelbremsen an der Hinterachse beginnt, verfehlt die Nachricht komplett; danach solide Passagen, aber 'Zum Vergleich, falls ihr den Verbrenner kennt: Der aktuelle Verbrenner-Tiguan' doppelt, und der 800-Volt-Satz wiederholt am Ende ueberfluessig 'auf der Plattform MEB+'."
+          },
+          {
+            "label": "F",
+            "readability": 6,
+            "flow_and_order": 2,
+            "naturalness_human_feel": 5,
+            "trust_and_clarity": 6,
+            "overall": 4,
+            "one_line_verdict": "Werk Emden als Aufmacher und 'Trommelbremsen an der Hinterachse' als erster Zwischentitel setzen die Prioritaeten auf den Kopf; 'Bei dessen Nachfolger verabschiedet sich Volkswagen' ist holprig, Innenraum, Name und Nutzwerte werden ueber den Text verstreut nachgereicht."
+          }
+        ],
+        "which_reads_like_a_human_journalist": "Fassung B: Sie ordnet die Termine so, wie ein Mensch sie im Kopf hat (Produktion, Marktstart, 'zu sehen gibt es das Auto schon vorher'), bringt mit 'Beim ID.4 hatte eine Ziffer gereicht' einen beilaeufigen, wertenden Nebensatz, den kein Zusammenfassungs-Reflex produziert, und spricht die Leser dort an, wo es aus dem Inhalt folgt (der Aerger ueber die Schieberegler), ohne Hedges wie 'muss sich zeigen' oder erklaerende Zwischentitel.",
+        "weaknesses_of_best": [
+          "Preis und R-Line sind ohne inneren Zusammenhang in einen Absatz gepackt: 'Die Preise fuer das Basismodell sollen laut Hersteller bei rund 42.000 Euro beginnen. Daneben plant Volkswagen eine R-Line ...' - das 'Daneben' ueberbrueckt zwei Themen, die nichts miteinander zu tun haben.",
+          "Der Text endet mit einem verwaisten Zwei-Satz-Absatz, der wie ein Rest wirkt: 'An der Hinterachse bleiben Trommelbremsen vorgesehen. Bei Elektroautos erfolgt die Verzoegerung ueberwiegend ueber Rekuperation.' - kein Anschluss nach vorn, keine Bruecke zur Leserfrage danach.",
+          "Die Pronomenkette im Nutzwert-Absatz zwingt zum Zurueckblaettern: 'Auch aeusserlich soll sie sich mit einer kantigeren Karosserie staerker an ihm orientieren.' ('sie' = Elektrovariante, 'ihm' = Verbrenner-Tiguan zwei Saetze vorher); dazu ist der Zwischentitel '400 Volt' eine nackte Zahl, die dem Leser nichts ankuendigt."
+        ]
+      }
+    ]
+  },
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "Read"
+    },
+    {
+      "type": "workflow_phase",
+      "index": 2,
+      "title": "Verify"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "reader-1",
+      "phaseIndex": 1,
+      "phaseTitle": "Read",
+      "agentId": "a05b65cdbabf223d1",
+      "model": "claude-fable-5-1",
+      "state": "done",
+      "startedAt": 1790535879369,
+      "queuedAt": 1790535879315,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "Fassung B - sie bündelt Termine und Technik so, wie man es …",
+      "promptPreview": "Du bist ein langjähriger WinFuture-Leser, 45, Technik-affin, liest morgens auf dem Handy in der Bahn.\n\nLies die Datei /tmp/claude-0/-home-user/0a9cc923-8822-574c-9a00-df14f3ae44c3/scratchpad/vw_candidates_blind.md. Sie enthält 10 Fassungen derselben Nachricht (VW ID. Tiguan), mit den Buchstaben A bis J bezeichnet, in zufälliger Reihenfolge. Eine davon ist der veröffentlichte Artikel, die anderen s…",
+      "promptFramed": true,
+      "lastProgressAt": 1790535978166,
+      "tokens": 100169,
+      "toolCalls": 3,
+      "durationMs": 98772,
+      "resultPreview": "{\"ranking\":[\"B\",\"E\",\"A\",\"J\",\"C\",\"G\",\"I\",\"D\",\"F\",\"H\"],\"scores\":[{\"label\":\"B\",\"readability\":8,\"flow_and_order\":8,\"naturalness_human_feel\":8,\"trust_and_clarity\":8,\"overall\":8,\"one_line_verdict\":\"Termine gebündelt, Technik gebündelt, zwei echte Leser-Anspielungen ('Beim ID.4 hatte eine Ziffer gereicht') - liest sich wie erzählt, nicht wie abgearbeitet.\"},{\"label\":\"E\",\"readability\":7,\"flow_and_order\":7…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 2,
+      "label": "reader-2",
+      "phaseIndex": 1,
+      "phaseTitle": "Read",
+      "agentId": "a2993e5b74f0908ce",
+      "model": "claude-fable-5-1",
+      "state": "done",
+      "startedAt": 1790535879393,
+      "queuedAt": 1790535879315,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "B - weil sie nicht nur Fakten stapelt, sondern mit kleinen …",
+      "promptPreview": "Du bist Autojournalist:in mit 20 Jahren Erfahrung bei einer Fachzeitschrift und liest Konkurrenztexte kritisch.\n\nLies die Datei /tmp/claude-0/-home-user/0a9cc923-8822-574c-9a00-df14f3ae44c3/scratchpad/vw_candidates_blind.md. Sie enthält 10 Fassungen derselben Nachricht (VW ID. Tiguan), mit den Buchstaben A bis J bezeichnet, in zufälliger Reihenfolge. Eine davon ist der veröffentlichte Artikel, die…",
+      "promptFramed": true,
+      "lastProgressAt": 1790536031071,
+      "tokens": 101744,
+      "toolCalls": 4,
+      "durationMs": 149168,
+      "resultPreview": "{\"ranking\":[\"B\",\"A\",\"C\",\"J\",\"E\",\"G\",\"D\",\"I\",\"H\",\"F\"],\"scores\":[{\"label\":\"B\",\"readability\":8,\"flow_and_order\":8,\"naturalness_human_feel\":8,\"trust_and_clarity\":8,\"overall\":8,\"one_line_verdict\":\"Knapper Einstieg, Termine sofort danach, 800 Volt sauber unter der eigenen Zwischenzeile eingebettet, dazu kleine menschliche Verbindungssaetze (Beim ID.4 hatte eine Ziffer gereicht) - die einzige Fassung, di…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 3,
+      "label": "reader-3",
+      "phaseIndex": 1,
+      "phaseTitle": "Read",
+      "agentId": "a93a0c9afafb1bbec",
+      "model": "claude-fable-5-1",
+      "state": "done",
+      "startedAt": 1790535980165,
+      "queuedAt": 1790535879315,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "Fassung B: Ihre Einschübe entstehen aus dem Stoff statt dra…",
+      "promptPreview": "Du bist Schlussredakteur:in einer Tageszeitung; dich interessieren Aufbau, Reihenfolge, Verständlichkeit und Glaubwürdigkeit.\n\nLies die Datei /tmp/claude-0/-home-user/0a9cc923-8822-574c-9a00-df14f3ae44c3/scratchpad/vw_candidates_blind.md. Sie enthält 10 Fassungen derselben Nachricht (VW ID. Tiguan), mit den Buchstaben A bis J bezeichnet, in zufälliger Reihenfolge. Eine davon ist der veröffentlicht…",
+      "promptFramed": true,
+      "lastProgressAt": 1790536051910,
+      "tokens": 95498,
+      "toolCalls": 2,
+      "durationMs": 71744,
+      "resultPreview": "{\"ranking\":[\"B\",\"A\",\"E\",\"C\",\"J\",\"I\",\"D\",\"G\",\"H\",\"F\"],\"scores\":[{\"label\":\"B\",\"readability\":8,\"flow_and_order\":7,\"naturalness_human_feel\":8,\"trust_and_clarity\":7,\"overall\":8,\"one_line_verdict\":\"Klarer Einstieg, sinnvolle Blöcke (Termine, Nutzwerte, Cockpit, Technik), lockere aber begründete Leseransprache; nur der Trommelbremsen-Nachklapp am Ende und die holprige Attribution im zweiten Absatz stören…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 4,
+      "label": "reader-4",
+      "phaseIndex": 1,
+      "phaseTitle": "Read",
+      "agentId": "a9a19f9b255c98de4",
+      "model": "claude-fable-5-1",
+      "state": "done",
+      "startedAt": 1790536033304,
+      "queuedAt": 1790535879316,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "Fassung B: Sie ordnet die Fakten wie jemand, der weiß, was …",
+      "promptPreview": "Du bist eine 29-jährige Leserin, die ein E-Auto kaufen will und den Text als Kaufinformation liest.\n\nLies die Datei /tmp/claude-0/-home-user/0a9cc923-8822-574c-9a00-df14f3ae44c3/scratchpad/vw_candidates_blind.md. Sie enthält 10 Fassungen derselben Nachricht (VW ID. Tiguan), mit den Buchstaben A bis J bezeichnet, in zufälliger Reihenfolge. Eine davon ist der veröffentlichte Artikel, die anderen sin…",
+      "promptFramed": true,
+      "lastProgressAt": 1790536127137,
+      "tokens": 98956,
+      "toolCalls": 3,
+      "durationMs": 93832,
+      "resultPreview": "{\"ranking\":[\"B\",\"C\",\"J\",\"E\",\"A\",\"D\",\"G\",\"I\",\"H\",\"F\"],\"scores\":[{\"label\":\"B\",\"readability\":8,\"flow_and_order\":8,\"naturalness_human_feel\":8,\"trust_and_clarity\":8,\"overall\":8,\"one_line_verdict\":\"Sauber nach Themen gruppiert (Termine, Nutzwert, Cockpit, Technik), Übergänge wie 'Zu sehen gibt es das Elektro-SUV schon vorher' wirken redaktionell; der Preis kommt mir als Käuferin aber zu spät und hängt a…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 5,
+      "label": "reader-5",
+      "phaseIndex": 1,
+      "phaseTitle": "Read",
+      "agentId": "a73fc28e0e34c9a1b",
+      "model": "claude-fable-5-1",
+      "state": "done",
+      "startedAt": 1790536053212,
+      "queuedAt": 1790535879316,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "Fassung B: Sie ordnet die Termine so, wie ein Mensch sie im…",
+      "promptPreview": "Du bist Linguist:in und untersuchst, welche Texte wie von Menschen geschriebene Nachrichten wirken und welche nach Textgenerator klingen; du kennst die typischen KI-Muster (aufgeräumte Struktur, erklärende Einordnungssätze, Zusammenfassungs-Reflexe).\n\nLies die Datei /tmp/claude-0/-home-user/0a9cc923-8822-574c-9a00-df14f3ae44c3/scratchpad/vw_candidates_blind.md. Sie enthält 10 Fassungen derselben N…",
+      "promptFramed": true,
+      "lastProgressAt": 1790536166506,
+      "tokens": 100255,
+      "toolCalls": 3,
+      "durationMs": 113294,
+      "resultPreview": "{\"ranking\":[\"B\",\"A\",\"C\",\"E\",\"G\",\"J\",\"I\",\"D\",\"H\",\"F\"],\"scores\":[{\"label\":\"B\",\"readability\":8,\"flow_and_order\":8,\"naturalness_human_feel\":8,\"trust_and_clarity\":8,\"overall\":8,\"one_line_verdict\":\"Knapper Lead, dann die Termine sauber in einem Absatz sortiert ('Zu sehen gibt es das Elektro-SUV schon vorher'), die Leseransprache folgt aus der Nachricht statt eingeschoben zu sein, und 'Beim ID.4 hatte ei…"
+    }
+  ],
+  "totalTokens": 496622,
+  "totalToolCalls": 15
+}
