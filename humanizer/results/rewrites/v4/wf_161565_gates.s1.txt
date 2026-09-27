@@ -1,0 +1,30 @@
+Bill Gates: "Niemand hält die KI-Selbstregulierung für ausreichend"
+
+Mehrere Vorfälle sind bekannt geworden, bei denen KI außer Kontrolle geraten war. Sie machen eine Kontrolle solcher Systeme dringlicher. Künstliche Intelligenz soll den Alltag erleichtern, ihr Missbrauch aber könnte zur ernsten Gefahr werden.
+
+"Niemand hält Selbstregulierung für ausreichend", sagt Bill Gates. Er fordert jetzt wieder einmal harte Regeln für KI und wendet sich dabei an den US-Kongress: Die Regeln sollen verbindlich sein. Dass KI-Konzerne ihre Sicherheitsvorkehrungen weitgehend selbst bestimmen, reicht aus seiner Sicht nicht aus. Selbstverpflichtungen der Branche könnten ein Baustein sein, reichten aber nicht.
+
+Im Gespräch mit NBC News nannte Gates die Verbindung aus böswilligen Akteuren und modernen KI-Werkzeugen besonders gefährlich. Noch keine Technologie habe ein vergleichbares Schadenspotenzial eröffnet. Falls ihr bei Missbrauch zuerst an Betrug denkt: Gemeint sind auch Manipulation, Cyberangriffe und mögliche Anwendungen im militärischen Bereich. Der Microsoft-Mitgründer warnt schon länger eindringlich vor den Risiken leistungsfähiger KI-Systeme.
+
+Washington
+
+US-Präsident Donald Trump lehnt eine umfassende staatliche Aufsicht ab und hält viele Sicherheitswarnungen für überzogen. Innovation soll aus seiner Sicht möglichst wenig durch Regulierung gebremst werden. In Washington prallen bei der Frage nach Regeln für künstliche Intelligenz gegensätzliche Positionen aufeinander, der Streit über staatliche Kontrolle eskaliert weiter. Gates positioniert sich klar auf der Seite derjenigen, die eine externe Kontrolle verlangen.
+
+Fähigkeiten, Tests, Schutzmechanismen
+
+Entscheidend sei, dass Politik und Behörden nachvollziehen können, welche Fähigkeiten moderne Modelle besitzen, wie sie getestet werden und welche Schutzmechanismen greifen. Die Strafverfolgungsbehörden und die Politiker müssten in die Diskussion darüber einbezogen werden, wie Schutzmaßnahmen und Überwachung aussehen sollen, und das müsse verbindlich vorgeschrieben werden. Für die Branche bedeute das zwar einen gewissen Mehraufwand, ihre Arbeit werde es aber nicht dramatisch verlangsamen.
+
+Kontrolliert werden sollen Systeme, die zunehmend eigenständig handeln, digitale Infrastruktur berühren und in sensible Bereiche wie Verwaltung, Gesundheit, Finanzen oder Sicherheit vordringen können. Gates' Warnung richtet sich vor allem an die Politik: Die Regeln sollten entstehen, bevor ein schwerer Missbrauch zeigt, wie spät sie kommen.
+
+Vertreter führender KI-Unternehmen sehen das anders als Trump. Gerade bei sehr leistungsfähigen Modellen, die komplexe Aufgaben planen, Code schreiben oder Sicherheitslücken suchen können, seien gemeinsame Regeln über Ländergrenzen hinweg nötig. Für internationale Sicherheitsstandards geworben haben Sam Altman von OpenAI und Dario Amodei von Anthropic, und zwar vor dem UN-Sicherheitsrat.
+
+Wie weit sollte die Politik bei der Kontrolle von KI gehen: Braucht es strenge gesetzliche Grenzen oder würde das Innovationen vor allem ausbremsen? Schreibt eure Meinung in die Kommentare.
+
+Zusammenfassung
+
+- Bill Gates drängt den US-Kongress auf verbindliche Gesetze für KI
+- Die Selbstregulierung durch Tech-Konzerne hält Gates für unzureichend
+- Gefahren drohen vor allem durch böswillige Akteure und Cyberangriffe
+- Donald Trump lehnt strenge staatliche Auflagen für Innovationen ab
+- Führende KI-Entwickler werben für weltweite Sicherheitsstandards
+- Behörden sollen Tests und Fähigkeiten der Modelle genau kontrollieren

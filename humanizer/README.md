@@ -81,20 +81,35 @@ Die Feature-Diagnose erklärt den Rückschritt bei Kimi exakt: v2 hatte die Zeit
 
 Messung: nachgebauter StoryScope-Klassifikator (narrativ, 257 Merkmale), P(Mensch) als Mittelwert über drei Annotationsläufe je Umschrift (Originale: ein Lauf, weil Logit ≪ 0). Faktentreue vom Faktenprüfer (100 = nichts erfunden, verändert, weggelassen). Rewriter: Claude Opus 5.5, eine Probe je Text.
 
+**Überblick Paper-Bereich (drei KI-Stories, P(Mensch) narrativ, Mittel über Annotationsläufe):**
+
+| Version | DeepSeek-Story | Gemini-Story | Kimi-Story | Mittel | bestanden (≥0,5) |
+|---|---|---|---|---|---|
+| original | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 |
+| v1 | 0.99 | 0.0 | 0.69 | 0.56 | 2.0 |
+| v2 | 0.82 | 0.27 | 0.04 | 0.38 | 1.0 |
+| v3 | 0.48 | 0.25 | 0.33 | 0.35 | 0.0 |
+| v4 | 1.0 | 0.03 | 0.17 | 0.4 | 1.0 |
+
+**Alle Messungen:**
+
 | Text | Version | Probe | Annot.-Läufe | P(Mensch) Mittel | min–max | Faktentreue | Wörter |
 |---|---|---|---|---|---|---|---|
 | DeepSeek-Story | original | – | 1 | **0.00** | 0.00–0.00 |  |  |
 | DeepSeek-Story | v1 | 1 | 3 | **0.99** | 0.98–0.99 | 100 | 1673 |
-| DeepSeek-Story | v2 | 1 | 1 | **0.88** | 0.88–0.88 | 90 | 1574 |
+| DeepSeek-Story | v2 | 1 | 3 | **0.82** | 0.78–0.88 | 90 | 1574 |
 | DeepSeek-Story | v3 | 1 | 3 | **0.48** | 0.21–0.99 | 90 | 1593 |
+| DeepSeek-Story | v4 | 1 | 3 | **1.00** | 0.99–1.00 | 100 | 1508 |
 | Gemini-Story | original | – | 1 | **0.00** | 0.00–0.00 |  |  |
 | Gemini-Story | v1 | 1 | 1 | **0.00** | 0.00–0.00 | 100 | 1702 |
 | Gemini-Story | v2 | 1 | 3 | **0.27** | 0.00–0.77 | 100 | 1547 |
 | Gemini-Story | v3 | 1 | 3 | **0.25** | 0.15–0.41 | 100 | 1488 |
+| Gemini-Story | v4 | 1 | 3 | **0.03** | 0.00–0.10 | 100 | 1504 |
 | Kimi-Story | original | – | 1 | **0.00** | 0.00–0.00 |  |  |
 | Kimi-Story | v1 | 1 | 3 | **0.69** | 0.21–0.98 | 100 | 1546 |
 | Kimi-Story | v2 | 1 | 3 | **0.04** | 0.00–0.08 | 90 | 1450 |
 | Kimi-Story | v3 | 1 | 3 | **0.33** | 0.07–0.78 | 90 | 1451 |
+| Kimi-Story | v4 | 1 | 3 | **0.17** | 0.08–0.34 | 100 | 1650 |
 | KI-Spiegel-News (Sonnet) | v2 | 1 | 1 | **0.65** | 0.65–0.65 | 100 | 254 |
 | KI-Spiegel-News (Opus) | v2 | 1 | 1 | **0.43** | 0.43–0.43 | 100 | 300 |
 | VW ID. Tiguan (News) | original | – | 3 | **0.02** | 0.00–0.02 |  |  |
@@ -104,17 +119,20 @@ Messung: nachgebauter StoryScope-Klassifikator (narrativ, 257 Merkmale), P(Mensc
 | VW ID. Tiguan (News) | v2 | 2 | 1 | **0.02** | 0.02–0.02 | 100 | 414 |
 | VW ID. Tiguan (News) | v3 | 1 | 1 | **0.04** | 0.04–0.04 | 100 | 409 |
 | VW ID. Tiguan (News) | v3 | 2 | 1 | **0.04** | 0.04–0.04 | 100 | 398 |
+| VW ID. Tiguan (News) | v4 | 1 | 1 | **0.03** | 0.03–0.03 | 100 | 440 |
+| VW ID. Tiguan (News) | v4 | 2 | 1 | **0.10** | 0.10–0.10 | 100 | 421 |
 | Bill Gates (News) | original | – | 1 | **0.69** | 0.69–0.69 |  |  |
 | Bill Gates (News) | v2 | 1 | 1 | **0.92** | 0.92–0.92 | 100 | 451 |
 | Bill Gates (News) | v3 | 1 | 1 | **0.38** | 0.38–0.38 | 90 | 440 |
+| Bill Gates (News) | v4 | 1 | 1 | **0.61** | 0.61–0.61 | 100 | 455 |
 
 Lesart:
 - **v1 ist die beste Version im Paper-Bereich:** zwei von drei KI-Stories werden vom Klassifikator als menschlich eingestuft (DeepSeek 0,99 stabil über drei Läufe; Kimi 0,69 mit Streuung 0,21–0,98), die dritte (Gemini) bleibt bei 0,00. Jede längere, stärker vorschreibende Version (v2, v3) hat die Gemini-Story verbessert (Logit −10 → −1 bis −3), aber die beiden anderen verschlechtert, weil der Rewriter die entscheidenden Zeitachsen-Eingriffe zugunsten der vielen Zusatzregeln fallen ließ.
-- v4 = v1 plus vier belegte Ergänzungen (Faktenregel für Wissensstand und Gewissheitsgrad, Enthüllung ins letzte Fünftel, Nachspiel höchstens ein Absatz, Geruch/Geschmack null, Zitatregel für News). (v4-Ergebnis: siehe Tabelle, Nachtest läuft.)
+- v4 = v1 plus vier belegte Ergänzungen (Faktenregel für Wissensstand und Gewissheitsgrad, Enthüllung ins letzte Fünftel, Nachspiel höchstens ein Absatz, Geruch/Geschmack null, Zitatregel für News). Ergebnis v4 (je drei Annotationsläufe): DeepSeek 1,00, Kimi 0,17, Gemini 0,03, Mittel 0,40, eine von drei bestanden; Faktentreue 100 bei allen fünf Texten. Die Strukturzusätze haben also wieder gekostet, was sie bei Gemini bringen sollten, ohne es dort zu bringen.
 - Die Faktentreue ist seit v2 bei Nachrichtentexten 100 (v1: 75/85 wegen erfundener „nicht bekannt"-Sätze); die schärfere Faktenregel ist in v4 enthalten.
 - Für den VW-Artikel bleibt P(Mensch) unter allen Versionen bei 0,02–0,10. Das ist kein Scheitern des Prompts, sondern die fehlende Trennschärfe des Instruments für Nachrichtentexte (§ 3–4): auch der menschliche Kontrolltext bekommt 0,09. Die Umschriften des VW-Artikels (`results/rewrites/`) sind fakten­treu (100) und lesen sich als Nachricht; ob sie „menschlicher" sind, kann dieses Instrument nicht sagen.
 
-**Empfehlung für die Redaktion:** `prompts/humanize_v4.md` verwenden (bzw. v1, falls v4 im Nachtest schlechter abschneidet, siehe Tabelle). Weil das Urteil des Klassifikators nahe der Grenze streut, lohnt sich bei Erzähltexten ein Auswahlschritt: zwei bis drei Umschriften erzeugen, jede dreimal annotieren, die mit dem höchsten Mittelwert nehmen (`ss_humanize.py --samples 3 --annot-runs 3`). Bei Nachrichtentexten ist der einzige harte, messbare Maßstab die Faktentreue; dort ist der Prompt vor allem ein Struktur-Werkzeug (Einstieg, Reihenfolge, Zitate, Leseransprache) und kein Detektor-Umgeher.
+**Empfehlung für die Redaktion:** `prompts/humanize_final.md` verwenden. Das ist der Strukturteil von v1 unverändert (die beste gemessene Version) plus die Faktenregeln aus v2–v4 (Wissensstand, Gewissheitsgrad, Zitatregel für News, zwei Prüfpunkte), die nur die Faktentreue betreffen und dort in allen Läufen 100 erreicht haben. Diese Kombination selbst wurde nicht noch einmal als Ganzes durchgemessen; ihr Strukturteil ist identisch mit v1. Weil das Urteil des Klassifikators nahe der Grenze streut, lohnt sich bei Erzähltexten ein Auswahlschritt: zwei bis drei Umschriften erzeugen, jede dreimal annotieren, die mit dem höchsten Mittelwert nehmen (`ss_humanize.py --samples 3 --annot-runs 3`). Bei Nachrichtentexten ist der einzige harte, messbare Maßstab die Faktentreue; dort ist der Prompt vor allem ein Struktur-Werkzeug (Einstieg, Reihenfolge, Zitate, Leseransprache) und kein Detektor-Umgeher.
 
 ## Abbildungen (wie im Paper)
 
