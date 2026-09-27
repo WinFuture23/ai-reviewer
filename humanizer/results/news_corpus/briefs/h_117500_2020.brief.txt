@@ -1,0 +1,18 @@
+**1. Thema:** Die Spieleseite Eurogamer hat getestet, wie realistisch der Microsoft Flight Simulator den echten Hurrikan Isaias simuliert.
+
+**2. Fakten:**
+- Anlass: Atlantische Hurrikan-Saison, aktuell Hurricane Isaias, der die US-Ostküste trifft
+- Betroffene Region: Karibik und Südosten der USA (allgemein), konkret US-Ostküste
+- Test durchgeführt von: Eurogamer (Spieleseite)
+- Autor: Martin Robinson
+- Ziel des Tests: Vergleich des Ingame-Wetters im Microsoft Flight Simulator mit echten Wetterdaten zu Hurricane Isaias
+- Einschränkung des Autors: Er sei kein Meteorologe und könne die Authentizität des Sturms nicht wissenschaftlich fundiert beurteilen; auch der Vergleich mit echten Wetterdaten sei nicht streng wissenschaftlich
+- Startpunkt der virtuellen Reise: Richmond International Airport, US-Bundesstaat Virginia
+- Route: von Richmond in Richtung des simulierten Hurricane Isaias
+- Eingesetzt wurden mehrere verschiedene Flugzeuge/Maschinen
+- Erlebnis: starke Turbulenzen, teilweise Höhenverlust von "dutzenden Metern" innerhalb der Turbulenzen
+- Zitat (Martin Robinson): "Beeindruckend ist, wie Microsoft Flight Simulator trotz der Dunkelheit und des Graus eines beträchtlichen Sturms immer noch absolut großartig aussieht."
+- Besonderes Erlebnis: Der Moment, in dem man über den Hurrikan hinaus in die Höhe fliegt
+- Zitat (Martin Robinson) zu diesem Moment: er habe "nach Luft geschnappt" und gedacht, "was für eine erstaunliche Sache dieses Spiel ist"
+
+**3. Nachrichtenwert:** Der Artikel greift einen aktuellen Praxistest auf, der zeigt, wie detailgetreu die Wettersimulation im neuen Microsoft Flight Simulator reale, gerade stattfindende Extremwetterereignisse abbildet.

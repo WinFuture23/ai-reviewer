@@ -1,0 +1,19 @@
+Bundesnetzagentur will WhatsApp wie einen SMS-Anbieter regulieren
+
+Die Bundesnetzagentur will Messaging- und Internetdienste wie WhatsApp künftig genauso behandeln wie klassische Telekommunikationsanbieter. Das hat Behördenchef Jochen Homann in einem Interview angekündigt. Grundlage ist ein laufender Rechtsstreit mit Google, der inzwischen beim Europäischen Gerichtshof liegt.
+
+Die Grenzen verschwimmen
+
+Im Gespräch mit der Financial Times (FT) erklärte Homann, dass sich SMS-Dienste kaum noch von webbasierten Angeboten wie WhatsApp von Facebook, iMessage von Apple oder Gmail von Google unterscheiden lassen. "Was wir sehen ist, dass die Grenze zwischen traditionellen Telekommunikationsdiensten und webbasierten Diensten wie [Google] Gmail und [Facebook] WhatsApp sehr verschwommen ist. Die Nutzer sehen oft gar keinen Unterschied", so der Präsident der Bundesnetzagentur.
+
+Daraus leitet Homann die Forderung nach einheitlichen Regeln ab: "Es kann nicht sein, dass ein Unternehmen, das traditionelle Telekommunikationsdienste anbietet, bestimmte regulatorische Anforderungen erfüllen muss, wie zum Beispiel die des Datenschutzes, während ein Unternehmen, das vergleichbare Dienste über das Internet anbietet, dies nicht tut."
+
+Datenschutz und staatlicher Zugriff
+
+Konkret geht es um Vorgaben beim Datenschutz, aber auch um staatliche Zugriffsmöglichkeiten. Dazu zählt etwa die Einrichtung von Überwachungsschnittstellen für Sicherheitsbehörden. Aus der Politik wurde bereits mehrfach gefordert, dass der Staat Zugriff auf WhatsApp-Daten erhalten soll.
+
+Homann hat dabei auch den Wettbewerb im Blick. Er will ein faires Umfeld für europäische Telekommunikationsanbieter schaffen, die mit den teils aus den USA stammenden Internetdiensten konkurrieren.
+
+Gmail-Verfahren als Präzedenzfall
+
+Als Präzedenzfall dient ein Verfahren gegen Google. Die Bundesnetzagentur hat den Konzern vor Gericht gebracht, weil dieser sich weigerte, Gmail als "Telekommunikationsangebot" registrieren zu lassen. Der Fall liegt aktuell beim Europäischen Gerichtshof (EuGH) und soll richtungsweisend für das weitere Vorgehen gegen WhatsApp sein. Sollte sich die Behörde gegen Google durchsetzen, will sie zeitnah auch gegen andere Dienste vorgehen.

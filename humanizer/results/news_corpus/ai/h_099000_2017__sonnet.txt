@@ -1,0 +1,15 @@
+Google schließt zehn kritische Lücken im Media Framework von Android
+
+Google hat das August-2017-Sicherheitsupdate für Android veröffentlicht und behebt damit zahlreiche Schwachstellen, darunter zehn als kritisch eingestufte Lücken im Media Framework. Nutzer sollten das Update angesichts einer besonders schwerwiegenden Sicherheitslücke zeitnah installieren.
+
+Kritische Lücke ermöglicht Codeausführung
+
+Wie aus den Android Security Bulletins für August hervorgeht, kann die gravierendste der behobenen Schwachstellen einem entfernten Angreifer mittels einer präparierten Datei die Ausführung beliebigen Codes im Rahmen eines privilegierten Prozesses ermöglichen. Betroffen sind die Android-Versionen 4.4.4, 5.0.2, 5.1.1, 6.0, 6.0.1, 7.0, 7.1.1 sowie 7.1.2. Nach Angaben von Google gibt es derzeit keine Hinweise darauf, dass diese Lücke bereits aktiv ausgenutzt wird. Zusätzlich wurden fehlerhafte Komponenten von MediaTek und Qualcomm korrigiert.
+
+Zwei Patch-Level-Versionen
+
+Das Update ist in zwei Patch-Level-Versionen unterteilt. Der partielle Security Patch Level String 2017-08-01 schließt zehn kritische und 14 hoch eingestufte Sicherheitslücken. Der komplette Patch-Level-String 2017-08-05 behebt zwei hoch und zwölf moderat eingestufte Schwachstellen. Alle Android-Nutzer erhalten künftig ein Update, das entsprechend als Version 2017-08-05 oder 2017-08-01 gekennzeichnet ist. Google-Pixel- und Nexus-Geräten wird dagegen ausschließlich der vollständige Patch-Level 2017-08-05 angeboten.
+
+Rollout hat bereits begonnen
+
+Google hatte seinen Partnern die Details zu den Sicherheitslücken bereits einen Monat vor der Veröffentlichung mitgeteilt. Zunächst steht das Update für die eigenen Geräte Google Pixel und Nexus zur Verfügung. Der Rollout dafür ist bereits gestartet, die Versorgung soll innerhalb von 48 Stunden abgeschlossen sein. Alternativ können Nutzer die entsprechenden Images auch manuell herunterladen. Für andere Hersteller hängt der Zeitpunkt der Verteilung wie üblich von deren eigenen Update-Zeitplänen ab.

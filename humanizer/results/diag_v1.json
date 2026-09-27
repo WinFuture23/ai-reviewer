@@ -1,0 +1,3146 @@
+{
+ "version": "v1",
+ "texts": [
+  {
+   "text": "dev_deepseek_4557",
+   "sample": 1,
+   "words_orig": 1805,
+   "words_rewrite": 1673,
+   "p_human_before": 0.0,
+   "p_human_after": 0.9908,
+   "logit_after": 4.68,
+   "factcheck": {
+    "invented_facts": [],
+    "altered_facts": [],
+    "dropped_facts": [],
+    "language_and_genre_preserved": true,
+    "fidelity_score": 100
+   },
+   "n_features_changed": 88,
+   "still_toward_ai_after_rewrite": [
+    {
+     "feature": "PLT_MOR_007",
+     "name": "Post-Climax Denouement Length",
+     "question": "How extended is the narrative after the main climactic event?",
+     "rewrite_value": "extended (multiple scenes/time jumps of aftermath/epilogue)",
+     "original_value": "extended (multiple scenes/time jumps of aftermath/epilogue)",
+     "contribution_to_ai_logit": -1.784,
+     "columns": [
+      {
+       "col": "PLT_MOR_007",
+       "x": 2.0,
+       "human_mean": 1.02,
+       "ai_mean": 1.47,
+       "contrib": -1.784
+      }
+     ]
+    },
+    {
+     "feature": "REV_SUR_007",
+     "name": "Twist Placement Pattern",
+     "question": "Where in the story are major twists primarily positioned?",
+     "rewrite_value": "mid_story_twist",
+     "original_value": "mid_story_twist",
+     "contribution_to_ai_logit": -1.534,
+     "columns": [
+      {
+       "col": "REV_SUR_007__mid_story_twist",
+       "x": 1.0,
+       "human_mean": 0.09,
+       "ai_mean": 0.22,
+       "contrib": -0.876
+      },
+      {
+       "col": "REV_SUR_007__climactic_end_twist",
+       "x": 0.0,
+       "human_mean": 0.61,
+       "ai_mean": 0.45,
+       "contrib": -0.543
+      },
+      {
+       "col": "REV_SUR_007__distributed_multiple_twists",
+       "x": 0.0,
+       "human_mean": 0.18,
+       "ai_mean": 0.14,
+       "contrib": -0.122
+      }
+     ]
+    },
+    {
+     "feature": "AGENT_ATTR_005",
+     "name": "Primary technique for rendering inner life",
+     "question": "What is the primary narrative technique for representing the central character's inner thoughts and feelings?",
+     "rewrite_value": "summary thought-report in narrator's voice",
+     "original_value": "summary thought-report in narrator's voice",
+     "contribution_to_ai_logit": -0.978,
+     "columns": [
+      {
+       "col": "AGENT_ATTR_005__summary thought-report in narrator's voice",
+       "x": 1.0,
+       "human_mean": 0.14,
+       "ai_mean": 0.15,
+       "contrib": -0.727
+      },
+      {
+       "col": "AGENT_ATTR_005__free indirect discourse (3rd person blending narrator and character voice)",
+       "x": 0.0,
+       "human_mean": 0.42,
+       "ai_mean": 0.5,
+       "contrib": -0.259
+      }
+     ]
+    },
+    {
+     "feature": "EVT_CAU_017",
+     "name": "Event Novelty Orientation",
+     "question": "On a 1–5 scale, how strongly does the story lean on surprising, schema-breaking events versus familiar, predictable ones (1 = very predictable, 5 = highly surprising)?",
+     "rewrite_value": "2",
+     "original_value": "2",
+     "contribution_to_ai_logit": -0.956,
+     "columns": [
+      {
+       "col": "EVT_CAU_017",
+       "x": 2.0,
+       "human_mean": 3.37,
+       "ai_mean": 3.01,
+       "contrib": -0.956
+      }
+     ]
+    },
+    {
+     "feature": "SET_ATM_017",
+     "name": "Dominant Sensory Modalities",
+     "question": "Which sensory modalities does the story most frequently engage when rendering setting?",
+     "rewrite_value": "visual|auditory|olfactory|tactile|gustatory",
+     "original_value": "visual|auditory|olfactory|tactile|gustatory",
+     "contribution_to_ai_logit": -0.59,
+     "columns": [
+      {
+       "col": "SET_ATM_017__auditory",
+       "x": 1.0,
+       "human_mean": 0.91,
+       "ai_mean": 0.93,
+       "contrib": -0.021
+      },
+      {
+       "col": "SET_ATM_017__olfactory",
+       "x": 1.0,
+       "human_mean": 0.57,
+       "ai_mean": 0.82,
+       "contrib": -0.38
+      },
+      {
+       "col": "SET_ATM_017__gustatory",
+       "x": 1.0,
+       "human_mean": 0.08,
+       "ai_mean": 0.07,
+       "contrib": -0.023
+      }
+     ]
+    },
+    {
+     "feature": "EVT_SCH_004",
+     "name": "Mode of resolution of the main event chain",
+     "question": "How is the central conflict or event chain brought to a close, if at all?",
+     "rewrite_value": "partial_or_compromise_resolution",
+     "original_value": "partial_or_compromise_resolution",
+     "contribution_to_ai_logit": -0.516,
+     "columns": [
+      {
+       "col": "EVT_SCH_004__resolved_through_internal_understanding_or_acceptance",
+       "x": 0.0,
+       "human_mean": 0.27,
+       "ai_mean": 0.47,
+       "contrib": 0.082
+      },
+      {
+       "col": "EVT_SCH_004__partial_or_compromise_resolution",
+       "x": 1.0,
+       "human_mean": 0.09,
+       "ai_mean": 0.1,
+       "contrib": -0.455
+      },
+      {
+       "col": "EVT_SCH_004__open_or_ambiguously_unresolved",
+       "x": 0.0,
+       "human_mean": 0.18,
+       "ai_mean": 0.09,
+       "contrib": 0.021
+      }
+     ]
+    },
+    {
+     "feature": "SOC_REL_013",
+     "name": "Diversity of Communication Channels",
+     "question": "Through which channels do socially important communications between characters occur?",
+     "rewrite_value": "face_to_face_dialogue|letters_notes_or_diaries|ritual_or_ceremonial_actions|indirect_via_objects_spaces_or_environment",
+     "original_value": "face_to_face_dialogue|letters_notes_or_diaries|ritual_or_ceremonial_actions|indirect_via_objects_spaces_or_environment",
+     "contribution_to_ai_logit": -0.412,
+     "columns": [
+      {
+       "col": "SOC_REL_013__letters_notes_or_diaries",
+       "x": 1.0,
+       "human_mean": 0.26,
+       "ai_mean": 0.3,
+       "contrib": -0.484
+      },
+      {
+       "col": "SOC_REL_013__digital_or_broadcast_media",
+       "x": 0.0,
+       "human_mean": 0.26,
+       "ai_mean": 0.23,
+       "contrib": 0.025
+      },
+      {
+       "col": "SOC_REL_013__ritual_or_ceremonial_actions",
+       "x": 1.0,
+       "human_mean": 0.27,
+       "ai_mean": 0.26,
+       "contrib": 0.075
+      }
+     ]
+    },
+    {
+     "feature": "EVT_TYP_006",
+     "name": "Dominant Focal Level of Events",
+     "question": "At what social scale do most important events operate?",
+     "rewrite_value": "family_or_small_group_scale",
+     "original_value": "family_or_small_group_scale",
+     "contribution_to_ai_logit": -0.386,
+     "columns": [
+      {
+       "col": "EVT_TYP_006__individual_or_intimate_personal_scale",
+       "x": 0.0,
+       "human_mean": 0.56,
+       "ai_mean": 0.55,
+       "contrib": -0.202
+      },
+      {
+       "col": "EVT_TYP_006__family_or_small_group_scale",
+       "x": 1.0,
+       "human_mean": 0.28,
+       "ai_mean": 0.3,
+       "contrib": -0.188
+      }
+     ]
+    },
+    {
+     "feature": "REV_SUS_002",
+     "name": "Visibility of Withholding",
+     "question": "Is the fact that something is being withheld made explicit to the reader (signposted as a mystery), or is it left implicit?",
+     "rewrite_value": "framed_as_overt_mystery_or_case",
+     "original_value": "framed_as_overt_mystery_or_case",
+     "contribution_to_ai_logit": -0.367,
+     "columns": [
+      {
+       "col": "REV_SUS_002__implicit_omission_only",
+       "x": 0.0,
+       "human_mean": 0.39,
+       "ai_mean": 0.3,
+       "contrib": -0.215
+      },
+      {
+       "col": "REV_SUS_002__framed_as_overt_mystery_or_case",
+       "x": 1.0,
+       "human_mean": 0.06,
+       "ai_mean": 0.07,
+       "contrib": -0.161
+      }
+     ]
+    },
+    {
+     "feature": "SIT_MET_008",
+     "name": "Reference Explicitness",
+     "question": "Are intertextual gestures primarily explicit name-checks or more diffuse, generic echoes?",
+     "rewrite_value": "Primarily implicit echoes (genres, archetypes, unnamed myths)",
+     "original_value": "Primarily implicit echoes (genres, archetypes, unnamed myths)",
+     "contribution_to_ai_logit": -0.363,
+     "columns": [
+      {
+       "col": "SIT_MET_008__Primarily implicit echoes (genres, archetypes, unnamed myths)",
+       "x": 1.0,
+       "human_mean": 0.5,
+       "ai_mean": 0.72,
+       "contrib": -0.177
+      },
+      {
+       "col": "SIT_MET_008__Balanced mix of explicit and implicit",
+       "x": 0.0,
+       "human_mean": 0.36,
+       "ai_mean": 0.16,
+       "contrib": -0.186
+      }
+     ]
+    },
+    {
+     "feature": "TMP_ORD_014",
+     "name": "Ending temporal scope",
+     "question": "Relative to the main line of events, where in story time does the narrative end?",
+     "rewrite_value": "ends_with_brief_forward_epilogue_or_flashforward",
+     "original_value": "ends_with_brief_forward_epilogue_or_flashforward",
+     "contribution_to_ai_logit": -0.338,
+     "columns": [
+      {
+       "col": "TMP_ORD_014__ends_at_or_just_after_main_climax_no_forward_jump",
+       "x": 0.0,
+       "human_mean": 0.69,
+       "ai_mean": 0.51,
+       "contrib": -0.319
+      },
+      {
+       "col": "TMP_ORD_014__ends_with_brief_forward_epilogue_or_flashforward",
+       "x": 1.0,
+       "human_mean": 0.04,
+       "ai_mean": 0.08,
+       "contrib": -0.063
+      },
+      {
+       "col": "TMP_ORD_014__ends_at_distant_future_or_far_past_vantage_summarizing_long_term",
+       "x": 0.0,
+       "human_mean": 0.25,
+       "ai_mean": 0.38,
+       "contrib": 0.024
+      }
+     ]
+    },
+    {
+     "feature": "AGENT_EMO_003",
+     "name": "Complexity of emotional arc",
+     "question": "How complex is the central character's emotional journey across the story?",
+     "rewrite_value": "some distinct shifts",
+     "original_value": "some distinct shifts",
+     "contribution_to_ai_logit": -0.314,
+     "columns": [
+      {
+       "col": "AGENT_EMO_003",
+       "x": 1.0,
+       "human_mean": 1.56,
+       "ai_mean": 1.65,
+       "contrib": -0.314
+      }
+     ]
+    },
+    {
+     "feature": "SOC_STR_010",
+     "name": "Individualization of Community",
+     "question": "How are broader communities (villages, crowds, congregations, online publics) represented socially?",
+     "rewrite_value": "mostly_individualized_side_characters",
+     "original_value": "mix_of_named_individuals_and_collective_masses",
+     "contribution_to_ai_logit": -0.303,
+     "columns": [
+      {
+       "col": "SOC_STR_010__mostly_individualized_side_characters",
+       "x": 1.0,
+       "human_mean": 0.21,
+       "ai_mean": 0.26,
+       "contrib": -0.183
+      },
+      {
+       "col": "SOC_STR_010__mostly_anonymous_crowds_or_collectives",
+       "x": 0.0,
+       "human_mean": 0.35,
+       "ai_mean": 0.4,
+       "contrib": -0.139
+      }
+     ]
+    },
+    {
+     "feature": "REV_DIS_001",
+     "name": "Overall Revelation Pacing Pattern",
+     "question": "How are major pieces of explanatory information (about stakes, backstory, ontology) distributed across the story?",
+     "rewrite_value": "episodic_or_serial_pulses_of_revelation",
+     "original_value": "episodic_or_serial_pulses_of_revelation",
+     "contribution_to_ai_logit": -0.271,
+     "columns": [
+      {
+       "col": "REV_DIS_001__back_loaded_key_revelations_near_end",
+       "x": 0.0,
+       "human_mean": 0.66,
+       "ai_mean": 0.48,
+       "contrib": -0.278
+      }
+     ]
+    },
+    {
+     "feature": "PLT_CON_007",
+     "name": "Agency in Resolution",
+     "question": "Is the resolution of the central conflict driven mainly by the protagonist's deliberate choices or by events beyond their control?",
+     "rewrite_value": "primarily_protagonist_choice",
+     "original_value": "primarily_protagonist_choice",
+     "contribution_to_ai_logit": -0.253,
+     "columns": [
+      {
+       "col": "PLT_CON_007__primarily_protagonist_choice",
+       "x": 1.0,
+       "human_mean": 0.46,
+       "ai_mean": 0.69,
+       "contrib": -0.227
+      }
+     ]
+    },
+    {
+     "feature": "SET_ATM_020",
+     "name": "Atmospheric Construction Techniques",
+     "question": "Which elements does the story most rely on to build atmosphere and mood in its settings?",
+     "rewrite_value": "weather_and_light|architecture_and_objects|decay_and_dirt",
+     "original_value": "architecture_and_objects|weather_and_light",
+     "contribution_to_ai_logit": -0.252,
+     "columns": [
+      {
+       "col": "SET_ATM_020__weather_and_light",
+       "x": 1.0,
+       "human_mean": 0.73,
+       "ai_mean": 0.9,
+       "contrib": -0.122
+      },
+      {
+       "col": "SET_ATM_020__nature_and_landscape",
+       "x": 0.0,
+       "human_mean": 0.76,
+       "ai_mean": 0.76,
+       "contrib": -0.149
+      },
+      {
+       "col": "SET_ATM_020__decay_and_dirt",
+       "x": 1.0,
+       "human_mean": 0.38,
+       "ai_mean": 0.45,
+       "contrib": 0.027
+      }
+     ]
+    },
+    {
+     "feature": "PLT_THM_009",
+     "name": "Integration of Subplots with Theme",
+     "question": "If subplots exist, how directly do they echo or complicate the central theme?",
+     "rewrite_value": "no_subplots",
+     "original_value": "no_subplots",
+     "contribution_to_ai_logit": -0.246,
+     "columns": [
+      {
+       "col": "PLT_THM_009__no_subplots",
+       "x": 1.0,
+       "human_mean": 0.57,
+       "ai_mean": 0.79,
+       "contrib": -0.088
+      },
+      {
+       "col": "PLT_THM_009__directly_thematically_parallel",
+       "x": 0.0,
+       "human_mean": 0.42,
+       "ai_mean": 0.21,
+       "contrib": -0.157
+      }
+     ]
+    },
+    {
+     "feature": "SET_LOC_008",
+     "name": "Dominant Space Types",
+     "question": "Which types of spaces dominate the story's significant scenes?",
+     "rewrite_value": "domestic_private",
+     "original_value": "domestic_private",
+     "contribution_to_ai_logit": -0.233,
+     "columns": [
+      {
+       "col": "SET_LOC_008__public_social",
+       "x": 0.0,
+       "human_mean": 0.62,
+       "ai_mean": 0.52,
+       "contrib": -0.042
+      },
+      {
+       "col": "SET_LOC_008__natural_outdoor",
+       "x": 0.0,
+       "human_mean": 0.63,
+       "ai_mean": 0.6,
+       "contrib": -0.245
+      },
+      {
+       "col": "SET_LOC_008__institutional_or_workplace",
+       "x": 0.0,
+       "human_mean": 0.64,
+       "ai_mean": 0.65,
+       "contrib": 0.059
+      }
+     ]
+    },
+    {
+     "feature": "PLT_MOR_002",
+     "name": "Moral Polarity Toward Protagonist",
+     "question": "What evaluative stance does the narrative ultimately take toward its central protagonist?",
+     "rewrite_value": "affirmative_heroic",
+     "original_value": "affirmative_heroic",
+     "contribution_to_ai_logit": -0.222,
+     "columns": [
+      {
+       "col": "PLT_MOR_002__affirmative_heroic",
+       "x": 1.0,
+       "human_mean": 0.29,
+       "ai_mean": 0.52,
+       "contrib": -0.125
+      },
+      {
+       "col": "PLT_MOR_002__ambivalent_or_morally_mixed",
+       "x": 0.0,
+       "human_mean": 0.58,
+       "ai_mean": 0.38,
+       "contrib": -0.102
+      }
+     ]
+    },
+    {
+     "feature": "SOC_DYN_020",
+     "name": "Violence Within Close Relationships",
+     "question": "Does physical or severe psychological violence occur within close relationships (family, romantic partners, long-term mentors/guardians)?",
+     "rewrite_value": "no",
+     "original_value": "no",
+     "contribution_to_ai_logit": -0.218,
+     "columns": [
+      {
+       "col": "SOC_DYN_020",
+       "x": 0.0,
+       "human_mean": 0.45,
+       "ai_mean": 0.34,
+       "contrib": -0.218
+      }
+     ]
+    }
+   ],
+   "now_toward_human": [
+    {
+     "feature": "PER_POV_009",
+     "name": "Frequency of direct address to the reader",
+     "rewrite_value": "occasional_asides",
+     "contribution": 1.828
+    },
+    {
+     "feature": "AGENT_EMO_002",
+     "name": "Modes of conveying the central character's emotions",
+     "rewrite_value": "explicit emotion words/labels|dialogue content or tone revealing emotion|actions and choices as emotional indicators",
+     "contribution": 1.475
+    },
+    {
+     "feature": "PLT_THM_008",
+     "name": "Thematic Unity",
+     "rewrite_value": "4",
+     "contribution": 1.273
+    },
+    {
+     "feature": "SIT_MET_303",
+     "name": "Thematic Explicitness and Moralizing",
+     "rewrite_value": "3",
+     "contribution": 1.141
+    },
+    {
+     "feature": "AGENT_EMO_001",
+     "name": "Frequency of explicit emotion naming",
+     "rewrite_value": "frequent",
+     "contribution": 1.073
+    },
+    {
+     "feature": "SET_ATM_005",
+     "name": "Sensory Density",
+     "rewrite_value": "3",
+     "contribution": 0.882
+    },
+    {
+     "feature": "PER_FOC_009",
+     "name": "Degree of explicit evaluative or moral commentary",
+     "rewrite_value": "1",
+     "contribution": 0.689
+    },
+    {
+     "feature": "AGENT_EMO_012",
+     "name": "Preferred cues for conveying emotional state",
+     "rewrite_value": "action choices and behavior (e.g., slamming doors, withdrawing, calling someone)|dialogue content and tone (what and how characters speak)",
+     "contribution": 0.679
+    }
+   ]
+  },
+  {
+   "text": "dev_gemini_10367",
+   "sample": 1,
+   "words_orig": 1839,
+   "words_rewrite": 1702,
+   "p_human_before": 0.0,
+   "p_human_after": 0.0,
+   "logit_after": -10.35,
+   "factcheck": {
+    "invented_facts": [],
+    "altered_facts": [],
+    "dropped_facts": [],
+    "language_and_genre_preserved": true,
+    "fidelity_score": 100
+   },
+   "n_features_changed": 73,
+   "still_toward_ai_after_rewrite": [
+    {
+     "feature": "PLT_MOR_007",
+     "name": "Post-Climax Denouement Length",
+     "question": "How extended is the narrative after the main climactic event?",
+     "rewrite_value": "extended (multiple scenes/time jumps of aftermath/epilogue)",
+     "original_value": "extended (multiple scenes/time jumps of aftermath/epilogue)",
+     "contribution_to_ai_logit": -1.08,
+     "columns": [
+      {
+       "col": "PLT_MOR_007",
+       "x": 2.0,
+       "human_mean": 1.02,
+       "ai_mean": 1.47,
+       "contrib": -1.08
+      }
+     ]
+    },
+    {
+     "feature": "REV_SUR_007",
+     "name": "Twist Placement Pattern",
+     "question": "Where in the story are major twists primarily positioned?",
+     "rewrite_value": "mid_story_twist",
+     "original_value": "mid_story_twist",
+     "contribution_to_ai_logit": -1.015,
+     "columns": [
+      {
+       "col": "REV_SUR_007__mid_story_twist",
+       "x": 1.0,
+       "human_mean": 0.09,
+       "ai_mean": 0.22,
+       "contrib": -0.381
+      },
+      {
+       "col": "REV_SUR_007__climactic_end_twist",
+       "x": 0.0,
+       "human_mean": 0.61,
+       "ai_mean": 0.45,
+       "contrib": -0.588
+      },
+      {
+       "col": "REV_SUR_007__distributed_multiple_twists",
+       "x": 0.0,
+       "human_mean": 0.18,
+       "ai_mean": 0.14,
+       "contrib": -0.058
+      }
+     ]
+    },
+    {
+     "feature": "PLT_THM_008",
+     "name": "Thematic Unity",
+     "question": "To what extent do subplots, set-pieces, and stylistic flourishes serve a central thematic concern?",
+     "rewrite_value": "5",
+     "original_value": "5",
+     "contribution_to_ai_logit": -1.012,
+     "columns": [
+      {
+       "col": "PLT_THM_008",
+       "x": 5.0,
+       "human_mean": 4.41,
+       "ai_mean": 4.74,
+       "contrib": -1.012
+      }
+     ]
+    },
+    {
+     "feature": "EVT_SCH_002",
+     "name": "Arc Completeness Relative to Implied Plot",
+     "question": "How much of the implied full plot does the text actually cover?",
+     "rewrite_value": "partial_arc_with_cliffhanger_or_open_crisis",
+     "original_value": "multi_phase_arc_extending_well_beyond_prompt",
+     "contribution_to_ai_logit": -0.745,
+     "columns": [
+      {
+       "col": "EVT_SCH_002",
+       "x": 1.0,
+       "human_mean": 1.97,
+       "ai_mean": 1.94,
+       "contrib": -0.745
+      }
+     ]
+    },
+    {
+     "feature": "SIT_MET_303",
+     "name": "Thematic Explicitness and Moralizing",
+     "question": "How explicitly does the story articulate its themes or morals in the narration or character speech?",
+     "rewrite_value": "4",
+     "original_value": "4",
+     "contribution_to_ai_logit": -0.697,
+     "columns": [
+      {
+       "col": "SIT_MET_303",
+       "x": 4.0,
+       "human_mean": 3.28,
+       "ai_mean": 3.94,
+       "contrib": -0.697
+      }
+     ]
+    },
+    {
+     "feature": "PER_DIA_001",
+     "name": "Dialogue-to-narration proportion",
+     "question": "Roughly what proportion of the text consists of direct dialogue (quoted speech) versus narration and description?",
+     "rewrite_value": "2",
+     "original_value": "2",
+     "contribution_to_ai_logit": -0.688,
+     "columns": [
+      {
+       "col": "PER_DIA_001",
+       "x": 2.0,
+       "human_mean": 2.95,
+       "ai_mean": 2.71,
+       "contrib": -0.688
+      }
+     ]
+    },
+    {
+     "feature": "PLT_STR_007",
+     "name": "Tension Escalation Clarity",
+     "question": "On a 1–5 scale, how clearly does the story build and escalate narrative tension toward one or more climaxes?",
+     "rewrite_value": "5",
+     "original_value": "5",
+     "contribution_to_ai_logit": -0.63,
+     "columns": [
+      {
+       "col": "PLT_STR_007",
+       "x": 5.0,
+       "human_mean": 3.9,
+       "ai_mean": 4.12,
+       "contrib": -0.63
+      }
+     ]
+    },
+    {
+     "feature": "SET_ATM_017",
+     "name": "Dominant Sensory Modalities",
+     "question": "Which sensory modalities does the story most frequently engage when rendering setting?",
+     "rewrite_value": "visual|auditory|olfactory|tactile|gustatory",
+     "original_value": "visual|auditory|olfactory|tactile|gustatory",
+     "contribution_to_ai_logit": -0.628,
+     "columns": [
+      {
+       "col": "SET_ATM_017__auditory",
+       "x": 1.0,
+       "human_mean": 0.91,
+       "ai_mean": 0.93,
+       "contrib": -0.043
+      },
+      {
+       "col": "SET_ATM_017__olfactory",
+       "x": 1.0,
+       "human_mean": 0.57,
+       "ai_mean": 0.82,
+       "contrib": -0.532
+      },
+      {
+       "col": "SET_ATM_017__gustatory",
+       "x": 1.0,
+       "human_mean": 0.08,
+       "ai_mean": 0.07,
+       "contrib": -0.042
+      }
+     ]
+    },
+    {
+     "feature": "SIT_MET_202",
+     "name": "Intertextual Strategy Types",
+     "question": "What kinds of intertextual engagement with other works or traditions does the story employ?",
+     "rewrite_value": "",
+     "original_value": "use_of_mythological_or_religious_source_material",
+     "contribution_to_ai_logit": -0.569,
+     "columns": [
+      {
+       "col": "SIT_MET_202__explicit_named_reference_to_specific_texts_or_authors",
+       "x": 0.0,
+       "human_mean": 0.46,
+       "ai_mean": 0.24,
+       "contrib": -0.257
+      },
+      {
+       "col": "SIT_MET_202__stylistic_pastiche_of_identifiable_author_or_period",
+       "x": 0.0,
+       "human_mean": 0.1,
+       "ai_mean": 0.16,
+       "contrib": 0.069
+      },
+      {
+       "col": "SIT_MET_202__use_of_mythological_or_religious_source_material",
+       "x": 0.0,
+       "human_mean": 0.7,
+       "ai_mean": 0.65,
+       "contrib": -0.382
+      }
+     ]
+    },
+    {
+     "feature": "EVT_CAU_017",
+     "name": "Event Novelty Orientation",
+     "question": "On a 1–5 scale, how strongly does the story lean on surprising, schema-breaking events versus familiar, predictable ones (1 = very predictable, 5 = highly surprising)?",
+     "rewrite_value": "3",
+     "original_value": "4",
+     "contribution_to_ai_logit": -0.472,
+     "columns": [
+      {
+       "col": "EVT_CAU_017",
+       "x": 3.0,
+       "human_mean": 3.37,
+       "ai_mean": 3.01,
+       "contrib": -0.472
+      }
+     ]
+    },
+    {
+     "feature": "SOC_REL_007",
+     "name": "Range of Relationship Types Present",
+     "question": "Which distinct types of social relationships are meaningfully present in the story?",
+     "rewrite_value": "familial_kinship|professional_or_economic|adversarial_or_criminal|communal_or_neighborly|spiritual_or_supernatural",
+     "original_value": "familial_kinship|adversarial_or_criminal|spiritual_or_supernatural|professional_or_economic|communal_or_neighborly",
+     "contribution_to_ai_logit": -0.469,
+     "columns": [
+      {
+       "col": "SOC_REL_007__familial_kinship",
+       "x": 1.0,
+       "human_mean": 0.7,
+       "ai_mean": 0.59,
+       "contrib": 0.141
+      },
+      {
+       "col": "SOC_REL_007__romantic_or_sexual",
+       "x": 0.0,
+       "human_mean": 0.48,
+       "ai_mean": 0.3,
+       "contrib": -0.384
+      },
+      {
+       "col": "SOC_REL_007__friendship_or_peer",
+       "x": 0.0,
+       "human_mean": 0.61,
+       "ai_mean": 0.49,
+       "contrib": -0.297
+      }
+     ]
+    },
+    {
+     "feature": "EVT_SCH_010",
+     "name": "Global Narrative Schema",
+     "question": "Which high-level narrative schemas are structurally central to the story?",
+     "rewrite_value": "quest/journey|investigation/mystery|siege/ordeal|frame_confession/memoir",
+     "original_value": "investigation/mystery|siege/ordeal|frame_confession/memoir",
+     "contribution_to_ai_logit": -0.45,
+     "columns": [
+      {
+       "col": "EVT_SCH_010__quest/journey",
+       "x": 1.0,
+       "human_mean": 0.19,
+       "ai_mean": 0.18,
+       "contrib": 0.05
+      },
+      {
+       "col": "EVT_SCH_010__investigation/mystery",
+       "x": 1.0,
+       "human_mean": 0.16,
+       "ai_mean": 0.16,
+       "contrib": -0.153
+      },
+      {
+       "col": "EVT_SCH_010__siege/ordeal",
+       "x": 1.0,
+       "human_mean": 0.25,
+       "ai_mean": 0.3,
+       "contrib": -0.214
+      }
+     ]
+    },
+    {
+     "feature": "AGENT_EMO_009",
+     "name": "Dominant mode of emotional expression",
+     "question": "How are characters' emotions most commonly conveyed?",
+     "rewrite_value": "embodied_sensations_and_metaphors",
+     "original_value": "embodied_sensations_and_metaphors",
+     "contribution_to_ai_logit": -0.39,
+     "columns": [
+      {
+       "col": "AGENT_EMO_009__explicit_emotion_labels",
+       "x": 0.0,
+       "human_mean": 0.29,
+       "ai_mean": 0.08,
+       "contrib": -0.028
+      },
+      {
+       "col": "AGENT_EMO_009__embodied_sensations_and_metaphors",
+       "x": 1.0,
+       "human_mean": 0.39,
+       "ai_mean": 0.81,
+       "contrib": -0.341
+      },
+      {
+       "col": "AGENT_EMO_009__behavioral_cues_and_action_only",
+       "x": 0.0,
+       "human_mean": 0.33,
+       "ai_mean": 0.11,
+       "contrib": -0.02
+      }
+     ]
+    },
+    {
+     "feature": "AGENT_EMO_002",
+     "name": "Modes of conveying the central character's emotions",
+     "question": "Through which modes are the central character's emotions mainly conveyed?",
+     "rewrite_value": "explicit emotion words/labels|bodily sensations or physiology (e.g., heartbeat, nausea, trembling)|actions and choices as emotional indicators|metaphorical or environmental imagery reflecting mood",
+     "original_value": "explicit emotion words/labels|bodily sensations or physiology (e.g., heartbeat, nausea, trembling)|metaphorical or environmental imagery reflecting mood|actions and choices as emotional indicators",
+     "contribution_to_ai_logit": -0.379,
+     "columns": [
+      {
+       "col": "AGENT_EMO_002__explicit emotion words/labels",
+       "x": 1.0,
+       "human_mean": 0.64,
+       "ai_mean": 0.58,
+       "contrib": 0.288
+      },
+      {
+       "col": "AGENT_EMO_002__metaphorical or environmental imagery reflecting mood",
+       "x": 1.0,
+       "human_mean": 0.5,
+       "ai_mean": 0.89,
+       "contrib": -0.664
+      }
+     ]
+    },
+    {
+     "feature": "SIT_MET_008",
+     "name": "Reference Explicitness",
+     "question": "Are intertextual gestures primarily explicit name-checks or more diffuse, generic echoes?",
+     "rewrite_value": "Primarily implicit echoes (genres, archetypes, unnamed myths)",
+     "original_value": "Primarily implicit echoes (genres, archetypes, unnamed myths)",
+     "contribution_to_ai_logit": -0.373,
+     "columns": [
+      {
+       "col": "SIT_MET_008__Primarily implicit echoes (genres, archetypes, unnamed myths)",
+       "x": 1.0,
+       "human_mean": 0.5,
+       "ai_mean": 0.72,
+       "contrib": -0.066
+      },
+      {
+       "col": "SIT_MET_008__Balanced mix of explicit and implicit",
+       "x": 0.0,
+       "human_mean": 0.36,
+       "ai_mean": 0.16,
+       "contrib": -0.304
+      }
+     ]
+    },
+    {
+     "feature": "SIT_MET_102",
+     "name": "Ending-Level Self-Commentary on Story",
+     "question": "Does the ending explicitly comment on the act of storytelling, narrative closure, or the status of this text as a story?",
+     "rewrite_value": "yes",
+     "original_value": "yes",
+     "contribution_to_ai_logit": -0.357,
+     "columns": [
+      {
+       "col": "SIT_MET_102",
+       "x": 1.0,
+       "human_mean": 0.37,
+       "ai_mean": 0.47,
+       "contrib": -0.357
+      }
+     ]
+    },
+    {
+     "feature": "SOC_DYN_010",
+     "name": "Dominant Power Structure Form",
+     "question": "What kind of power structure most strongly shapes the social world of the story?",
+     "rewrite_value": "diffuse_systemic_power",
+     "original_value": "diffuse_systemic_power",
+     "contribution_to_ai_logit": -0.347,
+     "columns": [
+      {
+       "col": "SOC_DYN_010__vertical_hierarchy",
+       "x": 0.0,
+       "human_mean": 0.57,
+       "ai_mean": 0.57,
+       "contrib": -0.095
+      },
+      {
+       "col": "SOC_DYN_010__diffuse_systemic_power",
+       "x": 1.0,
+       "human_mean": 0.04,
+       "ai_mean": 0.06,
+       "contrib": -0.236
+      }
+     ]
+    },
+    {
+     "feature": "SOC_DYN_019",
+     "name": "Dominant Interpersonal Conflict Modality",
+     "question": "How does interpersonal conflict most often manifest between characters?",
+     "rewrite_value": "covert_manipulation_or_abuse",
+     "original_value": "covert_manipulation_or_abuse",
+     "contribution_to_ai_logit": -0.34,
+     "columns": [
+      {
+       "col": "SOC_DYN_019__open_confrontation",
+       "x": 0.0,
+       "human_mean": 0.57,
+       "ai_mean": 0.48,
+       "contrib": -0.175
+      },
+      {
+       "col": "SOC_DYN_019__covert_manipulation_or_abuse",
+       "x": 1.0,
+       "human_mean": 0.14,
+       "ai_mean": 0.13,
+       "contrib": -0.161
+      }
+     ]
+    },
+    {
+     "feature": "AGENT_ATTR_005",
+     "name": "Primary technique for rendering inner life",
+     "question": "What is the primary narrative technique for representing the central character's inner thoughts and feelings?",
+     "rewrite_value": "first-person direct reporting of thoughts ('I thought...')",
+     "original_value": "first-person direct reporting of thoughts ('I thought...')",
+     "contribution_to_ai_logit": -0.329,
+     "columns": [
+      {
+       "col": "AGENT_ATTR_005__summary thought-report in narrator's voice",
+       "x": 0.0,
+       "human_mean": 0.14,
+       "ai_mean": 0.15,
+       "contrib": 0.049
+      },
+      {
+       "col": "AGENT_ATTR_005__free indirect discourse (3rd person blending narrator and character voice)",
+       "x": 0.0,
+       "human_mean": 0.42,
+       "ai_mean": 0.5,
+       "contrib": -0.367
+      }
+     ]
+    },
+    {
+     "feature": "SIT_MET_402",
+     "name": "Required External Knowledge Level",
+     "question": "How much non-everyday external knowledge (historical, theoretical, niche cultural) is required to fully understand the story's stakes or references?",
+     "rewrite_value": "none_beyond_everyday_life",
+     "original_value": "none_beyond_everyday_life",
+     "contribution_to_ai_logit": -0.327,
+     "columns": [
+      {
+       "col": "SIT_MET_402",
+       "x": 0.0,
+       "human_mean": 0.7,
+       "ai_mean": 0.54,
+       "contrib": -0.327
+      }
+     ]
+    }
+   ],
+   "now_toward_human": [
+    {
+     "feature": "PER_POV_009",
+     "name": "Frequency of direct address to the reader",
+     "rewrite_value": "occasional_asides",
+     "contribution": 1.018
+    },
+    {
+     "feature": "SIT_MET_004",
+     "name": "Fourth-Wall Permeability",
+     "rewrite_value": "3-Occasional direct address or acknowledgement of reader",
+     "contribution": 0.776
+    },
+    {
+     "feature": "REV_SUR_005",
+     "name": "Reader-Superior Knowledge Extent",
+     "rewrite_value": "local_short_lived_pockets",
+     "contribution": 0.599
+    },
+    {
+     "feature": "AGENT_ID_007",
+     "name": "Opacity of central character at introduction",
+     "rewrite_value": "partially opaque (some key aspects withheld or unclear)",
+     "contribution": 0.41
+    },
+    {
+     "feature": "PLT_CON_007",
+     "name": "Agency in Resolution",
+     "rewrite_value": "mixed_choice_and_chance",
+     "contribution": 0.374
+    },
+    {
+     "feature": "AGENT_ATTR_009",
+     "name": "Closure of central character's psychological arc",
+     "rewrite_value": "no",
+     "contribution": 0.367
+    },
+    {
+     "feature": "AGENT_ID_003",
+     "name": "Proportion of named vs. unnamed characters",
+     "rewrite_value": "only major characters have proper names; most minor figures are role-descriptors",
+     "contribution": 0.359
+    },
+    {
+     "feature": "AGENT_ATTR_004",
+     "name": "Explicit trait labeling",
+     "rewrite_value": "no",
+     "contribution": 0.342
+    }
+   ]
+  },
+  {
+   "text": "dev_kimi_4582",
+   "sample": 1,
+   "words_orig": 1804,
+   "words_rewrite": 1546,
+   "p_human_before": 0.0,
+   "p_human_after": 0.9784,
+   "logit_after": 3.81,
+   "factcheck": {
+    "invented_facts": [],
+    "altered_facts": [],
+    "dropped_facts": [],
+    "language_and_genre_preserved": true,
+    "fidelity_score": 100
+   },
+   "n_features_changed": 107,
+   "still_toward_ai_after_rewrite": [
+    {
+     "feature": "EVT_CAU_017",
+     "name": "Event Novelty Orientation",
+     "question": "On a 1–5 scale, how strongly does the story lean on surprising, schema-breaking events versus familiar, predictable ones (1 = very predictable, 5 = highly surprising)?",
+     "rewrite_value": "2",
+     "original_value": "2",
+     "contribution_to_ai_logit": -1.407,
+     "columns": [
+      {
+       "col": "EVT_CAU_017",
+       "x": 2.0,
+       "human_mean": 3.37,
+       "ai_mean": 3.01,
+       "contrib": -1.407
+      }
+     ]
+    },
+    {
+     "feature": "SIT_MET_303",
+     "name": "Thematic Explicitness and Moralizing",
+     "question": "How explicitly does the story articulate its themes or morals in the narration or character speech?",
+     "rewrite_value": "4",
+     "original_value": "5",
+     "contribution_to_ai_logit": -0.996,
+     "columns": [
+      {
+       "col": "SIT_MET_303",
+       "x": 4.0,
+       "human_mean": 3.28,
+       "ai_mean": 3.94,
+       "contrib": -0.996
+      }
+     ]
+    },
+    {
+     "feature": "PLT_THM_008",
+     "name": "Thematic Unity",
+     "question": "To what extent do subplots, set-pieces, and stylistic flourishes serve a central thematic concern?",
+     "rewrite_value": "5",
+     "original_value": "5",
+     "contribution_to_ai_logit": -0.895,
+     "columns": [
+      {
+       "col": "PLT_THM_008",
+       "x": 5.0,
+       "human_mean": 4.41,
+       "ai_mean": 4.74,
+       "contrib": -0.895
+      }
+     ]
+    },
+    {
+     "feature": "SET_ATM_017",
+     "name": "Dominant Sensory Modalities",
+     "question": "Which sensory modalities does the story most frequently engage when rendering setting?",
+     "rewrite_value": "visual|auditory|tactile|olfactory",
+     "original_value": "visual|auditory|olfactory|tactile|kinesthetic",
+     "contribution_to_ai_logit": -0.732,
+     "columns": [
+      {
+       "col": "SET_ATM_017__auditory",
+       "x": 1.0,
+       "human_mean": 0.91,
+       "ai_mean": 0.93,
+       "contrib": -0.022
+      },
+      {
+       "col": "SET_ATM_017__olfactory",
+       "x": 1.0,
+       "human_mean": 0.57,
+       "ai_mean": 0.82,
+       "contrib": -0.562
+      },
+      {
+       "col": "SET_ATM_017__kinesthetic",
+       "x": 0.0,
+       "human_mean": 0.68,
+       "ai_mean": 0.74,
+       "contrib": -0.157
+      }
+     ]
+    },
+    {
+     "feature": "AGENT_ATTR_005",
+     "name": "Primary technique for rendering inner life",
+     "question": "What is the primary narrative technique for representing the central character's inner thoughts and feelings?",
+     "rewrite_value": "summary thought-report in narrator's voice",
+     "original_value": "summary thought-report in narrator's voice",
+     "contribution_to_ai_logit": -0.709,
+     "columns": [
+      {
+       "col": "AGENT_ATTR_005__summary thought-report in narrator's voice",
+       "x": 1.0,
+       "human_mean": 0.14,
+       "ai_mean": 0.15,
+       "contrib": -0.391
+      },
+      {
+       "col": "AGENT_ATTR_005__free indirect discourse (3rd person blending narrator and character voice)",
+       "x": 0.0,
+       "human_mean": 0.42,
+       "ai_mean": 0.5,
+       "contrib": -0.342
+      },
+      {
+       "col": "AGENT_ATTR_005__first-person direct reporting of thoughts ('I thought...')",
+       "x": 0.0,
+       "human_mean": 0.43,
+       "ai_mean": 0.35,
+       "contrib": 0.024
+      }
+     ]
+    },
+    {
+     "feature": "PER_DIA_001",
+     "name": "Dialogue-to-narration proportion",
+     "question": "Roughly what proportion of the text consists of direct dialogue (quoted speech) versus narration and description?",
+     "rewrite_value": "2",
+     "original_value": "2",
+     "contribution_to_ai_logit": -0.675,
+     "columns": [
+      {
+       "col": "PER_DIA_001",
+       "x": 2.0,
+       "human_mean": 2.95,
+       "ai_mean": 2.71,
+       "contrib": -0.675
+      }
+     ]
+    },
+    {
+     "feature": "SOC_REL_013",
+     "name": "Diversity of Communication Channels",
+     "question": "Through which channels do socially important communications between characters occur?",
+     "rewrite_value": "face_to_face_dialogue|letters_notes_or_diaries|indirect_via_objects_spaces_or_environment",
+     "original_value": "face_to_face_dialogue|letters_notes_or_diaries|indirect_via_objects_spaces_or_environment",
+     "contribution_to_ai_logit": -0.601,
+     "columns": [
+      {
+       "col": "SOC_REL_013__letters_notes_or_diaries",
+       "x": 1.0,
+       "human_mean": 0.26,
+       "ai_mean": 0.3,
+       "contrib": -0.571
+      },
+      {
+       "col": "SOC_REL_013__digital_or_broadcast_media",
+       "x": 0.0,
+       "human_mean": 0.26,
+       "ai_mean": 0.23,
+       "contrib": 0.034
+      },
+      {
+       "col": "SOC_REL_013__ritual_or_ceremonial_actions",
+       "x": 0.0,
+       "human_mean": 0.27,
+       "ai_mean": 0.26,
+       "contrib": -0.045
+      }
+     ]
+    },
+    {
+     "feature": "SIT_MET_402",
+     "name": "Required External Knowledge Level",
+     "question": "How much non-everyday external knowledge (historical, theoretical, niche cultural) is required to fully understand the story's stakes or references?",
+     "rewrite_value": "none_beyond_everyday_life",
+     "original_value": "none_beyond_everyday_life",
+     "contribution_to_ai_logit": -0.5,
+     "columns": [
+      {
+       "col": "SIT_MET_402",
+       "x": 0.0,
+       "human_mean": 0.7,
+       "ai_mean": 0.54,
+       "contrib": -0.5
+      }
+     ]
+    },
+    {
+     "feature": "PLT_THM_004",
+     "name": "Thematic Domains",
+     "question": "Which thematic domains are centrally explored in the story's plot?",
+     "rewrite_value": "power/authority|justice/injustice|class/economics|identity/selfhood|family/generation|grief/loss",
+     "original_value": "power/authority|justice/injustice|class/economics|family/generation|identity/selfhood|grief/loss|social systems/institutions",
+     "contribution_to_ai_logit": -0.477,
+     "columns": [
+      {
+       "col": "PLT_THM_004__survival/fear",
+       "x": 0.0,
+       "human_mean": 0.25,
+       "ai_mean": 0.26,
+       "contrib": -0.042
+      },
+      {
+       "col": "PLT_THM_004__power/authority",
+       "x": 1.0,
+       "human_mean": 0.36,
+       "ai_mean": 0.39,
+       "contrib": -0.124
+      },
+      {
+       "col": "PLT_THM_004__justice/injustice",
+       "x": 1.0,
+       "human_mean": 0.28,
+       "ai_mean": 0.31,
+       "contrib": -0.281
+      }
+     ]
+    },
+    {
+     "feature": "REV_SUR_007",
+     "name": "Twist Placement Pattern",
+     "question": "Where in the story are major twists primarily positioned?",
+     "rewrite_value": "no_twist",
+     "original_value": "no_twist",
+     "contribution_to_ai_logit": -0.397,
+     "columns": [
+      {
+       "col": "REV_SUR_007__mid_story_twist",
+       "x": 0.0,
+       "human_mean": 0.09,
+       "ai_mean": 0.22,
+       "contrib": 0.112
+      },
+      {
+       "col": "REV_SUR_007__climactic_end_twist",
+       "x": 0.0,
+       "human_mean": 0.61,
+       "ai_mean": 0.45,
+       "contrib": -0.443
+      },
+      {
+       "col": "REV_SUR_007__distributed_multiple_twists",
+       "x": 0.0,
+       "human_mean": 0.18,
+       "ai_mean": 0.14,
+       "contrib": -0.052
+      }
+     ]
+    },
+    {
+     "feature": "TMP_DUR_009",
+     "name": "Density of Explicit Time Markers",
+     "question": "How frequently does the narrative use explicit temporal markers or transitions such as 'later that night', 'the next morning', 'weeks passed'?",
+     "rewrite_value": "4",
+     "original_value": "3",
+     "contribution_to_ai_logit": -0.395,
+     "columns": [
+      {
+       "col": "TMP_DUR_009",
+       "x": 4.0,
+       "human_mean": 3.04,
+       "ai_mean": 3.08,
+       "contrib": -0.395
+      }
+     ]
+    },
+    {
+     "feature": "AGENT_EMO_002",
+     "name": "Modes of conveying the central character's emotions",
+     "question": "Through which modes are the central character's emotions mainly conveyed?",
+     "rewrite_value": "explicit emotion words/labels|actions and choices as emotional indicators|metaphorical or environmental imagery reflecting mood|dialogue content or tone revealing emotion",
+     "original_value": "bodily sensations or physiology (e.g., heartbeat, nausea, trembling)|metaphorical or environmental imagery reflecting mood|actions and choices as emotional indicators",
+     "contribution_to_ai_logit": -0.372,
+     "columns": [
+      {
+       "col": "AGENT_EMO_002__explicit emotion words/labels",
+       "x": 1.0,
+       "human_mean": 0.64,
+       "ai_mean": 0.58,
+       "contrib": 0.225
+      },
+      {
+       "col": "AGENT_EMO_002__bodily sensations or physiology (e.g., heartbeat, nausea, trembling)",
+       "x": 0.0,
+       "human_mean": 0.59,
+       "ai_mean": 0.74,
+       "contrib": -0.034
+      },
+      {
+       "col": "AGENT_EMO_002__metaphorical or environmental imagery reflecting mood",
+       "x": 1.0,
+       "human_mean": 0.5,
+       "ai_mean": 0.89,
+       "contrib": -0.528
+      }
+     ]
+    },
+    {
+     "feature": "AGENT_ID_001",
+     "name": "Scope of named human agents",
+     "question": "How many distinct named human characters (with proper names) appear in the narrative, excluding purely collective labels like 'the villagers'?",
+     "rewrite_value": "4-6",
+     "original_value": "4-6",
+     "contribution_to_ai_logit": -0.339,
+     "columns": [
+      {
+       "col": "AGENT_ID_001__1",
+       "x": 0.0,
+       "human_mean": 0.1,
+       "ai_mean": 0.07,
+       "contrib": -0.14
+      },
+      {
+       "col": "AGENT_ID_001__2-3",
+       "x": 0.0,
+       "human_mean": 0.22,
+       "ai_mean": 0.33,
+       "contrib": 0.02
+      },
+      {
+       "col": "AGENT_ID_001__4-6",
+       "x": 1.0,
+       "human_mean": 0.33,
+       "ai_mean": 0.44,
+       "contrib": -0.198
+      }
+     ]
+    },
+    {
+     "feature": "AGENT_TRP_005",
+     "name": "Degree of personifying institutions or systems as characters",
+     "question": "To what extent does the narrative treat institutions or large-scale systems (e.g., the Church, the Consortium, the law, the land) as if they were characters with motives and agency?",
+     "rewrite_value": "consistently treated as agents",
+     "original_value": "consistently treated as agents",
+     "contribution_to_ai_logit": -0.33,
+     "columns": [
+      {
+       "col": "AGENT_TRP_005",
+       "x": 2.0,
+       "human_mean": 0.26,
+       "ai_mean": 0.39,
+       "contrib": -0.33
+      }
+     ]
+    },
+    {
+     "feature": "SOC_REL_007",
+     "name": "Range of Relationship Types Present",
+     "question": "Which distinct types of social relationships are meaningfully present in the story?",
+     "rewrite_value": "familial_kinship|professional_or_economic|adversarial_or_criminal|communal_or_neighborly",
+     "original_value": "familial_kinship|professional_or_economic|adversarial_or_criminal|communal_or_neighborly",
+     "contribution_to_ai_logit": -0.304,
+     "columns": [
+      {
+       "col": "SOC_REL_007__familial_kinship",
+       "x": 1.0,
+       "human_mean": 0.7,
+       "ai_mean": 0.59,
+       "contrib": 0.243
+      },
+      {
+       "col": "SOC_REL_007__romantic_or_sexual",
+       "x": 0.0,
+       "human_mean": 0.48,
+       "ai_mean": 0.3,
+       "contrib": -0.334
+      },
+      {
+       "col": "SOC_REL_007__friendship_or_peer",
+       "x": 0.0,
+       "human_mean": 0.61,
+       "ai_mean": 0.49,
+       "contrib": -0.288
+      }
+     ]
+    },
+    {
+     "feature": "SIT_MET_008",
+     "name": "Reference Explicitness",
+     "question": "Are intertextual gestures primarily explicit name-checks or more diffuse, generic echoes?",
+     "rewrite_value": "Primarily implicit echoes (genres, archetypes, unnamed myths)",
+     "original_value": "Primarily implicit echoes (genres, archetypes, unnamed myths)",
+     "contribution_to_ai_logit": -0.283,
+     "columns": [
+      {
+       "col": "SIT_MET_008__Primarily implicit echoes (genres, archetypes, unnamed myths)",
+       "x": 1.0,
+       "human_mean": 0.5,
+       "ai_mean": 0.72,
+       "contrib": -0.077
+      },
+      {
+       "col": "SIT_MET_008__Balanced mix of explicit and implicit",
+       "x": 0.0,
+       "human_mean": 0.36,
+       "ai_mean": 0.16,
+       "contrib": -0.208
+      }
+     ]
+    },
+    {
+     "feature": "AGENT_MOT_014",
+     "name": "Complexity of protagonist motivation",
+     "question": "How complex are the protagonist's motives across the story?",
+     "rewrite_value": "multiple but largely compatible goals or desires",
+     "original_value": "multiple but largely compatible goals or desires",
+     "contribution_to_ai_logit": -0.276,
+     "columns": [
+      {
+       "col": "AGENT_MOT_014",
+       "x": 1.0,
+       "human_mean": 1.46,
+       "ai_mean": 1.54,
+       "contrib": -0.276
+      }
+     ]
+    },
+    {
+     "feature": "EVT_TYP_006",
+     "name": "Dominant Focal Level of Events",
+     "question": "At what social scale do most important events operate?",
+     "rewrite_value": "community_or_institutional_scale",
+     "original_value": "community_or_institutional_scale",
+     "contribution_to_ai_logit": -0.253,
+     "columns": [
+      {
+       "col": "EVT_TYP_006__individual_or_intimate_personal_scale",
+       "x": 0.0,
+       "human_mean": 0.56,
+       "ai_mean": 0.55,
+       "contrib": -0.196
+      },
+      {
+       "col": "EVT_TYP_006__family_or_small_group_scale",
+       "x": 0.0,
+       "human_mean": 0.28,
+       "ai_mean": 0.3,
+       "contrib": 0.096
+      },
+      {
+       "col": "EVT_TYP_006__community_or_institutional_scale",
+       "x": 1.0,
+       "human_mean": 0.05,
+       "ai_mean": 0.07,
+       "contrib": -0.135
+      }
+     ]
+    },
+    {
+     "feature": "SOC_DYN_019",
+     "name": "Dominant Interpersonal Conflict Modality",
+     "question": "How does interpersonal conflict most often manifest between characters?",
+     "rewrite_value": "structural_or_institutional_conflict",
+     "original_value": "structural_or_institutional_conflict",
+     "contribution_to_ai_logit": -0.238,
+     "columns": [
+      {
+       "col": "SOC_DYN_019__open_confrontation",
+       "x": 0.0,
+       "human_mean": 0.57,
+       "ai_mean": 0.48,
+       "contrib": -0.202
+      },
+      {
+       "col": "SOC_DYN_019__structural_or_institutional_conflict",
+       "x": 1.0,
+       "human_mean": 0.08,
+       "ai_mean": 0.12,
+       "contrib": -0.042
+      }
+     ]
+    },
+    {
+     "feature": "AGENT_EMO_001",
+     "name": "Frequency of explicit emotion naming",
+     "question": "How often does the narration explicitly name the central character's emotions (e.g., 'she was afraid', 'he felt ashamed')?",
+     "rewrite_value": "occasional",
+     "original_value": "occasional",
+     "contribution_to_ai_logit": -0.238,
+     "columns": [
+      {
+       "col": "AGENT_EMO_001",
+       "x": 1.0,
+       "human_mean": 1.18,
+       "ai_mean": 1.05,
+       "contrib": -0.238
+      }
+     ]
+    }
+   ],
+   "now_toward_human": [
+    {
+     "feature": "PER_POV_009",
+     "name": "Frequency of direct address to the reader",
+     "rewrite_value": "occasional_asides",
+     "contribution": 1.486
+    },
+    {
+     "feature": "AGENT_EMO_009",
+     "name": "Dominant mode of emotional expression",
+     "rewrite_value": "explicit_emotion_labels",
+     "contribution": 0.964
+    },
+    {
+     "feature": "PLT_MOR_007",
+     "name": "Post-Climax Denouement Length",
+     "rewrite_value": "brief (a short scene or paragraph of aftermath)",
+     "contribution": 0.905
+    },
+    {
+     "feature": "SIT_MET_004",
+     "name": "Fourth-Wall Permeability",
+     "rewrite_value": "3-Occasional direct address or acknowledgement of reader",
+     "contribution": 0.9
+    },
+    {
+     "feature": "SIT_MET_012",
+     "name": "Literary Ambition Signaling",
+     "rewrite_value": "mainstream literary fiction (character and theme foregrounded over genre engines)",
+     "contribution": 0.806
+    },
+    {
+     "feature": "REV_SUS_002",
+     "name": "Visibility of Withholding",
+     "rewrite_value": "implicit_omission_only",
+     "contribution": 0.795
+    },
+    {
+     "feature": "AGENT_ID_002",
+     "name": "Secondary character density",
+     "rewrite_value": "many (8 or more)",
+     "contribution": 0.527
+    },
+    {
+     "feature": "PLT_CON_007",
+     "name": "Agency in Resolution",
+     "rewrite_value": "mixed_choice_and_chance",
+     "contribution": 0.508
+    }
+   ]
+  },
+  {
+   "text": "vw_161566_original",
+   "sample": 1,
+   "words_orig": 426,
+   "words_rewrite": 391,
+   "p_human_before": 0.0194,
+   "p_human_after": 0.0958,
+   "logit_after": -2.24,
+   "factcheck": {
+    "invented_facts": [
+     "\"Welche genau, ist noch nicht bekannt.\" – new claim that VW's exact practical figures (luggage space, towing) for the electric version are still unknown. The original only says the EV should reach similar figures."
+    ],
+    "altered_facts": [
+     "\"Die Akkus stehen schon fest\" – the original only says the batteries are \"vorgesehen\" (planned) or \"soll es geben\" (there should be). The rewrite turns a plan into a settled fact."
+    ],
+    "dropped_facts": [],
+    "language_and_genre_preserved": true,
+    "fidelity_score": 75
+   },
+   "n_features_changed": 76,
+   "still_toward_ai_after_rewrite": [
+    {
+     "feature": "EVT_SCH_002",
+     "name": "Arc Completeness Relative to Implied Plot",
+     "question": "How much of the implied full plot does the text actually cover?",
+     "rewrite_value": "setup_only_or_preliminary_phase",
+     "original_value": "setup_only_or_preliminary_phase",
+     "contribution_to_ai_logit": -1.922,
+     "columns": [
+      {
+       "col": "EVT_SCH_002",
+       "x": 0.0,
+       "human_mean": 1.97,
+       "ai_mean": 1.94,
+       "contrib": -1.922
+      }
+     ]
+    },
+    {
+     "feature": "SOC_REL_007",
+     "name": "Range of Relationship Types Present",
+     "question": "Which distinct types of social relationships are meaningfully present in the story?",
+     "rewrite_value": "",
+     "original_value": "professional_or_economic",
+     "contribution_to_ai_logit": -0.897,
+     "columns": [
+      {
+       "col": "SOC_REL_007__familial_kinship",
+       "x": 0.0,
+       "human_mean": 0.7,
+       "ai_mean": 0.59,
+       "contrib": -0.151
+      },
+      {
+       "col": "SOC_REL_007__romantic_or_sexual",
+       "x": 0.0,
+       "human_mean": 0.48,
+       "ai_mean": 0.3,
+       "contrib": -0.417
+      },
+      {
+       "col": "SOC_REL_007__friendship_or_peer",
+       "x": 0.0,
+       "human_mean": 0.61,
+       "ai_mean": 0.49,
+       "contrib": -0.178
+      }
+     ]
+    },
+    {
+     "feature": "REV_SUR_003",
+     "name": "Depth of Recontextualization After Surprise",
+     "question": "How extensively does a key revelation force the reader to reinterpret earlier scenes or character behavior?",
+     "rewrite_value": "1",
+     "original_value": "1",
+     "contribution_to_ai_logit": -0.843,
+     "columns": [
+      {
+       "col": "REV_SUR_003",
+       "x": 1.0,
+       "human_mean": 3.29,
+       "ai_mean": 2.95,
+       "contrib": -0.843
+      }
+     ]
+    },
+    {
+     "feature": "AGENT_MOT_003",
+     "name": "Dominant sources of motivation",
+     "question": "Which sources most strongly drive the central character's actions?",
+     "rewrite_value": "economic survival or material necessity",
+     "original_value": "economic survival or material necessity",
+     "contribution_to_ai_logit": -0.578,
+     "columns": [
+      {
+       "col": "AGENT_MOT_003__personal desire or ambition",
+       "x": 0.0,
+       "human_mean": 0.78,
+       "ai_mean": 0.66,
+       "contrib": -0.41
+      },
+      {
+       "col": "AGENT_MOT_003__social or familial obligations",
+       "x": 0.0,
+       "human_mean": 0.46,
+       "ai_mean": 0.39,
+       "contrib": -0.084
+      },
+      {
+       "col": "AGENT_MOT_003__trauma or past hurt",
+       "x": 0.0,
+       "human_mean": 0.57,
+       "ai_mean": 0.67,
+       "contrib": -0.036
+      }
+     ]
+    },
+    {
+     "feature": "SOC_STR_016",
+     "name": "Salience of Broader Community Beyond Core Characters",
+     "question": "How salient is a broader community or social milieu beyond the central characters?",
+     "rewrite_value": "none",
+     "original_value": "none",
+     "contribution_to_ai_logit": -0.569,
+     "columns": [
+      {
+       "col": "SOC_STR_016",
+       "x": 0.0,
+       "human_mean": 2.12,
+       "ai_mean": 2.01,
+       "contrib": -0.569
+      }
+     ]
+    },
+    {
+     "feature": "EVT_CAU_017",
+     "name": "Event Novelty Orientation",
+     "question": "On a 1–5 scale, how strongly does the story lean on surprising, schema-breaking events versus familiar, predictable ones (1 = very predictable, 5 = highly surprising)?",
+     "rewrite_value": "2",
+     "original_value": "2",
+     "contribution_to_ai_logit": -0.556,
+     "columns": [
+      {
+       "col": "EVT_CAU_017",
+       "x": 2.0,
+       "human_mean": 3.37,
+       "ai_mean": 3.01,
+       "contrib": -0.556
+      }
+     ]
+    },
+    {
+     "feature": "REV_SUR_007",
+     "name": "Twist Placement Pattern",
+     "question": "Where in the story are major twists primarily positioned?",
+     "rewrite_value": "no_twist",
+     "original_value": "no_twist",
+     "contribution_to_ai_logit": -0.548,
+     "columns": [
+      {
+       "col": "REV_SUR_007__no_twist",
+       "x": 1.0,
+       "human_mean": 0.1,
+       "ai_mean": 0.17,
+       "contrib": -0.194
+      },
+      {
+       "col": "REV_SUR_007__mid_story_twist",
+       "x": 0.0,
+       "human_mean": 0.09,
+       "ai_mean": 0.22,
+       "contrib": 0.043
+      },
+      {
+       "col": "REV_SUR_007__climactic_end_twist",
+       "x": 0.0,
+       "human_mean": 0.61,
+       "ai_mean": 0.45,
+       "contrib": -0.372
+      }
+     ]
+    },
+    {
+     "feature": "PER_DIA_001",
+     "name": "Dialogue-to-narration proportion",
+     "question": "Roughly what proportion of the text consists of direct dialogue (quoted speech) versus narration and description?",
+     "rewrite_value": "1",
+     "original_value": "1",
+     "contribution_to_ai_logit": -0.53,
+     "columns": [
+      {
+       "col": "PER_DIA_001",
+       "x": 1.0,
+       "human_mean": 2.95,
+       "ai_mean": 2.71,
+       "contrib": -0.53
+      }
+     ]
+    },
+    {
+     "feature": "EVT_SCH_003",
+     "name": "Strength of Event Escalation",
+     "question": "How strongly do events escalate in stakes or intensity over the course of the narrative?",
+     "rewrite_value": "1",
+     "original_value": "1",
+     "contribution_to_ai_logit": -0.486,
+     "columns": [
+      {
+       "col": "EVT_SCH_003",
+       "x": 1.0,
+       "human_mean": 3.63,
+       "ai_mean": 3.58,
+       "contrib": -0.486
+      }
+     ]
+    },
+    {
+     "feature": "SIT_MET_202",
+     "name": "Intertextual Strategy Types",
+     "question": "What kinds of intertextual engagement with other works or traditions does the story employ?",
+     "rewrite_value": "n/a",
+     "original_value": "",
+     "contribution_to_ai_logit": -0.451,
+     "columns": [
+      {
+       "col": "SIT_MET_202__explicit_named_reference_to_specific_texts_or_authors",
+       "x": 0.0,
+       "human_mean": 0.46,
+       "ai_mean": 0.24,
+       "contrib": -0.236
+      },
+      {
+       "col": "SIT_MET_202__retelling_or_reframing_of_specific_canonical_story",
+       "x": 0.0,
+       "human_mean": 0.06,
+       "ai_mean": 0.07,
+       "contrib": 0.024
+      },
+      {
+       "col": "SIT_MET_202__stylistic_pastiche_of_identifiable_author_or_period",
+       "x": 0.0,
+       "human_mean": 0.1,
+       "ai_mean": 0.16,
+       "contrib": 0.115
+      }
+     ]
+    },
+    {
+     "feature": "TMP_ORD_002",
+     "name": "Anachrony intensity",
+     "question": "On a 1–5 scale, how heavily does the narrative rely on explicit flashbacks or flash-forwards as structural devices?",
+     "rewrite_value": "1",
+     "original_value": "1",
+     "contribution_to_ai_logit": -0.414,
+     "columns": [
+      {
+       "col": "TMP_ORD_002",
+       "x": 1.0,
+       "human_mean": 2.59,
+       "ai_mean": 2.31,
+       "contrib": -0.414
+      }
+     ]
+    },
+    {
+     "feature": "SOC_STR_004",
+     "name": "Community Salience",
+     "question": "How salient is the broader community beyond the central characters?",
+     "rewrite_value": "none: no community or group beyond 1–2 characters is shown",
+     "original_value": "none: no community or group beyond 1–2 characters is shown",
+     "contribution_to_ai_logit": -0.387,
+     "columns": [
+      {
+       "col": "SOC_STR_004__none: no community or group beyond 1–2 characters is shown",
+       "x": 1.0,
+       "human_mean": 0.0,
+       "ai_mean": 0.01,
+       "contrib": -0.352
+      },
+      {
+       "col": "SOC_STR_004__active secondary agent: community exerts pressure, offers help, or significantly shapes outcomes",
+       "x": 0.0,
+       "human_mean": 0.49,
+       "ai_mean": 0.46,
+       "contrib": -0.028
+      }
+     ]
+    },
+    {
+     "feature": "TMP_ORD_004",
+     "name": "Depth of Flashback Nesting",
+     "question": "How deeply are flashbacks nested inside other temporal layers?",
+     "rewrite_value": "no_flashbacks",
+     "original_value": "no_flashbacks",
+     "contribution_to_ai_logit": -0.366,
+     "columns": [
+      {
+       "col": "TMP_ORD_004",
+       "x": 0.0,
+       "human_mean": 0.9,
+       "ai_mean": 0.88,
+       "contrib": -0.366
+      }
+     ]
+    },
+    {
+     "feature": "SET_LOC_011",
+     "name": "Location Variety Scope",
+     "question": "How many distinct physical locales does the story meaningfully inhabit over its course?",
+     "rewrite_value": "1_single_primary_location",
+     "original_value": "1_single_primary_location",
+     "contribution_to_ai_logit": -0.363,
+     "columns": [
+      {
+       "col": "SET_LOC_011",
+       "x": 0.0,
+       "human_mean": 1.35,
+       "ai_mean": 1.08,
+       "contrib": -0.363
+      }
+     ]
+    },
+    {
+     "feature": "AGENT_EMO_012",
+     "name": "Preferred cues for conveying emotional state",
+     "question": "Which textual cues are most commonly used to convey what characters are feeling?",
+     "rewrite_value": "",
+     "original_value": "action choices and behavior (e.g., slamming doors, withdrawing, calling someone)",
+     "contribution_to_ai_logit": -0.346,
+     "columns": [
+      {
+       "col": "AGENT_EMO_012__bodily sensations or physiology (e.g., heartbeat, nausea, tight chest)",
+       "x": 0.0,
+       "human_mean": 0.68,
+       "ai_mean": 0.88,
+       "contrib": 0.041
+      },
+      {
+       "col": "AGENT_EMO_012__facial expressions or gestures (e.g., frowns, smiles, posture)",
+       "x": 0.0,
+       "human_mean": 0.74,
+       "ai_mean": 0.65,
+       "contrib": -0.11
+      },
+      {
+       "col": "AGENT_EMO_012__action choices and behavior (e.g., slamming doors, withdrawing, calling someone)",
+       "x": 0.0,
+       "human_mean": 0.86,
+       "ai_mean": 0.6,
+       "contrib": -0.506
+      }
+     ]
+    },
+    {
+     "feature": "SET_LOC_015",
+     "name": "Predominant Space Types",
+     "question": "Which categories of space (domestic, public, natural, institutional, liminal) are structurally important across the narrative?",
+     "rewrite_value": "formal_institutional",
+     "original_value": "formal_institutional|public_urban_or_commercial",
+     "contribution_to_ai_logit": -0.343,
+     "columns": [
+      {
+       "col": "SET_LOC_015__domestic_private",
+       "x": 0.0,
+       "human_mean": 0.82,
+       "ai_mean": 0.82,
+       "contrib": -0.045
+      },
+      {
+       "col": "SET_LOC_015__public_urban_or_commercial",
+       "x": 0.0,
+       "human_mean": 0.55,
+       "ai_mean": 0.48,
+       "contrib": 0.047
+      },
+      {
+       "col": "SET_LOC_015__rural_or_wild_natural",
+       "x": 0.0,
+       "human_mean": 0.58,
+       "ai_mean": 0.57,
+       "contrib": 0.054
+      }
+     ]
+    },
+    {
+     "feature": "SET_TIM_016",
+     "name": "Temporal Scaffolding Complexity",
+     "question": "How complex is the story's handling of time (flashbacks, jumps, parallel timelines)?",
+     "rewrite_value": "1",
+     "original_value": "1",
+     "contribution_to_ai_logit": -0.338,
+     "columns": [
+      {
+       "col": "SET_TIM_016",
+       "x": 1.0,
+       "human_mean": 2.45,
+       "ai_mean": 2.21,
+       "contrib": -0.338
+      }
+     ]
+    },
+    {
+     "feature": "AGENT_MOT_012",
+     "name": "Typical motivation domains for major characters",
+     "question": "Which motivation domains most frequently drive major characters' actions?",
+     "rewrite_value": "ambition_status_or_power",
+     "original_value": "ambition_status_or_power",
+     "contribution_to_ai_logit": -0.315,
+     "columns": [
+      {
+       "col": "AGENT_MOT_012__survival_or_physical_safety",
+       "x": 0.0,
+       "human_mean": 0.49,
+       "ai_mean": 0.46,
+       "contrib": -0.026
+      },
+      {
+       "col": "AGENT_MOT_012__family_or_romantic_relationships",
+       "x": 0.0,
+       "human_mean": 0.62,
+       "ai_mean": 0.5,
+       "contrib": -0.225
+      },
+      {
+       "col": "AGENT_MOT_012__guilt_shame_or_desire_for_atonement",
+       "x": 0.0,
+       "human_mean": 0.51,
+       "ai_mean": 0.56,
+       "contrib": -0.036
+      }
+     ]
+    },
+    {
+     "feature": "AGENT_ID_004",
+     "name": "Types of non-human or collective agents",
+     "question": "Which kinds of non-human or collective entities are treated as agents (given actions, motives, or mental states)?",
+     "rewrite_value": "institutions/personified organizations (e.g., 'the Consortium', 'the Church')",
+     "original_value": "institutions/personified organizations (e.g., 'the Consortium', 'the Church')",
+     "contribution_to_ai_logit": -0.294,
+     "columns": [
+      {
+       "col": "AGENT_ID_004__sentient supernatural entities (spirits, gods, curses, relics)",
+       "x": 0.0,
+       "human_mean": 0.35,
+       "ai_mean": 0.37,
+       "contrib": -0.035
+      },
+      {
+       "col": "AGENT_ID_004__institutions/personified organizations (e.g., 'the Consortium', 'the Church')",
+       "x": 1.0,
+       "human_mean": 0.1,
+       "ai_mean": 0.16,
+       "contrib": -0.228
+      }
+     ]
+    },
+    {
+     "feature": "REV_DIS_007",
+     "name": "Dominant Channels of Major Revelations",
+     "question": "Through which channels are the most important pieces of new information delivered?",
+     "rewrite_value": "narrator_exposition_or_summary",
+     "original_value": "narrator_exposition_or_summary",
+     "contribution_to_ai_logit": -0.276,
+     "columns": [
+      {
+       "col": "REV_DIS_007__narrator_exposition_or_summary",
+       "x": 1.0,
+       "human_mean": 0.22,
+       "ai_mean": 0.19,
+       "contrib": -0.079
+      },
+      {
+       "col": "REV_DIS_007__character_to_character_dialogue",
+       "x": 0.0,
+       "human_mean": 0.81,
+       "ai_mean": 0.84,
+       "contrib": -0.022
+      },
+      {
+       "col": "REV_DIS_007__environmental_or_sensory_clues",
+       "x": 0.0,
+       "human_mean": 0.7,
+       "ai_mean": 0.74,
+       "contrib": -0.046
+      }
+     ]
+    }
+   ],
+   "now_toward_human": [
+    {
+     "feature": "SIT_MET_303",
+     "name": "Thematic Explicitness and Moralizing",
+     "rewrite_value": "1",
+     "contribution": 1.429
+    },
+    {
+     "feature": "TMP_DUR_011",
+     "name": "Dominant Narrative Tense",
+     "rewrite_value": "present",
+     "contribution": 1.196
+    },
+    {
+     "feature": "SET_ATM_017",
+     "name": "Dominant Sensory Modalities",
+     "rewrite_value": "visual|tactile",
+     "contribution": 0.806
+    },
+    {
+     "feature": "SET_LOC_004",
+     "name": "Opening Spatial Grounding",
+     "rewrite_value": "minimal_local_details_only",
+     "contribution": 0.773
+    },
+    {
+     "feature": "AGENT_EMO_002",
+     "name": "Modes of conveying the central character's emotions",
+     "rewrite_value": "",
+     "contribution": 0.724
+    },
+    {
+     "feature": "PER_POV_009",
+     "name": "Frequency of direct address to the reader",
+     "rewrite_value": "occasional_asides",
+     "contribution": 0.664
+    },
+    {
+     "feature": "AGENT_ID_003",
+     "name": "Proportion of named vs. unnamed characters",
+     "rewrite_value": "few or no characters are named; most are referred to by roles or relational terms",
+     "contribution": 0.592
+    },
+    {
+     "feature": "PLT_THM_008",
+     "name": "Thematic Unity",
+     "rewrite_value": "1",
+     "contribution": 0.563
+    }
+   ]
+  },
+  {
+   "text": "vw_161566_original",
+   "sample": 2,
+   "words_orig": 426,
+   "words_rewrite": 397,
+   "p_human_before": 0.0194,
+   "p_human_after": 0.0218,
+   "logit_after": -3.8,
+   "factcheck": {
+    "invented_facts": [
+     "Behauptung, zu den Nutzwerten der Elektrovariante sei nicht mehr bekannt ('mehr ist dazu nicht bekannt'); das steht nicht im Original"
+    ],
+    "altered_facts": [],
+    "dropped_facts": [],
+    "language_and_genre_preserved": true,
+    "fidelity_score": 85
+   },
+   "n_features_changed": 106,
+   "still_toward_ai_after_rewrite": [
+    {
+     "feature": "EVT_SCH_002",
+     "name": "Arc Completeness Relative to Implied Plot",
+     "question": "How much of the implied full plot does the text actually cover?",
+     "rewrite_value": "setup_only_or_preliminary_phase",
+     "original_value": "setup_only_or_preliminary_phase",
+     "contribution_to_ai_logit": -1.938,
+     "columns": [
+      {
+       "col": "EVT_SCH_002",
+       "x": 0.0,
+       "human_mean": 1.97,
+       "ai_mean": 1.94,
+       "contrib": -1.938
+      }
+     ]
+    },
+    {
+     "feature": "SOC_REL_007",
+     "name": "Range of Relationship Types Present",
+     "question": "Which distinct types of social relationships are meaningfully present in the story?",
+     "rewrite_value": "",
+     "original_value": "professional_or_economic",
+     "contribution_to_ai_logit": -1.086,
+     "columns": [
+      {
+       "col": "SOC_REL_007__familial_kinship",
+       "x": 0.0,
+       "human_mean": 0.7,
+       "ai_mean": 0.59,
+       "contrib": -0.258
+      },
+      {
+       "col": "SOC_REL_007__romantic_or_sexual",
+       "x": 0.0,
+       "human_mean": 0.48,
+       "ai_mean": 0.3,
+       "contrib": -0.426
+      },
+      {
+       "col": "SOC_REL_007__friendship_or_peer",
+       "x": 0.0,
+       "human_mean": 0.61,
+       "ai_mean": 0.49,
+       "contrib": -0.227
+      }
+     ]
+    },
+    {
+     "feature": "REV_SUR_003",
+     "name": "Depth of Recontextualization After Surprise",
+     "question": "How extensively does a key revelation force the reader to reinterpret earlier scenes or character behavior?",
+     "rewrite_value": "1",
+     "original_value": "1",
+     "contribution_to_ai_logit": -0.811,
+     "columns": [
+      {
+       "col": "REV_SUR_003",
+       "x": 1.0,
+       "human_mean": 3.29,
+       "ai_mean": 2.95,
+       "contrib": -0.811
+      }
+     ]
+    },
+    {
+     "feature": "EVT_CAU_017",
+     "name": "Event Novelty Orientation",
+     "question": "On a 1–5 scale, how strongly does the story lean on surprising, schema-breaking events versus familiar, predictable ones (1 = very predictable, 5 = highly surprising)?",
+     "rewrite_value": "2",
+     "original_value": "2",
+     "contribution_to_ai_logit": -0.713,
+     "columns": [
+      {
+       "col": "EVT_CAU_017",
+       "x": 2.0,
+       "human_mean": 3.37,
+       "ai_mean": 3.01,
+       "contrib": -0.713
+      }
+     ]
+    },
+    {
+     "feature": "REV_SUR_007",
+     "name": "Twist Placement Pattern",
+     "question": "Where in the story are major twists primarily positioned?",
+     "rewrite_value": "no_twist",
+     "original_value": "no_twist",
+     "contribution_to_ai_logit": -0.66,
+     "columns": [
+      {
+       "col": "REV_SUR_007__no_twist",
+       "x": 1.0,
+       "human_mean": 0.1,
+       "ai_mean": 0.17,
+       "contrib": -0.18
+      },
+      {
+       "col": "REV_SUR_007__mid_story_twist",
+       "x": 0.0,
+       "human_mean": 0.09,
+       "ai_mean": 0.22,
+       "contrib": 0.031
+      },
+      {
+       "col": "REV_SUR_007__climactic_end_twist",
+       "x": 0.0,
+       "human_mean": 0.61,
+       "ai_mean": 0.45,
+       "contrib": -0.485
+      }
+     ]
+    },
+    {
+     "feature": "AGENT_MOT_003",
+     "name": "Dominant sources of motivation",
+     "question": "Which sources most strongly drive the central character's actions?",
+     "rewrite_value": "n/a",
+     "original_value": "economic survival or material necessity",
+     "contribution_to_ai_logit": -0.611,
+     "columns": [
+      {
+       "col": "AGENT_MOT_003__personal desire or ambition",
+       "x": 0.0,
+       "human_mean": 0.78,
+       "ai_mean": 0.66,
+       "contrib": -0.483
+      },
+      {
+       "col": "AGENT_MOT_003__social or familial obligations",
+       "x": 0.0,
+       "human_mean": 0.46,
+       "ai_mean": 0.39,
+       "contrib": -0.086
+      },
+      {
+       "col": "AGENT_MOT_003__trauma or past hurt",
+       "x": 0.0,
+       "human_mean": 0.57,
+       "ai_mean": 0.67,
+       "contrib": -0.065
+      }
+     ]
+    },
+    {
+     "feature": "PER_DIA_001",
+     "name": "Dialogue-to-narration proportion",
+     "question": "Roughly what proportion of the text consists of direct dialogue (quoted speech) versus narration and description?",
+     "rewrite_value": "1",
+     "original_value": "1",
+     "contribution_to_ai_logit": -0.573,
+     "columns": [
+      {
+       "col": "PER_DIA_001",
+       "x": 1.0,
+       "human_mean": 2.95,
+       "ai_mean": 2.71,
+       "contrib": -0.573
+      }
+     ]
+    },
+    {
+     "feature": "SET_LOC_011",
+     "name": "Location Variety Scope",
+     "question": "How many distinct physical locales does the story meaningfully inhabit over its course?",
+     "rewrite_value": "1_single_primary_location",
+     "original_value": "1_single_primary_location",
+     "contribution_to_ai_logit": -0.561,
+     "columns": [
+      {
+       "col": "SET_LOC_011",
+       "x": 0.0,
+       "human_mean": 1.35,
+       "ai_mean": 1.08,
+       "contrib": -0.561
+      }
+     ]
+    },
+    {
+     "feature": "TMP_ORD_002",
+     "name": "Anachrony intensity",
+     "question": "On a 1–5 scale, how heavily does the narrative rely on explicit flashbacks or flash-forwards as structural devices?",
+     "rewrite_value": "1",
+     "original_value": "1",
+     "contribution_to_ai_logit": -0.549,
+     "columns": [
+      {
+       "col": "TMP_ORD_002",
+       "x": 1.0,
+       "human_mean": 2.59,
+       "ai_mean": 2.31,
+       "contrib": -0.549
+      }
+     ]
+    },
+    {
+     "feature": "SOC_STR_016",
+     "name": "Salience of Broader Community Beyond Core Characters",
+     "question": "How salient is a broader community or social milieu beyond the central characters?",
+     "rewrite_value": "none",
+     "original_value": "none",
+     "contribution_to_ai_logit": -0.459,
+     "columns": [
+      {
+       "col": "SOC_STR_016",
+       "x": 0.0,
+       "human_mean": 2.12,
+       "ai_mean": 2.01,
+       "contrib": -0.459
+      }
+     ]
+    },
+    {
+     "feature": "SET_LOC_015",
+     "name": "Predominant Space Types",
+     "question": "Which categories of space (domestic, public, natural, institutional, liminal) are structurally important across the narrative?",
+     "rewrite_value": "formal_institutional",
+     "original_value": "formal_institutional|public_urban_or_commercial",
+     "contribution_to_ai_logit": -0.457,
+     "columns": [
+      {
+       "col": "SET_LOC_015__domestic_private",
+       "x": 0.0,
+       "human_mean": 0.82,
+       "ai_mean": 0.82,
+       "contrib": -0.063
+      },
+      {
+       "col": "SET_LOC_015__public_urban_or_commercial",
+       "x": 0.0,
+       "human_mean": 0.55,
+       "ai_mean": 0.48,
+       "contrib": 0.047
+      },
+      {
+       "col": "SET_LOC_015__rural_or_wild_natural",
+       "x": 0.0,
+       "human_mean": 0.58,
+       "ai_mean": 0.57,
+       "contrib": -0.046
+      }
+     ]
+    },
+    {
+     "feature": "SIT_MET_202",
+     "name": "Intertextual Strategy Types",
+     "question": "What kinds of intertextual engagement with other works or traditions does the story employ?",
+     "rewrite_value": "n/a",
+     "original_value": "",
+     "contribution_to_ai_logit": -0.445,
+     "columns": [
+      {
+       "col": "SIT_MET_202__explicit_named_reference_to_specific_texts_or_authors",
+       "x": 0.0,
+       "human_mean": 0.46,
+       "ai_mean": 0.24,
+       "contrib": -0.245
+      },
+      {
+       "col": "SIT_MET_202__stylistic_pastiche_of_identifiable_author_or_period",
+       "x": 0.0,
+       "human_mean": 0.1,
+       "ai_mean": 0.16,
+       "contrib": 0.088
+      },
+      {
+       "col": "SIT_MET_202__use_of_mythological_or_religious_source_material",
+       "x": 0.0,
+       "human_mean": 0.7,
+       "ai_mean": 0.65,
+       "contrib": -0.302
+      }
+     ]
+    },
+    {
+     "feature": "TMP_ORD_004",
+     "name": "Depth of Flashback Nesting",
+     "question": "How deeply are flashbacks nested inside other temporal layers?",
+     "rewrite_value": "no_flashbacks",
+     "original_value": "no_flashbacks",
+     "contribution_to_ai_logit": -0.395,
+     "columns": [
+      {
+       "col": "TMP_ORD_004",
+       "x": 0.0,
+       "human_mean": 0.9,
+       "ai_mean": 0.88,
+       "contrib": -0.395
+      }
+     ]
+    },
+    {
+     "feature": "AGENT_MOT_012",
+     "name": "Typical motivation domains for major characters",
+     "question": "Which motivation domains most frequently drive major characters' actions?",
+     "rewrite_value": "n/a",
+     "original_value": "ambition_status_or_power",
+     "contribution_to_ai_logit": -0.381,
+     "columns": [
+      {
+       "col": "AGENT_MOT_012__survival_or_physical_safety",
+       "x": 0.0,
+       "human_mean": 0.49,
+       "ai_mean": 0.46,
+       "contrib": -0.098
+      },
+      {
+       "col": "AGENT_MOT_012__family_or_romantic_relationships",
+       "x": 0.0,
+       "human_mean": 0.62,
+       "ai_mean": 0.5,
+       "contrib": -0.167
+      },
+      {
+       "col": "AGENT_MOT_012__curiosity_or_epistemic_drive",
+       "x": 0.0,
+       "human_mean": 0.47,
+       "ai_mean": 0.49,
+       "contrib": -0.03
+      }
+     ]
+    },
+    {
+     "feature": "AGENT_EMO_012",
+     "name": "Preferred cues for conveying emotional state",
+     "question": "Which textual cues are most commonly used to convey what characters are feeling?",
+     "rewrite_value": "n/a",
+     "original_value": "action choices and behavior (e.g., slamming doors, withdrawing, calling someone)",
+     "contribution_to_ai_logit": -0.369,
+     "columns": [
+      {
+       "col": "AGENT_EMO_012__facial expressions or gestures (e.g., frowns, smiles, posture)",
+       "x": 0.0,
+       "human_mean": 0.74,
+       "ai_mean": 0.65,
+       "contrib": -0.063
+      },
+      {
+       "col": "AGENT_EMO_012__action choices and behavior (e.g., slamming doors, withdrawing, calling someone)",
+       "x": 0.0,
+       "human_mean": 0.86,
+       "ai_mean": 0.6,
+       "contrib": -0.555
+      },
+      {
+       "col": "AGENT_EMO_012__metaphorical or environmental mirroring (weather, setting, or images echoing mood)",
+       "x": 0.0,
+       "human_mean": 0.47,
+       "ai_mean": 0.87,
+       "contrib": 0.311
+      }
+     ]
+    },
+    {
+     "feature": "SOC_STR_004",
+     "name": "Community Salience",
+     "question": "How salient is the broader community beyond the central characters?",
+     "rewrite_value": "none: no community or group beyond 1–2 characters is shown",
+     "original_value": "none: no community or group beyond 1–2 characters is shown",
+     "contribution_to_ai_logit": -0.363,
+     "columns": [
+      {
+       "col": "SOC_STR_004__none: no community or group beyond 1–2 characters is shown",
+       "x": 1.0,
+       "human_mean": 0.0,
+       "ai_mean": 0.01,
+       "contrib": -0.352
+      }
+     ]
+    },
+    {
+     "feature": "AGENT_ROLE_003",
+     "name": "Plot agency level of the central character",
+     "question": "To what extent does the central character initiate and control key events, rather than mainly reacting to them?",
+     "rewrite_value": "n/a",
+     "original_value": "mostly active",
+     "contribution_to_ai_logit": -0.35,
+     "columns": [
+      {
+       "col": "AGENT_ROLE_003",
+       "x": null,
+       "human_mean": 1.23,
+       "ai_mean": 1.33,
+       "contrib": -0.35
+      }
+     ]
+    },
+    {
+     "feature": "PLT_THM_004",
+     "name": "Thematic Domains",
+     "question": "Which thematic domains are centrally explored in the story's plot?",
+     "rewrite_value": "technology/science",
+     "original_value": "technology/science",
+     "contribution_to_ai_logit": -0.327,
+     "columns": [
+      {
+       "col": "PLT_THM_004__survival/fear",
+       "x": 0.0,
+       "human_mean": 0.25,
+       "ai_mean": 0.26,
+       "contrib": -0.062
+      },
+      {
+       "col": "PLT_THM_004__power/authority",
+       "x": 0.0,
+       "human_mean": 0.36,
+       "ai_mean": 0.39,
+       "contrib": 0.044
+      },
+      {
+       "col": "PLT_THM_004__justice/injustice",
+       "x": 0.0,
+       "human_mean": 0.28,
+       "ai_mean": 0.31,
+       "contrib": 0.047
+      }
+     ]
+    },
+    {
+     "feature": "EVT_SCH_003",
+     "name": "Strength of Event Escalation",
+     "question": "How strongly do events escalate in stakes or intensity over the course of the narrative?",
+     "rewrite_value": "1",
+     "original_value": "1",
+     "contribution_to_ai_logit": -0.312,
+     "columns": [
+      {
+       "col": "EVT_SCH_003",
+       "x": 1.0,
+       "human_mean": 3.63,
+       "ai_mean": 3.58,
+       "contrib": -0.312
+      }
+     ]
+    },
+    {
+     "feature": "AGENT_EMO_001",
+     "name": "Frequency of explicit emotion naming",
+     "question": "How often does the narration explicitly name the central character's emotions (e.g., 'she was afraid', 'he felt ashamed')?",
+     "rewrite_value": "rare/never",
+     "original_value": "rare/never",
+     "contribution_to_ai_logit": -0.298,
+     "columns": [
+      {
+       "col": "AGENT_EMO_001",
+       "x": 0.0,
+       "human_mean": 1.18,
+       "ai_mean": 1.05,
+       "contrib": -0.298
+      }
+     ]
+    }
+   ],
+   "now_toward_human": [
+    {
+     "feature": "SIT_MET_303",
+     "name": "Thematic Explicitness and Moralizing",
+     "rewrite_value": "1",
+     "contribution": 1.866
+    },
+    {
+     "feature": "TMP_DUR_011",
+     "name": "Dominant Narrative Tense",
+     "rewrite_value": "present",
+     "contribution": 1.348
+    },
+    {
+     "feature": "SET_ATM_017",
+     "name": "Dominant Sensory Modalities",
+     "rewrite_value": "visual|tactile",
+     "contribution": 0.837
+    },
+    {
+     "feature": "SET_LOC_004",
+     "name": "Opening Spatial Grounding",
+     "rewrite_value": "none_or_very_vague",
+     "contribution": 0.722
+    },
+    {
+     "feature": "PER_POV_001",
+     "name": "Dominant narrative person",
+     "rewrite_value": "third_person",
+     "contribution": 0.669
+    },
+    {
+     "feature": "PLT_THM_008",
+     "name": "Thematic Unity",
+     "rewrite_value": "1",
+     "contribution": 0.61
+    },
+    {
+     "feature": "PER_FOC_009",
+     "name": "Degree of explicit evaluative or moral commentary",
+     "rewrite_value": "1",
+     "contribution": 0.594
+    },
+    {
+     "feature": "REV_SUS_007",
+     "name": "Pre-Threat Character Investment",
+     "rewrite_value": "1",
+     "contribution": 0.52
+    }
+   ]
+  }
+ ],
+ "aggregate_toward_ai": [
+  {
+   "feature": "EVT_SCH_002",
+   "name": "Arc Completeness Relative to Implied Plot",
+   "question": "How much of the implied full plot does the text actually cover?",
+   "sum_contrib": -4.604822874069214,
+   "n_texts": 3,
+   "values": [
+    "partial_arc_with_cliffhanger_or_open_crisis",
+    "setup_only_or_preliminary_phase",
+    "setup_only_or_preliminary_phase"
+   ]
+  },
+  {
+   "feature": "REV_SUR_007",
+   "name": "Twist Placement Pattern",
+   "question": "Where in the story are major twists primarily positioned?",
+   "sum_contrib": -4.154228895258711,
+   "n_texts": 5,
+   "values": [
+    "mid_story_twist",
+    "mid_story_twist",
+    "no_twist",
+    "no_twist",
+    "no_twist"
+   ]
+  },
+  {
+   "feature": "EVT_CAU_017",
+   "name": "Event Novelty Orientation",
+   "question": "On a 1–5 scale, how strongly does the story lean on surprising, schema-breaking events versus familiar, predictable ones (1 = very predictable, 5 = highly surprising)?",
+   "sum_contrib": -4.103611141443253,
+   "n_texts": 5,
+   "values": [
+    "2",
+    "3",
+    "2",
+    "2",
+    "2"
+   ]
+  },
+  {
+   "feature": "PLT_MOR_007",
+   "name": "Post-Climax Denouement Length",
+   "question": "How extended is the narrative after the main climactic event?",
+   "sum_contrib": -2.864611864089966,
+   "n_texts": 2,
+   "values": [
+    "extended (multiple scenes/time jumps of aftermath/epilogue)",
+    "extended (multiple scenes/time jumps of aftermath/epilogue)"
+   ]
+  },
+  {
+   "feature": "SOC_REL_007",
+   "name": "Range of Relationship Types Present",
+   "question": "Which distinct types of social relationships are meaningfully present in the story?",
+   "sum_contrib": -2.756222503609024,
+   "n_texts": 4,
+   "values": [
+    "familial_kinship|professional_or_economic|adversarial_or_cri",
+    "familial_kinship|professional_or_economic|adversarial_or_cri",
+    "",
+    ""
+   ]
+  },
+  {
+   "feature": "PER_DIA_001",
+   "name": "Dialogue-to-narration proportion",
+   "question": "Roughly what proportion of the text consists of direct dialogue (quoted speech) versus narration and description?",
+   "sum_contrib": -2.4660379886627197,
+   "n_texts": 4,
+   "values": [
+    "2",
+    "2",
+    "1",
+    "1"
+   ]
+  },
+  {
+   "feature": "AGENT_ATTR_005",
+   "name": "Primary technique for rendering inner life",
+   "question": "What is the primary narrative technique for representing the central character's inner thoughts and feelings?",
+   "sum_contrib": -2.0166423600167036,
+   "n_texts": 3,
+   "values": [
+    "summary thought-report in narrator's voice",
+    "first-person direct reporting of thoughts ('I thought...')",
+    "summary thought-report in narrator's voice"
+   ]
+  },
+  {
+   "feature": "SET_ATM_017",
+   "name": "Dominant Sensory Modalities",
+   "question": "Which sensory modalities does the story most frequently engage when rendering setting?",
+   "sum_contrib": -1.9503189078022842,
+   "n_texts": 3,
+   "values": [
+    "visual|auditory|olfactory|tactile|gustatory",
+    "visual|auditory|olfactory|tactile|gustatory",
+    "visual|auditory|tactile|olfactory"
+   ]
+  },
+  {
+   "feature": "PLT_THM_008",
+   "name": "Thematic Unity",
+   "question": "To what extent do subplots, set-pieces, and stylistic flourishes serve a central thematic concern?",
+   "sum_contrib": -1.9070093631744385,
+   "n_texts": 2,
+   "values": [
+    "5",
+    "5"
+   ]
+  },
+  {
+   "feature": "SIT_MET_303",
+   "name": "Thematic Explicitness and Moralizing",
+   "question": "How explicitly does the story articulate its themes or morals in the narration or character speech?",
+   "sum_contrib": -1.6931366324424744,
+   "n_texts": 2,
+   "values": [
+    "4",
+    "4"
+   ]
+  },
+  {
+   "feature": "REV_SUR_003",
+   "name": "Depth of Recontextualization After Surprise",
+   "question": "How extensively does a key revelation force the reader to reinterpret earlier scenes or character behavior?",
+   "sum_contrib": -1.653523027896881,
+   "n_texts": 2,
+   "values": [
+    "1",
+    "1"
+   ]
+  },
+  {
+   "feature": "SIT_MET_202",
+   "name": "Intertextual Strategy Types",
+   "question": "What kinds of intertextual engagement with other works or traditions does the story employ?",
+   "sum_contrib": -1.4648049637908116,
+   "n_texts": 3,
+   "values": [
+    "",
+    "n/a",
+    "n/a"
+   ]
+  },
+  {
+   "feature": "AGENT_MOT_003",
+   "name": "Dominant sources of motivation",
+   "question": "Which sources most strongly drive the central character's actions?",
+   "sum_contrib": -1.1890034172683954,
+   "n_texts": 2,
+   "values": [
+    "economic survival or material necessity",
+    "n/a"
+   ]
+  },
+  {
+   "feature": "SOC_STR_016",
+   "name": "Salience of Broader Community Beyond Core Characters",
+   "question": "How salient is a broader community or social milieu beyond the central characters?",
+   "sum_contrib": -1.02750825881958,
+   "n_texts": 2,
+   "values": [
+    "none",
+    "none"
+   ]
+  },
+  {
+   "feature": "SIT_MET_008",
+   "name": "Reference Explicitness",
+   "question": "Are intertextual gestures primarily explicit name-checks or more diffuse, generic echoes?",
+   "sum_contrib": -1.0188075373880565,
+   "n_texts": 3,
+   "values": [
+    "Primarily implicit echoes (genres, archetypes, unnamed myths",
+    "Primarily implicit echoes (genres, archetypes, unnamed myths",
+    "Primarily implicit echoes (genres, archetypes, unnamed myths"
+   ]
+  },
+  {
+   "feature": "SOC_REL_013",
+   "name": "Diversity of Communication Channels",
+   "question": "Through which channels do socially important communications between characters occur?",
+   "sum_contrib": -1.0122138337610522,
+   "n_texts": 2,
+   "values": [
+    "face_to_face_dialogue|letters_notes_or_diaries|ritual_or_cer",
+    "face_to_face_dialogue|letters_notes_or_diaries|indirect_via_"
+   ]
+  },
+  {
+   "feature": "TMP_ORD_002",
+   "name": "Anachrony intensity",
+   "question": "On a 1–5 scale, how heavily does the narrative rely on explicit flashbacks or flash-forwards as structural devices?",
+   "sum_contrib": -0.9631390273571014,
+   "n_texts": 2,
+   "values": [
+    "1",
+    "1"
+   ]
+  },
+  {
+   "feature": "SET_LOC_011",
+   "name": "Location Variety Scope",
+   "question": "How many distinct physical locales does the story meaningfully inhabit over its course?",
+   "sum_contrib": -0.9240067601203918,
+   "n_texts": 2,
+   "values": [
+    "1_single_primary_location",
+    "1_single_primary_location"
+   ]
+  },
+  {
+   "feature": "SIT_MET_402",
+   "name": "Required External Knowledge Level",
+   "question": "How much non-everyday external knowledge (historical, theoretical, niche cultural) is required to fully understand the story's stakes or references?",
+   "sum_contrib": -0.8266022503376007,
+   "n_texts": 2,
+   "values": [
+    "none_beyond_everyday_life",
+    "none_beyond_everyday_life"
+   ]
+  },
+  {
+   "feature": "PLT_THM_004",
+   "name": "Thematic Domains",
+   "question": "Which thematic domains are centrally explored in the story's plot?",
+   "sum_contrib": -0.8040568902288214,
+   "n_texts": 2,
+   "values": [
+    "power/authority|justice/injustice|class/economics|identity/s",
+    "technology/science"
+   ]
+  },
+  {
+   "feature": "SET_LOC_015",
+   "name": "Predominant Space Types",
+   "question": "Which categories of space (domestic, public, natural, institutional, liminal) are structurally important across the narrative?",
+   "sum_contrib": -0.799721647053957,
+   "n_texts": 2,
+   "values": [
+    "formal_institutional",
+    "formal_institutional"
+   ]
+  },
+  {
+   "feature": "EVT_SCH_003",
+   "name": "Strength of Event Escalation",
+   "question": "How strongly do events escalate in stakes or intensity over the course of the narrative?",
+   "sum_contrib": -0.7978354692459106,
+   "n_texts": 2,
+   "values": [
+    "1",
+    "1"
+   ]
+  },
+  {
+   "feature": "TMP_ORD_004",
+   "name": "Depth of Flashback Nesting",
+   "question": "How deeply are flashbacks nested inside other temporal layers?",
+   "sum_contrib": -0.7609135210514069,
+   "n_texts": 2,
+   "values": [
+    "no_flashbacks",
+    "no_flashbacks"
+   ]
+  },
+  {
+   "feature": "AGENT_EMO_002",
+   "name": "Modes of conveying the central character's emotions",
+   "question": "Through which modes are the central character's emotions mainly conveyed?",
+   "sum_contrib": -0.7513720483111683,
+   "n_texts": 2,
+   "values": [
+    "explicit emotion words/labels|bodily sensations or physiolog",
+    "explicit emotion words/labels|actions and choices as emotion"
+   ]
+  },
+  {
+   "feature": "SOC_STR_004",
+   "name": "Community Salience",
+   "question": "How salient is the broader community beyond the central characters?",
+   "sum_contrib": -0.7499680950859329,
+   "n_texts": 2,
+   "values": [
+    "none: no community or group beyond 1–2 characters is shown",
+    "none: no community or group beyond 1–2 characters is shown"
+   ]
+  }
+ ],
+ "news_domain_note": "A separate news mirror corpus (15 human WinFuture articles 2017-2020 vs 30 LLM mirror articles) shows NO significant separation with the StoryScope features (5-fold CV AUC 0.29 narrative, 0.46 full, 0.62 style-only; permutation p>0.29). The paper's classifier cannot certify humanness for short German news. Therefore the measurable target is the fiction domain; for news, keep the hard fact rules and the structural instructions, but do not add news-specific feature targets that the data does not support.",
+ "news_domain_corpus": {
+  "n_human": 15,
+  "n_ai": 30,
+  "loo_auc_narrative": 0.24888888888888885,
+  "loo_acc_narrative": 0.4888888888888889,
+  "loo_core30": {
+   "auc": 0.32888888888888884,
+   "acc": 0.4444444444444444
+  }
+ },
+ "news_top_features_not_significant": [
+  {
+   "feature": "SOC_STR_017",
+   "name": "Dyadic vs Group Scene Emphasis",
+   "question": "To what extent do key social interactions occur in intimate dyads versus larger group scenes?",
+   "gap_z_human_minus_ai": -0.75,
+   "human_news": "mean 1.47",
+   "ai_news": "mean 2.70",
+   "values": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5"
+   ]
+  },
+  {
+   "feature": "SOC_REL_018",
+   "name": "Power Symmetry in Central Relationship",
+   "question": "Is the central relationship in the story characterized by strong power imbalance or relative equality?",
+   "gap_z_human_minus_ai": 0.74,
+   "human_news": "strongly_asymmetric 53%, moderately_asymmetric 33%, largely_peer_like 13%",
+   "ai_news": "strongly_asymmetric 63%, largely_peer_like 30%, moderately_asymmetric 7%",
+   "values": [
+    "strongly_asymmetric",
+    "moderately_asymmetric",
+    "largely_peer_like"
+   ]
+  },
+  {
+   "feature": "PER_FOC_008",
+   "name": "Narrator presence/visibility",
+   "question": "How visible is the narrator as a distinct speaking presence (with opinions, personality, or direct address)?",
+   "gap_z_human_minus_ai": 0.7,
+   "human_news": "mean 1.47",
+   "ai_news": "mean 1.13",
+   "values": [
+    "1_almost_invisible_narrator_minimal_intrusion",
+    "2_rare_asides_or_stylistic_flourishes",
+    "3_moderately_present_with_recurring_comments",
+    "4_strongly_personalized_voice_guiding_interpretation",
+    "5_highly_intrusive_narrator_almost_a_character_in_its_own_right"
+   ]
+  },
+  {
+   "feature": "SET_LOC_005",
+   "name": "Dominant Spatial Scale",
+   "question": "What is the dominant spatial scale of the story's core action?",
+   "gap_z_human_minus_ai": 0.65,
+   "human_news": "multi_scale_mixed 40%, urban_or_regional 40%, intimate_or_bodily 13%",
+   "ai_news": "urban_or_regional 43%, multi_scale_mixed 40%, household_or_local_block 13%",
+   "values": [
+    "intimate_or_bodily",
+    "household_or_local_block",
+    "urban_or_regional",
+    "planetary_or_cosmic",
+    "multi_scale_mixed"
+   ]
+  },
+  {
+   "feature": "PLT_THM_006",
+   "name": "Dominant Narrative Archetype",
+   "question": "Which classic narrative archetype best fits the story's main arc?",
+   "gap_z_human_minus_ai": -0.64,
+   "human_news": "investigation/mystery 47%, slice_of_life/vignette 27%, quest/journey 20%",
+   "ai_news": "investigation/mystery 40%, overcoming_the_monster/disaster 23%, slice_of_life/vignette 10%",
+   "values": [
+    "quest/journey",
+    "voyage_and_return",
+    "rags_to_riches_or_education",
+    "rebirth/redemption",
+    "tragedy/fall_from_grace",
+    "overcoming_the_monster/disaster",
+    "comedy_of_errors/social_farse",
+    "investigation/mystery"
+   ]
+  },
+  {
+   "feature": "PER_DIA_006",
+   "name": "Use of alternative dialogue-like forms",
+   "question": "Does the text incorporate dialogue-like communication in alternative formats (such as chat logs, transcripts, forum posts, letters, or reports) that function as conversation?",
+   "gap_z_human_minus_ai": 0.61,
+   "human_news": "no 67%, yes 33%",
+   "ai_news": "no 90%, yes 10%",
+   "values": [
+    "yes",
+    "no"
+   ]
+  },
+  {
+   "feature": "PLT_THM_001",
+   "name": "Number of Central Themes",
+   "question": "How many distinct central themes does the story develop in a sustained way?",
+   "gap_z_human_minus_ai": -0.56,
+   "human_news": "single_central_theme 93%, two_primary_themes 7%",
+   "ai_news": "single_central_theme 70%, two_primary_themes 30%",
+   "values": [
+    "single_central_theme",
+    "two_primary_themes",
+    "multiple_disparate_themes"
+   ]
+  },
+  {
+   "feature": "PER_DIA_005",
+   "name": "Balance of direct versus indirect speech",
+   "question": "Does the story mainly present speech as direct quotations, as indirect/reported speech, or mostly summarize conversation?",
+   "gap_z_human_minus_ai": 0.56,
+   "human_news": "mixed_direct_and_indirect_speech 53%, primarily_indirect_or_summary_of_speech 40%, primarily_direct_quoted_speech 7%",
+   "ai_news": "primarily_indirect_or_summary_of_speech 57%, mixed_direct_and_indirect_speech 27%, primarily_direct_quoted_speech 17%",
+   "values": [
+    "primarily_direct_quoted_speech",
+    "mixed_direct_and_indirect_speech",
+    "primarily_indirect_or_summary_of_speech"
+   ]
+  },
+  {
+   "feature": "SIT_GEN_009",
+   "name": "Assumed Reader Competence",
+   "question": "What level of genre or literary competence does the story assume of its reader?",
+   "gap_z_human_minus_ai": -0.53,
+   "human_news": "General reader (no specialized knowledge assumed) 100%",
+   "ai_news": "General reader (no specialized knowledge assumed) 83%, Genre-savvy reader (expects familiarity with specific genre tropes) 17%",
+   "values": [
+    "General reader (no specialized knowledge assumed)",
+    "Genre-savvy reader (expects familiarity with specific genre tropes)",
+    "Literary-educated reader (expects comfort with complex structures/allusions)",
+    "Insider/series reader (expects prior knowledge of specific fictional universe)"
+   ]
+  },
+  {
+   "feature": "REV_SUS_003",
+   "name": "Resolution of Backward-Looking Mysteries",
+   "question": "To what extent are the main mysteries about past events or hidden causes eventually answered?",
+   "gap_z_human_minus_ai": -0.53,
+   "human_news": "n/a 80%, partially_resolved 13%, fully_resolved 7%",
+   "ai_news": "n/a 60%, largely_open_ended 17%, fully_resolved 13%",
+   "values": [
+    "fully_resolved",
+    "partially_resolved",
+    "largely_open_ended"
+   ]
+  }
+ ]
+}

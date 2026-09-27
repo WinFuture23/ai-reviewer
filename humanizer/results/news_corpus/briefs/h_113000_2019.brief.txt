@@ -1,0 +1,17 @@
+**Thema:** Vodafone hat den Vodafone Pass (Zero-Rating-Angebot) neu geregelt, sodass er jetzt auch im EU-Ausland gilt.
+
+**Fakten:**
+- Betroffenes Produkt: Vodafone Pass / Vodafone GigaPass-Angebote (Zero-Rating-Dienst)
+- Kläger: Verbraucherzentrale Bundesverband (vzbv), Klage im vergangenen Jahr eingereicht
+- Vorwurf des vzbv: Vodafone habe gegen geltendes EU-Recht verstoßen
+- Gericht: Landgericht Düsseldorf gab dem vzbv Recht, verpflichtete Vodafone zur Änderung der Rahmenbedingungen der Vodafone Pässe
+- Vergleichbarer Fall: ähnliches Urteil zuvor bereits gegen die Telekom
+- Neue Regelung: Vodafone Pass gilt jetzt auch im EU-Ausland sowie in Island, Liechtenstein und Norwegen
+- Datenvolumen: bis zu 39 GB pro Monat im EU-Ausland nutzbar ohne Anrechnung oder Drosselung – unabhängig davon, wie viele Pässe gebucht sind
+- Rechtsgrundlage der Begrenzung: EU-Roaming-Abkommen
+- Inkrafttreten der Änderung: 13. Dezember
+- Information der Kunden: über die Vodafone-Webseite sowie einen Hinweis in der Vodafone-App bei Nutzung im EU-Ausland
+- Zitat (Vodafone-Webseite): „Du kannst mit dem Vodafone Pass aktuell teilnehmende Partner-Apps im Inland nutzen, ohne ihr Datenvolumen zu verbrauchen. Dein Vodafone Pass gilt auch im EU-Ausland, in Island, Liechtenstein und Norwegen. Hier hast Du ein Datenvolumen von 39 GB im Monat, egal, wie viele Pässe Du hast.“
+- Kategorien der GigaPass-Angebote: Chat-Apps, Musik-Apps, Video-Apps, soziale Netzwerke, Spiele
+
+**Nachrichtenwert:** Vodafone reagiert mit der zum 13. Dezember eingeführten Neuregelung auf ein Gerichtsurteil des Landgerichts Düsseldorf infolge einer vzbv-Klage wegen mutmaßlichen Verstoßes gegen EU-Rececht.

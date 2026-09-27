@@ -1,0 +1,17 @@
+Bundesnetzagentur will WhatsApp künftig wie Telekom-Dienste regulieren
+
+Die Bundesnetzagentur plant, Messaging-Dienste wie WhatsApp künftig denselben regulatorischen Anforderungen zu unterwerfen wie klassische Telekommunikationsanbieter. Das kündigte Behördenchef Jochen Homann in einem Interview mit der Financial Times an. Grundlage für den Vorstoß ist ein bereits laufender Rechtsstreit mit Google um den E-Mail-Dienst Gmail.
+
+Grenze zwischen Telekommunikation und Internetdiensten verschwimmt
+
+Homann begründet den Schritt damit, dass sich webbasierte Kommunikationsdienste wie WhatsApp von Facebook, iMessage von Apple oder Gmail von Google in der Nutzung kaum noch von klassischen Telekommunikationsdiensten wie SMS unterscheiden. "Was wir sehen ist, dass die Grenze zwischen traditionellen Telekommunikationsdiensten und webbasierten Diensten wie Gmail und WhatsApp sehr verschwommen ist. Die Nutzer sehen oft gar keinen Unterschied", so Homann. Deshalb müssten auch für diese Anbieter dieselben regulatorischen Anforderungen gelten wie für etablierte Telekommunikationsunternehmen, insbesondere im Bereich Datenschutz und bei staatlichen Zugriffsmöglichkeiten. Konkret geht es dabei auch um die Einrichtung von Überwachungsschnittstellen für Sicherheitsbehörden, ein Thema, das die Politik im Zusammenhang mit WhatsApp bereits mehrfach gefordert hat.
+
+"Es kann nicht sein, dass ein Unternehmen, das traditionelle Telekommunikationsdienste anbietet, bestimmte regulatorische Anforderungen erfüllen muss, wie zum Beispiel die des Datenschutzes, während ein Unternehmen, das vergleichbare Dienste über das Internet anbietet, dies nicht tut", erklärte Homann weiter.
+
+Fairer Wettbewerb für europäische Anbieter im Blick
+
+Dem Bundesnetzagentur-Chef geht es dabei auch um ein faires Wettbewerbsumfeld für europäische Telekommunikationsanbieter, die vielfach strengeren Auflagen unterliegen als die oft US-amerikanischen Internetkonzerne, die vergleichbare Dienste anbieten.
+
+EuGH-Verfahren gegen Google als Testfall
+
+Als Präzedenzfall dient der Behörde ihr Rechtsstreit mit Google: Die Bundesnetzagentur hatte Google vor Gericht gebracht, weil sich der Konzern weigerte, Gmail als Telekommunikationsangebot registrieren zu lassen. Der Fall liegt derzeit beim Europäischen Gerichtshof und gilt als richtungsweisend für das weitere Vorgehen der Behörde. Sollte die Bundesnetzagentur vor dem EuGH gegen Google obsiegen, will sie zeitnah auch gegen andere Dienste wie WhatsApp vorgehen und diese ebenfalls zur Registrierung als Telekommunikationsanbieter verpflichten.

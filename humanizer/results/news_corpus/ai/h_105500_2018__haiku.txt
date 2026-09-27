@@ -1,0 +1,17 @@
+Geekbench: OnePlus 6T bestätigt Snapdragon 845 und Android 9
+
+Vor der offiziellen Vorstellung des OnePlus 6T am 30. Oktober 2018 in New York sind in der Geekbench-Datenbank erstmals konkrete Hardware-Spezifikationen des neuen Flaggschiffs aufgetaucht. Der Benchmark offenbart bereits erste technische Details des kommenden Smartphones.
+
+Hardware und Software
+
+Der Geekbench-Eintrag zeigt das OnePlus 6T unter dem Codenamen "FS FS P8801". Das Gerät wird mit dem Qualcomm Snapdragon 845 bestückt, einem Octa-Core-Prozessor mit einer Maximaltaktung von bis zu 2,8 GHz. Das getestete Muster verfügt über 8 GB Arbeitsspeicher und läuft bereits mit Android 9.0 "Pie" ab Werk. Diese Spezifikation repräsentiert die High-End-Variante des Geräts.
+
+Frühe Sichtungen
+
+Die ersten Einträge im Geekbench-Benchmark stammen bereits von Ende August 2018. Dies ist nicht ungewöhnlich bei OnePlus-Geräten: Auch der Vorgänger OnePlus 6 war im Frühjahr 2018 unter dem Codenamen "NS NS P7819" in die Datenbank eingegangen. Damals zeigten frühe Samples diese Modellnummer im Android-Menü "Über das Telefon", und OnePlus präsentierte das Gerät Pressevertretern sogar vorab mit dieser Angabe.
+
+Display und Besonderheiten
+
+Das OnePlus 6T soll über ein 6,4 Zoll großes OLED-Display verfügen. Eine Besonderheit des neuen Flaggschiffs ist die Integration des Fingerabdrucklesers direkt unter dem Displayglas. Insgesamt wird das OnePlus 6T als inkrementelles Upgrade gegenüber seinem Vorgänger OnePlus 6 charakterisiert.
+
+Bereits vor den Geekbench-Einträgen waren offizielle Marketing-Bilder des Geräts aufgetaucht. Die Vorstellung findet am 30. Oktober 2018 statt.

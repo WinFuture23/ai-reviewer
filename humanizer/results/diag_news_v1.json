@@ -1,0 +1,689 @@
+{
+ "corpus": {
+  "n_human": 15,
+  "n_ai": 30,
+  "loo_auc_narrative": 0.24888888888888885,
+  "loo_acc_narrative": 0.4888888888888889,
+  "loo_core30": {
+   "auc": 0.32888888888888884,
+   "acc": 0.4444444444444444
+  }
+ },
+ "top_separating_features": [
+  {
+   "feature": "SOC_STR_017",
+   "name": "Dyadic vs Group Scene Emphasis",
+   "question": "To what extent do key social interactions occur in intimate dyads versus larger group scenes?",
+   "gap_z_human_minus_ai": -0.75,
+   "human_news": "mean 1.47",
+   "ai_news": "mean 2.70",
+   "values": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5"
+   ]
+  },
+  {
+   "feature": "SOC_REL_018",
+   "name": "Power Symmetry in Central Relationship",
+   "question": "Is the central relationship in the story characterized by strong power imbalance or relative equality?",
+   "gap_z_human_minus_ai": 0.74,
+   "human_news": "strongly_asymmetric 53%, moderately_asymmetric 33%, largely_peer_like 13%",
+   "ai_news": "strongly_asymmetric 63%, largely_peer_like 30%, moderately_asymmetric 7%",
+   "values": [
+    "strongly_asymmetric",
+    "moderately_asymmetric",
+    "largely_peer_like"
+   ]
+  },
+  {
+   "feature": "PER_FOC_008",
+   "name": "Narrator presence/visibility",
+   "question": "How visible is the narrator as a distinct speaking presence (with opinions, personality, or direct address)?",
+   "gap_z_human_minus_ai": 0.7,
+   "human_news": "mean 1.47",
+   "ai_news": "mean 1.13",
+   "values": [
+    "1_almost_invisible_narrator_minimal_intrusion",
+    "2_rare_asides_or_stylistic_flourishes",
+    "3_moderately_present_with_recurring_comments",
+    "4_strongly_personalized_voice_guiding_interpretation",
+    "5_highly_intrusive_narrator_almost_a_character_in_its_own_right"
+   ]
+  },
+  {
+   "feature": "SET_LOC_005",
+   "name": "Dominant Spatial Scale",
+   "question": "What is the dominant spatial scale of the story's core action?",
+   "gap_z_human_minus_ai": 0.65,
+   "human_news": "multi_scale_mixed 40%, urban_or_regional 40%, intimate_or_bodily 13%",
+   "ai_news": "urban_or_regional 43%, multi_scale_mixed 40%, household_or_local_block 13%",
+   "values": [
+    "intimate_or_bodily",
+    "household_or_local_block",
+    "urban_or_regional",
+    "planetary_or_cosmic",
+    "multi_scale_mixed"
+   ]
+  },
+  {
+   "feature": "PLT_THM_006",
+   "name": "Dominant Narrative Archetype",
+   "question": "Which classic narrative archetype best fits the story's main arc?",
+   "gap_z_human_minus_ai": -0.64,
+   "human_news": "investigation/mystery 47%, slice_of_life/vignette 27%, quest/journey 20%",
+   "ai_news": "investigation/mystery 40%, overcoming_the_monster/disaster 23%, slice_of_life/vignette 10%",
+   "values": [
+    "quest/journey",
+    "voyage_and_return",
+    "rags_to_riches_or_education",
+    "rebirth/redemption",
+    "tragedy/fall_from_grace",
+    "overcoming_the_monster/disaster",
+    "comedy_of_errors/social_farse",
+    "investigation/mystery"
+   ]
+  },
+  {
+   "feature": "PER_DIA_006",
+   "name": "Use of alternative dialogue-like forms",
+   "question": "Does the text incorporate dialogue-like communication in alternative formats (such as chat logs, transcripts, forum posts, letters, or reports) that function as conversation?",
+   "gap_z_human_minus_ai": 0.61,
+   "human_news": "no 67%, yes 33%",
+   "ai_news": "no 90%, yes 10%",
+   "values": [
+    "yes",
+    "no"
+   ]
+  },
+  {
+   "feature": "PLT_THM_001",
+   "name": "Number of Central Themes",
+   "question": "How many distinct central themes does the story develop in a sustained way?",
+   "gap_z_human_minus_ai": -0.56,
+   "human_news": "single_central_theme 93%, two_primary_themes 7%",
+   "ai_news": "single_central_theme 70%, two_primary_themes 30%",
+   "values": [
+    "single_central_theme",
+    "two_primary_themes",
+    "multiple_disparate_themes"
+   ]
+  },
+  {
+   "feature": "PER_DIA_005",
+   "name": "Balance of direct versus indirect speech",
+   "question": "Does the story mainly present speech as direct quotations, as indirect/reported speech, or mostly summarize conversation?",
+   "gap_z_human_minus_ai": 0.56,
+   "human_news": "mixed_direct_and_indirect_speech 53%, primarily_indirect_or_summary_of_speech 40%, primarily_direct_quoted_speech 7%",
+   "ai_news": "primarily_indirect_or_summary_of_speech 57%, mixed_direct_and_indirect_speech 27%, primarily_direct_quoted_speech 17%",
+   "values": [
+    "primarily_direct_quoted_speech",
+    "mixed_direct_and_indirect_speech",
+    "primarily_indirect_or_summary_of_speech"
+   ]
+  },
+  {
+   "feature": "SIT_GEN_009",
+   "name": "Assumed Reader Competence",
+   "question": "What level of genre or literary competence does the story assume of its reader?",
+   "gap_z_human_minus_ai": -0.53,
+   "human_news": "General reader (no specialized knowledge assumed) 100%",
+   "ai_news": "General reader (no specialized knowledge assumed) 83%, Genre-savvy reader (expects familiarity with specific genre tropes) 17%",
+   "values": [
+    "General reader (no specialized knowledge assumed)",
+    "Genre-savvy reader (expects familiarity with specific genre tropes)",
+    "Literary-educated reader (expects comfort with complex structures/allusions)",
+    "Insider/series reader (expects prior knowledge of specific fictional universe)"
+   ]
+  },
+  {
+   "feature": "REV_SUS_003",
+   "name": "Resolution of Backward-Looking Mysteries",
+   "question": "To what extent are the main mysteries about past events or hidden causes eventually answered?",
+   "gap_z_human_minus_ai": -0.53,
+   "human_news": "n/a 80%, partially_resolved 13%, fully_resolved 7%",
+   "ai_news": "n/a 60%, largely_open_ended 17%, fully_resolved 13%",
+   "values": [
+    "fully_resolved",
+    "partially_resolved",
+    "largely_open_ended"
+   ]
+  },
+  {
+   "feature": "TMP_ORD_005",
+   "name": "Backstory Placement Strategy",
+   "question": "Where in the narrative are key backstory revelations concentrated?",
+   "gap_z_human_minus_ai": -0.49,
+   "human_news": "front_loaded_exposition 47%, minimal_or_implict_backstory_only 27%, evenly_interleaved_throughout 20%",
+   "ai_news": "evenly_interleaved_throughout 43%, minimal_or_implict_backstory_only 27%, front_loaded_exposition 27%",
+   "values": [
+    "front_loaded_exposition",
+    "evenly_interleaved_throughout",
+    "withheld_until_late_reveal",
+    "minimal_or_implict_backstory_only"
+   ]
+  },
+  {
+   "feature": "REV_DIS_006",
+   "name": "Primary Epistemic Engine of Interest",
+   "question": "What is the main epistemic mode that drives reader engagement with information in this story?",
+   "gap_z_human_minus_ai": -0.47,
+   "human_news": "low_info_tension_character_or_atmosphere_driven 93%, forward_suspense_what_will_happen 7%",
+   "ai_news": "low_info_tension_character_or_atmosphere_driven 83%, backward_mystery_what_really_happened 13%, forward_suspense_what_will_happen 3%",
+   "values": [
+    "forward_suspense_what_will_happen",
+    "backward_mystery_what_really_happened",
+    "dramatic_irony_reader_knows_more",
+    "low_info_tension_character_or_atmosphere_driven"
+   ]
+  },
+  {
+   "feature": "PLT_STR_005",
+   "name": "Dominant Revelation Pattern",
+   "question": "What is the primary pattern by which new information and surprises are delivered?",
+   "gap_z_human_minus_ai": -0.47,
+   "human_news": "transparent_exposition_minimal_secrets 100%",
+   "ai_news": "transparent_exposition_minimal_secrets 87%, mystery_or_investigation_driven 13%",
+   "values": [
+    "mystery_or_investigation_driven",
+    "dramatic_irony_reader_knows_more_than_characters",
+    "transparent_exposition_minimal_secrets",
+    "twist_or_reversal_focused",
+    "iterative_reframing_of_the_same_events"
+   ]
+  },
+  {
+   "feature": "PLT_THM_005",
+   "name": "Thematic Resolution Pattern",
+   "question": "By the end, how are the main thematic tensions treated?",
+   "gap_z_human_minus_ai": -0.47,
+   "human_news": "resolved (tensions largely settled or answered) 53%, unresolved (tensions deliberately left open) 47%",
+   "ai_news": "resolved (tensions largely settled or answered) 50%, unresolved (tensions deliberately left open) 37%, partially_resolved (some progress but key tensions remain) 13%",
+   "values": [
+    "resolved (tensions largely settled or answered)",
+    "partially_resolved (some progress but key tensions remain)",
+    "unresolved (tensions deliberately left open)",
+    "reframed/transcended (tension transformed into new understanding)"
+   ]
+  },
+  {
+   "feature": "AGENT_ROLE_009",
+   "name": "Primary epistemic agent (who interprets the story's mysteries)",
+   "question": "Who primarily discovers, interprets, or explains key information, puzzles, or moral meanings within the narrative?",
+   "gap_z_human_minus_ai": 0.47,
+   "human_news": "external narrator/authorial commentary 67%, expert or institutional figure (detective, priest, scientist, court) 27%, central character themselves 7%",
+   "ai_news": "external narrator/authorial commentary 43%, expert or institutional figure (detective, priest, scientist, court) 27%, central character themselves 23%",
+   "values": [
+    "central character themselves",
+    "companion or sidekick figure",
+    "expert or institutional figure (detective, priest, scientist, court)",
+    "external narrator/authorial commentary",
+    "no clear investigative agent (mysteries left largely uninterpreted)"
+   ]
+  },
+  {
+   "feature": "SET_LOC_008",
+   "name": "Dominant Space Types",
+   "question": "Which types of spaces dominate the story's significant scenes?",
+   "gap_z_human_minus_ai": 0.46,
+   "human_news": "institutional_or_workplace|virtual_or_digital 27%, virtual_or_digital 20%, institutional_or_workplace 20%",
+   "ai_news": "virtual_or_digital 27%, institutional_or_workplace|virtual_or_digital 27%, institutional_or_workplace 23%",
+   "values": [
+    "domestic_private",
+    "public_social",
+    "natural_outdoor",
+    "institutional_or_workplace",
+    "virtual_or_digital"
+   ]
+  },
+  {
+   "feature": "PLT_STR_001",
+   "name": "Global Arc Shape",
+   "question": "What overall structural shape does the plot follow?",
+   "gap_z_human_minus_ai": 0.45,
+   "human_news": "deliberately_flat_or_anti_climactic 40%, fragmentary_or_elliptical 27%, classic_rising_action_to_climax_to_denouement 27%",
+   "ai_news": "fragmentary_or_elliptical 43%, classic_rising_action_to_climax_to_denouement 20%, deliberately_flat_or_anti_climactic 20%",
+   "values": [
+    "classic_rising_action_to_climax_to_denouement",
+    "episodic_or_serial_adventures",
+    "circular_or_return_to_start_state",
+    "fragmentary_or_elliptical",
+    "iterative_or_variation_on_a_scenario",
+    "deliberately_flat_or_anti_climactic"
+   ]
+  },
+  {
+   "feature": "SIT_GEN_003",
+   "name": "Genre Signal Timing",
+   "question": "How early in the story does the text clearly signal its primary genre to the reader?",
+   "gap_z_human_minus_ai": 0.45,
+   "human_news": "mean 1.20",
+   "ai_news": "mean 0.60",
+   "values": [
+    "immediate (within opening paragraph)",
+    "early (within the first scene/page)",
+    "mid-story (after some neutral buildup)",
+    "late/ambiguous (genre only clear near the end or never fully fixed)"
+   ]
+  },
+  {
+   "feature": "SOC_COM_017",
+   "name": "Dominant Channel for Pivotal Interactions",
+   "question": "Through what medium do the story's most pivotal relational moments (confessions, betrayals, reconciliations, decisions) primarily occur?",
+   "gap_z_human_minus_ai": 0.45,
+   "human_news": "written or recorded media (letters, emails, case files, legal documents, logs, forum posts) 80%, mediated/technological (phone, video, simulations, AI interfaces, social apps) 7%, internal/imagined (dreams, fantasies, silent addresses to absent or dead others) 7%",
+   "ai_news": "written or recorded media (letters, emails, case files, legal documents, logs, forum posts) 83%, mediated/technological (phone, video, simulations, AI interfaces, social apps) 13%, internal/imagined (dreams, fantasies, silent addresses to absent or dead others) 3%",
+   "values": [
+    "face-to-face spoken dialogue",
+    "written or recorded media (letters, emails, case files, legal documents, logs, forum posts)",
+    "ritual/action/gesture (shared labour, offerings, performances, nonverbal acts)",
+    "mediated/technological (phone, video, simulations, AI interfaces, social apps)",
+    "internal/imagined (dreams, fantasies, silent addresses to absent or dead others)"
+   ]
+  },
+  {
+   "feature": "SOC_REL_022",
+   "name": "Primary Channel for Deep Relational Content",
+   "question": "Through which channel are the most important emotional truths or shifts between characters primarily conveyed?",
+   "gap_z_human_minus_ai": 0.45,
+   "human_news": "written_or_recorded_media 67%, direct_spoken_dialogue 20%, shared_actions_and_routines 7%",
+   "ai_news": "written_or_recorded_media 73%, direct_spoken_dialogue 23%, internal_monologue_or_fantasy 3%",
+   "values": [
+    "direct_spoken_dialogue",
+    "shared_actions_and_routines",
+    "written_or_recorded_media",
+    "internal_monologue_or_fantasy"
+   ]
+  },
+  {
+   "feature": "SOC_DYN_019",
+   "name": "Dominant Interpersonal Conflict Modality",
+   "question": "How does interpersonal conflict most often manifest between characters?",
+   "gap_z_human_minus_ai": 0.45,
+   "human_news": "structural_or_institutional_conflict 93%, avoidance_or_silence 7%",
+   "ai_news": "structural_or_institutional_conflict 93%, covert_manipulation_or_abuse 7%",
+   "values": [
+    "open_confrontation",
+    "covert_manipulation_or_abuse",
+    "avoidance_or_silence",
+    "structural_or_institutional_conflict"
+   ]
+  },
+  {
+   "feature": "EVT_SCH_010",
+   "name": "Global Narrative Schema",
+   "question": "Which high-level narrative schemas are structurally central to the story?",
+   "gap_z_human_minus_ai": 0.45,
+   "human_news": " 60%, investigation/mystery 20%, trial/test/game 13%",
+   "ai_news": " 63%, investigation/mystery 23%, trial/test/game 7%",
+   "values": [
+    "quest/journey",
+    "investigation/mystery",
+    "transformation/redemption",
+    "siege/ordeal",
+    "slice_of_life",
+    "trial/test/game",
+    "heist/caper",
+    "frame_confession/memoir"
+   ]
+  },
+  {
+   "feature": "TMP_DUR_012",
+   "name": "Narrator's Temporal Distance from Events",
+   "question": "From what temporal vantage point does the narrator tell the story relative to the events (simultaneous or retrospective)?",
+   "gap_z_human_minus_ai": 0.45,
+   "human_news": "simultaneous_or_ongoing (narration_occurs_as_events_unfold) 80%, slightly_retrospective (days_to_few_years_after) 13%, distant_retrospective (many_years_or_decades_after) 7%",
+   "ai_news": "simultaneous_or_ongoing (narration_occurs_as_events_unfold) 73%, slightly_retrospective (days_to_few_years_after) 20%, multiple_temporal_vantages_mixed 7%",
+   "values": [
+    "simultaneous_or_ongoing (narration_occurs_as_events_unfold)",
+    "slightly_retrospective (days_to_few_years_after)",
+    "distant_retrospective (many_years_or_decades_after)",
+    "multiple_temporal_vantages_mixed"
+   ]
+  },
+  {
+   "feature": "AGENT_ATTR_004",
+   "name": "Explicit trait labeling",
+   "question": "Does the narration explicitly ascribe stable personality traits to the central character (e.g., 'she was shy and stubborn') rather than only showing them through behaviour?",
+   "gap_z_human_minus_ai": 0.45,
+   "human_news": "no 93%, yes 7%",
+   "ai_news": "no 100%",
+   "values": [
+    "yes",
+    "no"
+   ]
+  },
+  {
+   "feature": "AGENT_EMO_009",
+   "name": "Dominant mode of emotional expression",
+   "question": "How are characters' emotions most commonly conveyed?",
+   "gap_z_human_minus_ai": 0.45,
+   "human_news": "behavioral_cues_and_action_only 93%, embodied_sensations_and_metaphors 7%",
+   "ai_news": "behavioral_cues_and_action_only 90%, explicit_emotion_labels 7%, consistently_ambiguous_or_suppressed 3%",
+   "values": [
+    "explicit_emotion_labels",
+    "embodied_sensations_and_metaphors",
+    "behavioral_cues_and_action_only",
+    "consistently_ambiguous_or_suppressed"
+   ]
+  },
+  {
+   "feature": "PLT_MOR_004",
+   "name": "Protagonist Transformational Trajectory",
+   "question": "How does the primary protagonist change internally over the course of the story?",
+   "gap_z_human_minus_ai": 0.45,
+   "human_news": "no_significant_internal_change 93%, mixed_or_partial_change 7%",
+   "ai_news": "no_significant_internal_change 97%, positive_growth_or_enlightenment 3%",
+   "values": [
+    "positive_growth_or_enlightenment",
+    "negative_fall_or_corruption",
+    "mixed_or_partial_change",
+    "no_significant_internal_change"
+   ]
+  },
+  {
+   "feature": "SET_ATM_020",
+   "name": "Atmospheric Construction Techniques",
+   "question": "Which elements does the story most rely on to build atmosphere and mood in its settings?",
+   "gap_z_human_minus_ai": 0.45,
+   "human_news": "technology_and_media 93%, weather_and_light|nature_and_landscape 7%",
+   "ai_news": "technology_and_media 87%, technology_and_media|architecture_and_objects 7%, weather_and_light 3%",
+   "values": [
+    "weather_and_light",
+    "architecture_and_objects",
+    "nature_and_landscape",
+    "crowds_and_noise",
+    "decay_and_dirt",
+    "technology_and_media"
+   ]
+  },
+  {
+   "feature": "AGENT_ATTR_003",
+   "name": "Social identity anchors for the central character",
+   "question": "Which kinds of social identity markers are used to situate the central character?",
+   "gap_z_human_minus_ai": 0.45,
+   "human_news": "occupation or specific skill (e.g., detective, physicist, wrestler) 60%, occupation or specific skill (e.g., detective, physicist, wrestler)|legal or institutional status (e.g., suspect, prisoner, veteran) 20%, legal or institutional status (e.g., suspect, prisoner, veteran) 13%",
+   "ai_news": "occupation or specific skill (e.g., detective, physicist, wrestler) 57%, occupation or specific skill (e.g., detective, physicist, wrestler)|legal or institutional status (e.g., suspect, prisoner, veteran) 20%, legal or institutional status (e.g., suspect, prisoner, veteran) 13%",
+   "values": [
+    "family roles (e.g., mother, son, aunt)",
+    "occupation or specific skill (e.g., detective, physicist, wrestler)",
+    "class, wealth, ethnicity, or nationality markers",
+    "psychological label or diagnosis (e.g., autistic, depressive, 'sensitive')",
+    "mythic or archetypal title (e.g., 'Anchor', 'paladin', 'final girl')",
+    "legal or institutional status (e.g., suspect, prisoner, veteran)"
+   ]
+  },
+  {
+   "feature": "PLT_MOR_002",
+   "name": "Moral Polarity Toward Protagonist",
+   "question": "What evaluative stance does the narrative ultimately take toward its central protagonist?",
+   "gap_z_human_minus_ai": -0.45,
+   "human_news": "ambivalent_or_morally_mixed 87%, affirmative_heroic 13%",
+   "ai_news": "ambivalent_or_morally_mixed 67%, affirmative_heroic 33%",
+   "values": [
+    "affirmative_heroic",
+    "critical_tragic_flaw",
+    "ambivalent_or_morally_mixed",
+    "subversive_or_antiheroic"
+   ]
+  },
+  {
+   "feature": "SOC_DYN_021",
+   "name": "On-Page Reconciliation or Forgiveness",
+   "question": "Is there a depicted moment of reconciliation or forgiveness between previously conflicted parties?",
+   "gap_z_human_minus_ai": 0.45,
+   "human_news": "no_reconciliation 93%, partial_or_ambiguous 7%",
+   "ai_news": "no_reconciliation 97%, yes_substantial_reconciliation 3%",
+   "values": [
+    "yes_substantial_reconciliation",
+    "partial_or_ambiguous",
+    "no_reconciliation"
+   ]
+  }
+ ],
+ "texts": {
+  "vw_161566_original": {
+   "original": {
+    "score": {
+     "p_human_news": 0.4755253791809082,
+     "p_human_news_core30": 0.8686779737472534,
+     "dist_human": 19.720611572265625,
+     "dist_ai": 19.806581497192383,
+     "nearest": "human",
+     "pc1": -2.6097519397735596,
+     "pc2": -5.133760452270508
+    },
+    "values_on_top_features": {
+     "SOC_STR_017": "1",
+     "SOC_REL_018": "largely_peer_like",
+     "PER_FOC_008": "2",
+     "SET_LOC_005": "urban_or_regional",
+     "PLT_THM_006": "slice_of_life/vignette",
+     "PER_DIA_006": "no",
+     "PLT_THM_001": "single_central_theme",
+     "PER_DIA_005": "primarily_indirect_or_summary_of_speech",
+     "SIT_GEN_009": "General reader (no specialized knowledge assumed)",
+     "REV_SUS_003": "n/a",
+     "TMP_ORD_005": "minimal_or_implict_backstory_only",
+     "REV_DIS_006": "low_info_tension_character_or_atmosphere_driven",
+     "PLT_STR_005": "transparent_exposition_minimal_secrets",
+     "PLT_THM_005": "resolved (tensions largely settled or answered)",
+     "AGENT_ROLE_009": "external narrator/authorial commentary",
+     "SET_LOC_008": "institutional_or_workplace",
+     "PLT_STR_001": "deliberately_flat_or_anti_climactic",
+     "SIT_GEN_003": "immediate (within opening paragraph)",
+     "SOC_COM_017": "written or recorded media (letters, emails, case files, legal documents, logs, forum posts)",
+     "SOC_REL_022": "written_or_recorded_media",
+     "SOC_DYN_019": "structural_or_institutional_conflict",
+     "EVT_SCH_010": "",
+     "TMP_DUR_012": "simultaneous_or_ongoing (narration_occurs_as_events_unfold)",
+     "AGENT_ATTR_004": "no",
+     "AGENT_EMO_009": "behavioral_cues_and_action_only",
+     "PLT_MOR_004": "no_significant_internal_change",
+     "SET_ATM_020": "architecture_and_objects|technology_and_media",
+     "AGENT_ATTR_003": "occupation or specific skill (e.g., detective, physicist, wrestler)",
+     "PLT_MOR_002": "ambivalent_or_morally_mixed",
+     "SOC_DYN_021": "no_reconciliation"
+    }
+   },
+   "v1_s1": {
+    "score": {
+     "p_human_news": 0.20970527827739716,
+     "p_human_news_core30": 0.14904330670833588,
+     "dist_human": 24.02393341064453,
+     "dist_ai": 23.71760368347168,
+     "nearest": "ai",
+     "pc1": -0.13128265738487244,
+     "pc2": -2.517677068710327
+    },
+    "factcheck": {
+     "invented_facts": [
+      "\"Welche genau, ist noch nicht bekannt.\" – new claim that VW's exact practical figures (luggage space, towing) for the electric version are still unknown. The original only says the EV should reach similar figures."
+     ],
+     "altered_facts": [
+      "\"Die Akkus stehen schon fest\" – the original only says the batteries are \"vorgesehen\" (planned) or \"soll es geben\" (there should be). The rewrite turns a plan into a settled fact."
+     ],
+     "dropped_facts": [],
+     "language_and_genre_preserved": true,
+     "fidelity_score": 75
+    },
+    "values_on_top_features": {
+     "SOC_STR_017": "5",
+     "SOC_REL_018": "n/a",
+     "PER_FOC_008": "2",
+     "SET_LOC_005": "urban_or_regional",
+     "PLT_THM_006": "n/a",
+     "PER_DIA_006": "no",
+     "PLT_THM_001": "n/a",
+     "PER_DIA_005": "n/a",
+     "SIT_GEN_009": "General reader (no specialized knowledge assumed)",
+     "REV_SUS_003": "n/a",
+     "TMP_ORD_005": "minimal_or_implict_backstory_only",
+     "REV_DIS_006": "low_info_tension_character_or_atmosphere_driven",
+     "PLT_STR_005": "n/a",
+     "PLT_THM_005": "n/a",
+     "AGENT_ROLE_009": "no clear investigative agent (mysteries left largely uninterpreted)",
+     "SET_LOC_008": "institutional_or_workplace",
+     "PLT_STR_001": "n/a",
+     "SIT_GEN_003": "n/a",
+     "SOC_COM_017": "written or recorded media (letters, emails, case files, legal documents, logs, forum posts)",
+     "SOC_REL_022": "written_or_recorded_media",
+     "SOC_DYN_019": "n/a",
+     "EVT_SCH_010": "n/a",
+     "TMP_DUR_012": "simultaneous_or_ongoing (narration_occurs_as_events_unfold)",
+     "AGENT_ATTR_004": "no",
+     "AGENT_EMO_009": "consistently_ambiguous_or_suppressed",
+     "PLT_MOR_004": "n/a",
+     "SET_ATM_020": "technology_and_media",
+     "AGENT_ATTR_003": "n/a",
+     "PLT_MOR_002": "n/a",
+     "SOC_DYN_021": "no_reconciliation"
+    }
+   },
+   "v1_s2": {
+    "score": {
+     "p_human_news": 0.525905191898346,
+     "p_human_news_core30": 0.6224734783172607,
+     "dist_human": 24.628225326538086,
+     "dist_ai": 24.702730178833008,
+     "nearest": "human",
+     "pc1": 1.3086528778076172,
+     "pc2": -0.22054578363895416
+    },
+    "factcheck": {
+     "invented_facts": [
+      "Behauptung, zu den Nutzwerten der Elektrovariante sei nicht mehr bekannt ('mehr ist dazu nicht bekannt'); das steht nicht im Original"
+     ],
+     "altered_facts": [],
+     "dropped_facts": [],
+     "language_and_genre_preserved": true,
+     "fidelity_score": 85
+    },
+    "values_on_top_features": {
+     "SOC_STR_017": "1",
+     "SOC_REL_018": "n/a",
+     "PER_FOC_008": "2",
+     "SET_LOC_005": "urban_or_regional",
+     "PLT_THM_006": "n/a",
+     "PER_DIA_006": "no",
+     "PLT_THM_001": "n/a",
+     "PER_DIA_005": "primarily_indirect_or_summary_of_speech",
+     "SIT_GEN_009": "General reader (no specialized knowledge assumed)",
+     "REV_SUS_003": "fully_resolved",
+     "TMP_ORD_005": "minimal_or_implict_backstory_only",
+     "REV_DIS_006": "forward_suspense_what_will_happen",
+     "PLT_STR_005": "transparent_exposition_minimal_secrets",
+     "PLT_THM_005": "n/a",
+     "AGENT_ROLE_009": "n/a",
+     "SET_LOC_008": "institutional_or_workplace",
+     "PLT_STR_001": "n/a",
+     "SIT_GEN_003": "n/a",
+     "SOC_COM_017": "n/a",
+     "SOC_REL_022": "n/a",
+     "SOC_DYN_019": "n/a",
+     "EVT_SCH_010": "n/a",
+     "TMP_DUR_012": "simultaneous_or_ongoing (narration_occurs_as_events_unfold)",
+     "AGENT_ATTR_004": "n/a",
+     "AGENT_EMO_009": "n/a",
+     "PLT_MOR_004": "no_significant_internal_change",
+     "SET_ATM_020": "architecture_and_objects|technology_and_media",
+     "AGENT_ATTR_003": "n/a",
+     "PLT_MOR_002": "n/a",
+     "SOC_DYN_021": "no_reconciliation"
+    }
+   }
+  },
+  "wf_161565_gates": {
+   "original": {
+    "score": {
+     "p_human_news": 0.7032743096351624,
+     "p_human_news_core30": 0.9267547726631165,
+     "dist_human": 26.77046775817871,
+     "dist_ai": 27.013132095336914,
+     "nearest": "human",
+     "pc1": -0.652090847492218,
+     "pc2": 5.24272346496582
+    },
+    "values_on_top_features": {
+     "SOC_STR_017": "3",
+     "SOC_REL_018": "moderately_asymmetric",
+     "PER_FOC_008": "2",
+     "SET_LOC_005": "urban_or_regional",
+     "PLT_THM_006": "overcoming_the_monster/disaster",
+     "PER_DIA_006": "no",
+     "PLT_THM_001": "two_primary_themes",
+     "PER_DIA_005": "mixed_direct_and_indirect_speech",
+     "SIT_GEN_009": "General reader (no specialized knowledge assumed)",
+     "REV_SUS_003": "n/a",
+     "TMP_ORD_005": "front_loaded_exposition",
+     "REV_DIS_006": "low_info_tension_character_or_atmosphere_driven",
+     "PLT_STR_005": "transparent_exposition_minimal_secrets",
+     "PLT_THM_005": "unresolved (tensions deliberately left open)",
+     "AGENT_ROLE_009": "central character themselves",
+     "SET_LOC_008": "institutional_or_workplace",
+     "PLT_STR_001": "fragmentary_or_elliptical",
+     "SIT_GEN_003": "immediate (within opening paragraph)",
+     "SOC_COM_017": "written or recorded media (letters, emails, case files, legal documents, logs, forum posts)",
+     "SOC_REL_022": "written_or_recorded_media",
+     "SOC_DYN_019": "structural_or_institutional_conflict",
+     "EVT_SCH_010": "",
+     "TMP_DUR_012": "simultaneous_or_ongoing (narration_occurs_as_events_unfold)",
+     "AGENT_ATTR_004": "no",
+     "AGENT_EMO_009": "behavioral_cues_and_action_only",
+     "PLT_MOR_004": "no_significant_internal_change",
+     "SET_ATM_020": "technology_and_media",
+     "AGENT_ATTR_003": "occupation or specific skill (e.g., detective, physicist, wrestler)|legal or institutional status (e.g., suspect, prisoner, veteran)",
+     "PLT_MOR_002": "ambivalent_or_morally_mixed",
+     "SOC_DYN_021": "no_reconciliation"
+    }
+   }
+  },
+  "wf_112000_human2019": {
+   "original": {
+    "score": {
+     "p_human_news": 0.41861486434936523,
+     "p_human_news_core30": 0.37221208214759827,
+     "dist_human": 18.396635055541992,
+     "dist_ai": 18.062496185302734,
+     "nearest": "ai",
+     "pc1": 0.9517736434936523,
+     "pc2": 1.8627233505249023
+    },
+    "values_on_top_features": {
+     "SOC_STR_017": "1",
+     "SOC_REL_018": "largely_peer_like",
+     "PER_FOC_008": "2",
+     "SET_LOC_005": "urban_or_regional",
+     "PLT_THM_006": "quest/journey",
+     "PER_DIA_006": "no",
+     "PLT_THM_001": "single_central_theme",
+     "PER_DIA_005": "primarily_direct_quoted_speech",
+     "SIT_GEN_009": "General reader (no specialized knowledge assumed)",
+     "REV_SUS_003": "n/a",
+     "TMP_ORD_005": "minimal_or_implict_backstory_only",
+     "REV_DIS_006": "low_info_tension_character_or_atmosphere_driven",
+     "PLT_STR_005": "transparent_exposition_minimal_secrets",
+     "PLT_THM_005": "reframed/transcended (tension transformed into new understanding)",
+     "AGENT_ROLE_009": "central character themselves",
+     "SET_LOC_008": "institutional_or_workplace",
+     "PLT_STR_001": "deliberately_flat_or_anti_climactic",
+     "SIT_GEN_003": "immediate (within opening paragraph)",
+     "SOC_COM_017": "written or recorded media (letters, emails, case files, legal documents, logs, forum posts)",
+     "SOC_REL_022": "written_or_recorded_media",
+     "SOC_DYN_019": "structural_or_institutional_conflict",
+     "EVT_SCH_010": "",
+     "TMP_DUR_012": "simultaneous_or_ongoing (narration_occurs_as_events_unfold)",
+     "AGENT_ATTR_004": "no",
+     "AGENT_EMO_009": "behavioral_cues_and_action_only",
+     "PLT_MOR_004": "no_significant_internal_change",
+     "SET_ATM_020": "technology_and_media",
+     "AGENT_ATTR_003": "occupation or specific skill (e.g., detective, physicist, wrestler)",
+     "PLT_MOR_002": "affirmative_heroic",
+     "SOC_DYN_021": "no_reconciliation"
+    }
+   }
+  }
+ }
+}

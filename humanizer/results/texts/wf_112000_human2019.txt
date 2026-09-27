@@ -1,0 +1,13 @@
+KI-Forscher: Die heutige hochgelobte KI ist im Grunde strohdoof
+
+Vom aktuellen Hype um KI-Algorithmen, die zu einem allgemeinen Buzzword geworden sind, fühlen sich die richtigen KI-Forscher dann schon etwas übergangen. Dabei arbeiten sie an viel spannenderen Projekten, wie eine Stellungnahme von ihnen gerade zeigt.
+
+"Zwei Arten des maschinellen Lernens sind heute erfolgreich: zum einen tiefe neuronale Netze, auch als Deep Learning bekannt, zum anderen das Verstärkungslernen", erklärte Laurenz Wiskott, Inhaber des Lehrstuhls Theorie Neuronaler Systeme der Ruhr-Universität Bochum. Beides kann aber nur in einem sehr beschränkten Rahmen erfolgreich operieren. Oder wie es der Experte ausdrückte: "Das Problem mit diesen Prozessen maschinellen Lernens ist, dass sie im Grunde strohdoof sind."
+
+Schaut man sich die Debatte um die aktuell verfügbaren KI-Systeme an, scheint es fast, als habe man es mit einer völlig überraschend aufgetauchten Neuerung zu tun, die alles bisher dagewesene gravierend verändert. Fragt man hingegen Wissenschaftler, die seit langer Zeit an KI-Technologien forschen, hört sich das etwas anders an.
+
+Flexibilität gibt es nicht
+
+"Die zugrundeliegenden Techniken stammen aus den 1980er-Jahren. Der Grund für ihren heutigen Erfolg liegt nur darin, dass wir heute größere Rechenkapazitäten haben und mehr Daten", führte Wiskott aus. Im Kern trainiert man das System mit großem Aufwand auf eine ganz bestimmte Aufgabe. Und diese kann die Maschine dann oft tatsächlich besser und vor allem schneller als der Mensch ausführen. Ein Problem entsteht aber dann, wenn es auch nur zu relativ geringfügigen Abweichungen kommt und etwas Flexibilität gefragt wäre.
+
+In Bochum wird daher am Institut für Neuroinformatik an neuen Strategien gearbeitet, die Maschinen dazu befähigen sollen, Strukturen selbstständig zu entdecken. Das wäre dann die Basis dafür, dass die Systeme ohne äußere Eingriffe lernen können. Wenn das funktioniert, wären sie letztlich auch in der Lage sich selbst zur Lösung von Aufgaben zu befähigen, für die sie nicht oder nur ansatzweise trainiert wurden.

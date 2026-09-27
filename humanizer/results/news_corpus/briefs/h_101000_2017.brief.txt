@@ -1,0 +1,16 @@
+**1. Thema:** Microsoft erhöht die Finanzierung seines KI-Umweltschutzprogramms "AI for Earth" deutlich.
+
+**2. Fakten:**
+- Programm: "AI for Earth" von Microsoft
+- Ziel: Förderung von Projekten, die moderne KI-Verfahren nutzen, um Probleme des Erd-/Umweltschutzes zu lösen
+- Bisheriges Jahresbudget: rund 2 Millionen Dollar
+- Neues Budget: 50 Millionen Dollar, verteilt über die kommenden fünf Jahre
+- Ankündigung durch: Brad Smith, Chef-Justiziar (President/Chief Legal Officer) von Microsoft
+- Finanzielle Mittel sind laut Artikel nur eine grobe Schätzgröße, da Microsoft die eigentlichen Werte in Form von Azure-Cloud-Kapazitäten und Technologie-Spenden bereitstellt
+- Empfänger: Forscher-Teams diverser Universitäten sowie Nichtregierungsorganisationen (NGOs), die Zugang zu KI-Algorithmen erhalten
+- In den ersten sechs Monaten seit Programmstart: 35 Empfänger in 10 Ländern unterstützt
+- Zusätzliche Unterstützung Microsofts: Hilfe bei der Skalierung von Projekten auf größere Dimensionen, Vernetzung mit Partnern, Unterstützung bei der Umwandlung von Projekten in kommerziell tragfähige Produkte
+- Zitat von Brad Smith: "Inzwischen dürfte ja jeder mit der aktuellen Position der US-Regierung vertraut sein"
+- Sinngemäße Aussage Smiths: Angesichts der US-Regierungsposition seien Beiträge von Technologieunternehmen umso dringender nötig
+
+**3. Anlass/Nachrichtenwert:** Microsoft kündigt eine 25-fache Aufstockung der Mittel für sein bislang eher als Marketinginstrument wahrgenommenes Umwelt-KI-Programm an.

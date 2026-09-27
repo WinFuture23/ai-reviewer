@@ -1,0 +1,23 @@
+Datenkrake Google: Kontroverse um Gmail-Einkaufslisten-Sammlung
+
+Eine alte Funktion von Google sorgt jetzt für einen großen Aufschrei: Es geht dabei um eine Anzeige von getätigten Verkäufen, die Google - im Grunde ohne das Einverständnis des Nutzers - anhand von Rechnungen aus dem Gmail-Konto herausfiltert. Jetzt ist der Streit entbrannt, ob das ein Datenschutz-Problem ist oder nicht und man hinterfragt, warum Google das eigentlich macht.
+
+Hochgekommen ist die ganze Angelegenheit nach einem Bericht des US-Senders CNBC. Dieser hatte berichtet, dass Google mithilfe von Rechnungen, die Firmen an eine Gmail-Adresse senden eine Liste erstellt, in der der Nutzer seine ganze Einkaufs-Historie nachvollziehen kann. Das ist nicht ganz neu, führt nun aber wieder zu einer Kontroverse, nach dem Google-Chef Sundar Pichai erst vor kurzem die Privatsphäre als wichtiges Gut bezeichnet hatte, wobei er anmahnte, es nicht zu einem Luxusgut werden zu lassen. So werden zum Beispiel Käufe gelistet, die in den diversen Online-Shops, App Stores oder auch bei Ebay getätigt wurden.
+
+Daten nur für den Accountinhaber
+
+Aus Sicht von Google ist das nicht mehr als ein kleiner Service. Jeder Gmail-Nutzer kann seine Einkaufliste einsehen. Gesammelt werden die Daten allem Anschein nach schon seit dem Jahr 2012. Das große Aber: Google selbst gibt an, von dieser Auswertung keinen Nutzen zu ziehen.
+
+Man verwende die Daten weder für gezieltes Advertising noch verkaufe man die gesammelten Daten an Dritte. Da Google auch gern als große Datenkrake bezeichnet wird, kommt das Unternehmen mit dieser Analyse der Käufe eines Nutzers natürlich wieder in den Fokus von Datenschützern.
+
+Laut Google kann man auch nur seine eigene Liste aufrufen und diese kann nicht von Dritten eingesehen werden.
+
+So funktioniert das Löschen
+
+Als kleiner Tipp. Man kann die Liste zwar nicht einfach in Gänze löschen. Man kann aber nach dem Anklicken eines Artikels das Produkt aus der Liste entfernen. Ebenso ist es möglich sich anzeigen zu lassen, woher die Daten stammen und auf die Ursprungs-E-Mail zu wechseln.
+
+Laut Google funktioniert das so:
+
+- Wählen Sie eine Bestellung aus, um ihre Details zu sehen und sie aus Ihrer Liste zu löschen.
+- Wählen Sie oben rechts das Infosymbol Informationen und dann Ursprungsdienst aus.
+- Je nachdem, wo Sie die Bestellung aufgegeben haben, können Sie sie löschen, indem Sie Löschen wählen. Andernfalls wählen Sie Detailansicht oder E-Mail ansehen, um zum ursprünglichen Dienst zu wechseln und ihn zu verwalten.

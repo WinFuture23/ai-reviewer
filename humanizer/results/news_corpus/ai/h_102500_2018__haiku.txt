@@ -1,0 +1,19 @@
+iOS-Entwickler warnt vor Datenschutz-Lücken bei Fotofreigaben
+
+Ein iOS-Entwickler warnt aktuell vor einem bislang wenig beachteten Datenschutz-Problem: Apps mit Zugriff auf die iPhone-Fotobibliothek können deutlich umfassender in die Privatsphäre eindringen als Nutzer typischerweise erwarten. Die Warnung kommt im Kontext aktueller Facebook-Datenskandale.
+
+Analyse von tausenden Bildern pro Minute
+
+Ben Sandofsky, selbst Entwickler einer etablierten Kamera-App, hat in einem heise-Bericht auf die erheblichen Gefahren hingewiesen. Wenn ein Nutzer einer App die Erlaubnis für den Zugriff auf die Fotobibliothek erteilt, kann diese nicht nur einzelne Bilder abrufen, sondern Bildinhalte direkt auf dem Gerät umfassend analysieren. Nach Sandofsky können dabei "tausende Bilder pro Minute" verarbeitet werden, ohne dass eine Übertragung an externe Server erforderlich ist.
+
+Persönliche Daten aus Fotos extrahierbar
+
+Die automatisierte Bildanalyse vermag beachtliche Mengen an persönlichen Informationen zu extrahieren. Erkannt werden können das Alter und Geschlecht fotografierter Personen sowie Gegenstände auf den Bildern. Noch problematischer sind die Standortdaten, die vielen Fotos eingebettet sind. Mit diesen Informationen können Apps detaillierte Bewegungsprofile erstellen und dadurch den wahrscheinlichen Wohnort, Urlaubsziele und bevorzugte Aufenthaltsorte ermitteln.
+
+Ein anderer Entwickler demonstrierte früher eindrucksvoll mit einer Demo-App, wie leicht sich die in Fotos eingebetteten GPS-Daten auslesen lassen – sogar ohne dass der Nutzer die Standortfreigabe für die App explizit aktiviert hat. Apple hat mittlerweile reagiert und warnt Nutzer ausdrücklich im Freigabemenü vor dieser Möglichkeit.
+
+Facebook SDK teilt Rechte automatisch weiter
+
+Die Situation wird besonders kritisch, wenn Apps das Facebook SDK nutzen. Dieses "Software Development Kit" leitet automatisch alle Rechte an Facebook weiter, die ein Nutzer der betreffenden App gewährt hat – auch den umfassenden Zugriff auf die Fotobibliothek. Das größte Problem: Für normale Nutzer bleibt verborgen, ob eine installierte App das Facebook SDK einsetzt.
+
+Die Warnung kommt zu einer Zeit, in der Facebook durch verschiedene Datenskandale massiv unter Druck steht. Zum Schutz ihrer Privatsphäre können Nutzer einzelne Fotos über das iOS-Sharing-Menü mit Apps teilen, anstatt allumfassende Zugriffe auf die komplette Fotobibliothek zu gewähren. Dies kann allerdings zu funktionalen Einschränkungen führen.

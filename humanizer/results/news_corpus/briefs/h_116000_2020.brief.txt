@@ -1,0 +1,21 @@
+**1. Thema:** Microsoft Solitaire feiert seinen 30. Geburtstag und bekommt aus diesem Anlass neue Challenges.
+
+**2. Fakten:**
+- Spiel: Microsoft Solitaire
+- Release-Datum: 22. Mai 1990
+- Erschienen zusammen mit Windows 3.0
+- Hauptverantwortlich für die Entwicklung: ein Praktikant
+- Anlass: 30. Geburtstag des Spiels
+- Heute Teil der "Microsoft Solitaire Collection"
+- Weitere enthaltene Klassiker in der Collection: Freecell, Spider, Klondike, Pyramide, TriPeaks
+- Zum Jubiläum: neue Challenges wurden hinzugefügt
+- Aufruf, an diesem Tag besonders viele Runden zu spielen, um einen Rekord aufzustellen
+- Aktuell ca. 35 Millionen aktive Nutzer, die monatlich Solitaire-Runden starten
+- Ursprünglich beworben als Lernmittel für PC-Steuerung und Mausbedienung
+- Heute vor allem als Freizeitspiel genutzt
+- Solitaire war bis Windows 8 durchgehend fester Bestandteil von Windows
+- 2012: Microsoft überarbeitete das Spiel stark und ergänzte neue Spielmodi
+- In Windows 10 standardmäßig enthalten
+- "Microsoft Solitaire Collection" verfügbar für PC, Android, iOS sowie als Web-Version
+
+**3. Anlass/Nachrichtenwert:** Microsoft Solitaire wird 30 Jahre alt, und Microsoft nutzt den Jahrestag, um neue Inhalte für das nach wie vor populäre Kartenspiel bereitzustellen.

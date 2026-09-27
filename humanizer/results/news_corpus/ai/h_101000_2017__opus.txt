@@ -1,0 +1,17 @@
+Microsoft stockt Budget für KI-Umweltprogramm "AI for Earth" massiv auf
+
+Microsoft nimmt für den Umweltschutz deutlich mehr Geld in die Hand. Das Unternehmen hat angekündigt, die Mittel für sein Programm "AI for Earth" kräftig aufzustocken. Statt rund 2 Millionen Dollar pro Jahr stehen künftig 50 Millionen Dollar zur Verfügung, verteilt über die kommenden fünf Jahre.
+
+Mehr als nur ein Marketinginstrument
+
+Mit "AI for Earth" fördert Microsoft Projekte, die moderne KI-Verfahren nutzen, um Probleme des Umweltschutzes zu lösen. Bislang wurde das Programm allerdings eher als Marketinginstrument wahrgenommen, denn das Jahresbudget lag bei gerade einmal rund 2 Millionen Dollar. Das soll sich nun ändern: Wie Brad Smith, President und Chief Legal Officer von Microsoft, bekanntgab, fließen künftig insgesamt 50 Millionen Dollar in das Programm. Die neue Gesamtsumme entspricht damit dem 25-Fachen des bisherigen Jahresbudgets.
+
+Cloud-Kapazitäten statt Bargeld
+
+Die genannten Summen sind allerdings nur als grobe Schätzgröße zu verstehen. Microsoft zahlt die Mittel nämlich nicht direkt aus, sondern stellt die eigentlichen Werte in Form von Kapazitäten in der Azure-Cloud sowie als Technologie-Spenden bereit. Zu den Empfängern zählen Forscher-Teams diverser Universitäten sowie Nichtregierungsorganisationen, die auf diesem Weg Zugang zu KI-Algorithmen erhalten.
+
+In den ersten sechs Monaten seit dem Start des Programms hat Microsoft bereits 35 Empfänger in 10 Ländern unterstützt. Dabei geht es aber nicht allein um Rechenleistung und Technik. Der Konzern hilft den geförderten Projekten auch dabei, auf größere Dimensionen zu skalieren, vernetzt sie mit passenden Partnern und unterstützt sie dabei, aus ihren Ansätzen kommerziell tragfähige Produkte zu machen.
+
+Seitenhieb auf die US-Regierung
+
+Bei der Ankündigung ließ Smith zudem einen deutlichen politischen Unterton erkennen. "Inzwischen dürfte ja jeder mit der aktuellen Position der US-Regierung vertraut sein", sagte der Microsoft-Manager. Gerade vor diesem Hintergrund seien Beiträge von Technologieunternehmen umso dringender nötig. Mit der Aufstockung von "AI for Earth" will Microsoft offenbar zeigen, dass die Branche hier selbst Verantwortung übernehmen kann.

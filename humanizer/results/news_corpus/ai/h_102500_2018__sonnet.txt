@@ -1,0 +1,21 @@
+iPhone-Apps können Fotobibliothek für Gesichtsanalyse und Standortdaten auswerten
+
+Ein Entwickler warnt davor, dass Kamera- und andere Apps auf dem iPhone weitreichendere Analysen der Fotobibliothek durchführen können, als vielen Nutzern bewusst ist. Wird einer App Zugriff auf die Fotos gewährt, kann sie damit theoretisch Gesichter, Gegenstände und sogar Standortverläufe auswerten. Im Kontext des aktuellen Facebook-Datenskandals gewinnt diese Problematik zusätzliche Brisanz, da manche Apps ihre Berechtigungen automatisch an Facebook weiterreichen.
+
+Analyse direkt auf dem Gerät möglich
+
+Wie heise berichtet, hat der Entwickler Ben Sandofsky, der selbst eine Kamera-App programmiert, auf diese Datenschutzlücke aufmerksam gemacht. Mit der Freigabe der iOS-Fotobibliothek erteilen Nutzer Apps die Erlaubnis, sämtliche Foto- und Videoinhalte zu analysieren. Laut Sandofsky lassen sich dabei "tausende Bilder pro Minute" direkt auf dem Gerät auswerten, ohne dass die Daten überhaupt an einen Server übertragen werden müssten. Eine solche Analyse kann unter anderem das Alter und Geschlecht abgebildeter Personen sowie einzelne Gegenstände im Bild erkennen.
+
+Bewegungsprofile durch Standortdaten in Fotos
+
+Besonders heikel ist, dass viele Fotos Standortdaten enthalten. Werden diese ausgelesen, lassen sich daraus Bewegungsprofile erstellen, die Rückschlüsse auf den wahrscheinlichen Wohnort, bevorzugte Aufenthaltsorte oder Urlaubsziele der Nutzer zulassen. Bereits in der Vergangenheit hatte eine Analyse anderer Entwickler mit einer Demo-App gezeigt, dass sich in Fotos eingebettete GPS-Daten auslesen lassen – selbst dann, wenn der Nutzer der App gar keine Standortfreigabe erteilt hat. Apple weist mittlerweile im entsprechenden Freigabemenü auf diesen Umstand hin.
+
+Facebook-SDK reicht Rechte automatisch weiter
+
+Besonders problematisch wird es laut Bericht bei Apps, die das Facebook SDK (Software Development Kit) einsetzen. Solche Apps geben Facebook automatisch alle Rechte weiter, die der Nutzer der jeweiligen App eingeräumt hat – also auch den Zugriff auf die komplette Fotobibliothek samt der darin enthaltenen Analysemöglichkeiten. Für normale Nutzer ist dabei kaum erkennbar, ob eine installierte App überhaupt das Facebook SDK verwendet, da dies in der Oberfläche nicht sichtbar gemacht wird.
+
+Alternative: Einzelne Fotos statt kompletter Freigabe
+
+Als mögliche Abhilfe empfiehlt der Bericht, statt einer pauschalen Freigabe der gesamten Fotobibliothek einzelne Bilder gezielt über das iOS-Sharing-Menü mit den jeweiligen Apps zu teilen. Dieser Weg schränkt den Zugriff auf ausgewählte Fotos ein, kann aber mit einem eingeschränkten Funktionsumfang der betroffenen App einhergehen.
+
+Der Fall zeigt, dass selbst Apple mit seinem Ruf als besonders datenschutzfreundlicher Hersteller nicht vor solchen Lücken gefeit ist. Angesichts des laufenden Facebook-Datenskandals rückt die Frage, wie großzügig App-Berechtigungen tatsächlich ausgelegt werden können, verstärkt in den Fokus der Öffentlichkeit.

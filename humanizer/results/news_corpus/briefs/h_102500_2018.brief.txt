@@ -1,0 +1,17 @@
+1. Thema: Ein iOS-Entwickler warnt, dass Kamera- und andere Apps auf iPhones mit Zugriff auf die Fotobibliothek auch weitreichende Bildinhalte analysieren können – bei Nutzung der Facebook-SDK sogar zugunsten von Facebook.
+
+2. Fakten:
+- Entwickler: Ben Sandofsky, selbst Entwickler einer Kamera-App
+- Quelle: Bericht von heise
+- Anlass: aktueller Facebook-Datenskandal
+- Mit Freigabe der iOS-Fotobibliothek erhalten Apps Erlaubnis, Foto-/Videoinhalte zu analysieren
+- Zitat (Sandofsky): Auswertung von "tausenden Bildern pro Minute" direkt auf dem Gerät möglich, Übertragung an Server nicht mehr nötig
+- Analyse kann erkennen: Alter und Geschlecht abgebildeter Personen, Gegenstände im Bild
+- Viele Fotos enthalten Standortdaten → Erstellung von Bewegungsprofilen möglich (wahrscheinlicher Wohnort, Urlaubsziele, bevorzugte Aufenthaltsorte)
+- Frühere Analyse anderer Entwickler mit einer Demo-App zeigte: eingebettete GPS-Daten in Fotos auslesbar, auch ohne Standortfreigabe
+- Apple weist mittlerweile im Freigabemenü auf diesen Umstand hin
+- Apps mit Facebook SDK ("Software Development Kit") geben Facebook automatisch alle Rechte, die der Nutzer der App eingeräumt hat
+- Für normale Nutzer kaum erkennbar, ob eine App die Facebook SDK nutzt
+- Alternative: Einzelne Bilder über iOS-Sharing-Menü mit Apps teilen statt pauschaler Fotobibliothek-Freigabe – dabei aber eingeschränkter Funktionsumfang möglich
+
+3. Anlass/Nachrichtenwert: Im Kontext des aktuellen Facebook-Datenskandals macht ein Entwickler auf eine bislang wenig beachtete Datenschutzlücke bei iOS-Fotozugriffsrechten aufmerksam, die auch Apple – trotz seines Datenschutz-Rufs – betrifft.

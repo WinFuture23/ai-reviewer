@@ -1,0 +1,19 @@
+Bochumer KI-Forscher dämpfen den Hype: Heutige Systeme sind "im Grunde strohdoof"
+
+Um Künstliche Intelligenz herrscht derzeit ein regelrechter Hype. Forscher der Ruhr-Universität Bochum rücken das Bild nun zurecht: Deep Learning und Verstärkungslernen seien zwar erfolgreich, aber grundlegend unflexibel. Am Institut für Neuroinformatik arbeitet man deshalb an Maschinen, die selbstständig lernen sollen.
+
+Zwei Ansätze dominieren
+
+"Zwei Arten des maschinellen Lernens sind heute erfolgreich: zum einen tiefe neuronale Netze, auch als Deep Learning bekannt, zum anderen das Verstärkungslernen", erklärt Laurenz Wiskott, Inhaber des Lehrstuhls Theorie Neuronaler Systeme an der Ruhr-Universität Bochum. Beide Ansätze könnten allerdings nur in einem sehr beschränkten Rahmen erfolgreich operieren. Wiskott formuliert es drastisch: "Das Problem mit diesen Prozessen maschinellen Lernens ist, dass sie im Grunde strohdoof sind."
+
+Alte Technik, mehr Rechenleistung
+
+Neu sind die Methoden dabei keineswegs. "Die zugrundeliegenden Techniken stammen aus den 1980er-Jahren. Der Grund für ihren heutigen Erfolg liegt nur darin, dass wir heute größere Rechenkapazitäten haben und mehr Daten", so Wiskott. Der aktuelle Boom beruht demnach nicht auf grundlegend neuen Verfahren, sondern vor allem auf mehr Rechenleistung und größeren Datenmengen.
+
+Spezialisten ohne Flexibilität
+
+Die Systeme werden mit großem Aufwand auf eine ganz bestimmte Aufgabe trainiert. Diese können sie anschließend oft besser und schneller erledigen als ein Mensch. Doch schon bei geringfügigen Abweichungen von der trainierten Aufgabe stoßen sie an ihre Grenzen: Sobald Flexibilität gefragt ist, versagen sie. Die beeindruckenden Leistungen der Systeme gelten also stets nur für den eng umrissenen Bereich, für den sie trainiert wurden.
+
+Maschinen sollen selbst Strukturen entdecken
+
+Am Institut für Neuroinformatik in Bochum wird daher an neuen Strategien gearbeitet. Sie sollen Maschinen befähigen, Strukturen selbstständig zu entdecken. Ziel ist es, dass die Systeme ohne äußere Eingriffe lernen können. Langfristig sollen sie sich sogar selbst befähigen, Aufgaben zu lösen, für die sie nicht oder nur ansatzweise trainiert wurden. Damit wollen die Bochumer Forscher genau jene Schwäche angehen, die heutigen KI-Systemen trotz aller Erfolge noch anhaftet.

@@ -1,0 +1,18 @@
+**1. Thema:** Google sammelt aus Rechnungs-E-Mails in Gmail automatisch eine Einkaufshistorie der Nutzer, was Datenschutz-Kontroverse auslöst.
+
+**2. Fakten:**
+- Auslöser: Bericht des US-Senders CNBC
+- Funktion: Google erstellt aus Rechnungen/E-Mails in Gmail-Konten eine Liste getätigter Käufe (Einkaufshistorie)
+- Erfasste Käufe u.a. aus: Online-Shops, App Stores, Ebay
+- Datensammlung besteht laut Bericht bereits seit 2012
+- Google-Chef: Sundar Pichai; hatte kürzlich Privatsphäre als wichtiges Gut bezeichnet und gemahnt, sie dürfe nicht zum Luxusgut werden
+- Google-Position: Daten werden nicht für gezielte Werbung (Advertising) genutzt und nicht an Dritte verkauft
+- Zugriff: Liste ist nur für den jeweiligen Account-Inhaber selbst einsehbar, nicht für Dritte
+- Löschmöglichkeit: Liste kann nicht komplett gelöscht werden, aber einzelne Artikel lassen sich nach Anklicken entfernen
+- Anleitung laut Google zum Löschen/Verwalten einzelner Einträge:
+  1. Bestellung auswählen, um Details zu sehen und aus der Liste zu löschen
+  2. Oben rechts Infosymbol „Informationen“ wählen, dann „Ursprungsdienst“
+  3. Je nach Bestelldienst: „Löschen“ wählen, oder „Detailansicht“/„E-Mail ansehen“, um zum ursprünglichen Dienst zu wechseln und dort zu verwalten
+- Google wird im Artikel als „Datenkrake“ bezeichnet, was die Kontroverse befeuert
+
+**3. Nachrichtenwert:** Der CNBC-Bericht über die aus Gmail-Rechnungen generierte Einkaufsliste löst erneut Debatten über Googles Datenschutzpraktiken aus, zumal er kurz nach Pichais Aussagen zum Schutz der Privatsphäre bekannt wird.

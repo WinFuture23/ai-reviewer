@@ -1,0 +1,18 @@
+**Thema:** KI-Forscher relativieren den aktuellen KI-Hype und erklären, warum heutige Deep-Learning- und Verstärkungslernsysteme trotz ihrer Erfolge grundlegend unflexibel sind.
+
+**Fakten:**
+- Quelle/Person: Laurenz Wiskott, Inhaber des Lehrstuhls Theorie Neuronaler Systeme der Ruhr-Universität Bochum
+- Zitat Wiskott: „Zwei Arten des maschinellen Lernens sind heute erfolgreich: zum einen tiefe neuronale Netze, auch als Deep Learning bekannt, zum anderen das Verstärkungslernen.“
+- Zitat Wiskott: „Das Problem mit diesen Prozessen maschinellen Lernens ist, dass sie im Grunde strohdoof sind.“
+- Zitat Wiskott: „Die zugrundeliegenden Techniken stammen aus den 1980er-Jahren. Der Grund für ihren heutigen Erfolg liegt nur darin, dass wir heute größere Rechenkapazitäten haben und mehr Daten.“
+- Beide erfolgreichen ML-Ansätze (Deep Learning, Verstärkungslernen) können laut Wiskott nur in sehr beschränktem Rahmen erfolgreich operieren.
+- Ursprung der zugrundeliegenden Techniken: 1980er-Jahre.
+- Heutiger Erfolg basiert laut Wiskott auf größerer Rechenkapazität und mehr verfügbaren Daten, nicht auf grundlegend neuen Methoden.
+- Systeme werden mit großem Aufwand auf eine ganz bestimmte Aufgabe trainiert und können diese oft besser/schneller als Menschen ausführen.
+- Problem: Schon bei geringfügigen Abweichungen von der trainierten Aufgabe, wenn Flexibilität gefragt ist, versagen die Systeme.
+- Ort/Institution: Institut für Neuroinformatik in Bochum (Ruhr-Universität Bochum)
+- Dort wird an neuen Strategien gearbeitet, die Maschinen befähigen sollen, Strukturen selbstständig zu entdecken.
+- Ziel: Systeme sollen ohne äußere Eingriffe lernen können.
+- Langfristiges Ziel: Systeme sollen sich selbst befähigen können, Aufgaben zu lösen, für die sie nicht oder nur ansatzweise trainiert wurden.
+
+**Anlass:** Eine Stellungnahme von Bochumer KI-Forschern rückt den öffentlichen Hype um KI zurecht und stellt aktuelle Forschungsarbeiten zu flexibleren, selbstlernenden Systemen vor.

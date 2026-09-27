@@ -1,0 +1,15 @@
+Entwickler warnt: iOS-Apps analysieren Fotoinhalte bis ins letzte Detail
+
+Geht es um den Schutz der Nutzerdaten, genießt Apple auf jeden Fall einen besseren Ruf als Facebook. Wie jetzt ein Entwickler warnt, kann man bei der Nutzung von Kamera-Apps auf iOS-Geräten aber sehr viel Persönliches preisgeben. Mit den Zugriffsrechten erhalten Anwendungen auch die Erlaubnis, alle Bildinhalte zu analysieren. Nutzt die App die Facebook SDK, überträgt sich dieses Recht auch auf das soziale Netzwerk.
+
+Bilder werden bis ins letzte Detail auf ihre Inhalte analysiert
+
+Natürlich muss man als Nutzer immer ganz bewusst darüber entscheiden, welchen Anwendungen man welche Rechte gewährt. Eines von vielen Problemen: Oft ist es nicht ohne Weiteres ersichtlich, wie weitreichend die Zugriffsmöglichkeiten wirklich ausfallen. Im Zuge des aktuellen Facebook-Skandals macht jetzt ein iOS-Entwickler darauf aufmerksam, dass auch das mobile Apple-Betriebssystem für Dritte einige Möglichkeiten bietet, von Nutzern weitreichende Datensätze zu sammeln.
+
+Wie der Entwickler Ben Sandofsky - selber Entwickler einer Kamera-App - laut des Berichts von heise warnt, erteilt ein Nutzer mit der Freigabe der iOS-Fotobibliothek für Apps auch eine Erlaubnis, die Inhalte der Fotos und Videos zu analysieren. Wie Sandofsky ausführt, sei es mittlerweile kein Problem mehr, eine Auswertung von "tausenden Bildern pro Minute" direkt auf dem Gerät vorzunehmen, eine Übertragung sei für die Betreiber der Apps nicht mehr notwendig.
+
+Bei der Analyse können sehr leicht Alter und Geschlecht der abgebildeten Personen sowie weitere Inhalte wie Gegenstände im Bild erkannt werden. Darüber hinaus enthalten viele Aufnahmen auch Standortdaten und erlauben so das Erstellen eines Bewegungsprofils mit Inhalten wie dem wahrscheinlichen Wohnort, Urlaubsziele und bevorzugte Aufenthaltsorte. Wie eine frühere Analyse von anderen Entwicklern mit einer Demo-App hier schon gezeigt hatte, kann die in Fotos eingebettete GPS-Information dabei ohne Standortfreigabe ausgelesen werden. Apple weist auf diesen Umstand mittlerweile auch im Freigabemenü hin.
+
+Ist die Facebook SDK an Bord, kann das soziale Netzwerk voll zugreifen
+
+Wie Sandofsky weiter ausführt, spitzt sich das Problem nach seiner Ansicht mit einem Blick auf Facebook noch weiter zu. Apps, die das sogenannte "Software Development Kit" (SDK) des Konzerns nutzen, räumen diesem automatisch alle Rechte ein, die der Nutzer zuvor der Anwendung eingeräumt hat. Aktuell gibt es aber für den normalen Nutzer kaum eine Möglichkeit, zuverlässig und schnell zu erkennen, ob die Facebook SDK in der Anwendung an Bord ist. Wer seine Bilder und die damit zusammenhängenden Daten nicht pauschal preisgeben möchte, kann einzelne Bilder über das iOS-Sharing-Menü mit Apps teilen - dann kann aber der Funktionsumfang eingeschränkt sein.

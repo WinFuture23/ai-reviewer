@@ -1,0 +1,19 @@
+1. Thema: Ein Geekbench-Eintrag liefert erste technische Details zum kommenden OnePlus 6T.
+
+2. Fakten:
+- Hersteller: OnePlus (chinesischer Smartphone-Hersteller)
+- Produkt: OnePlus 6T, neues Flaggschiff für die zweite Jahreshälfte 2018
+- Vorstellung/Launch-Event: 30. Oktober 2018 in New York City
+- Zuvor bereits offizielle Marketing-Bilder des Geräts aufgetaucht
+- Quelle der technischen Daten: Benchmark-Datenbank Geekbench
+- Gerät taucht bei Geekbench unter Codename "FS FS P8801" auf (nicht unter offiziellem Namen)
+- Erste Geekbench-Einträge stammen bereits von Ende August 2018
+- Vorgänger OnePlus 6 tauchte im Frühjahr 2018 bei Geekbench unter Codename "NS NS P7819" auf; frühe Samples zeigten diese Modellnummer im Android-Menü "Über das Telefon"; OnePlus zeigte Pressevertretern das Gerät damals vorab mit dieser Angabe
+- Prozessor: Qualcomm Snapdragon 845, Octacore-SoC, Maximaltakt bis zu 2,8 GHz
+- Arbeitsspeicher: 8 GB RAM (beim getesteten Modell, High-End-Variante)
+- Betriebssystem: Android 9.0 "Pie" (ab Werk)
+- Display: vermutlich 6,4 Zoll, OLED
+- Fingerabdruckleser: laut Hersteller direkt unter dem Display integriert
+- Charakterisierung: inkrementelles Upgrade gegenüber dem OnePlus 6
+
+3. Anlass/Nachrichtenwert: Ein neu aufgetauchter Geekbench-Benchmark bestätigt erstmals konkrete Hardware- und Software-Spezifikationen des OnePlus 6T vor dessen offizieller Präsentation am 30. Oktober 2018.

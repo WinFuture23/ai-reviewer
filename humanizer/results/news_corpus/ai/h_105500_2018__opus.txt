@@ -1,0 +1,21 @@
+OnePlus 6T: Geekbench-Eintrag verrät erste technische Details
+
+Noch vor der offiziellen Präsentation am 30. Oktober liefert die Benchmark-Datenbank Geekbench erste konkrete Details zum kommenden OnePlus 6T. Der chinesische Smartphone-Hersteller setzt beim neuen Flaggschiff demnach auf einen bewährten Qualcomm-Chip, reichlich Arbeitsspeicher und die aktuelle Android-Version.
+
+Unter Codename in der Datenbank
+
+OnePlus wird das OnePlus 6T, sein neues Flaggschiff für die zweite Jahreshälfte 2018, am 30. Oktober 2018 im Rahmen eines Launch-Events in New York City vorstellen. Bereits zuvor waren offizielle Marketing-Bilder des Geräts aufgetaucht. Nun gibt ein Eintrag bei Geekbench Aufschluss über die technische Ausstattung. Das Smartphone taucht dort allerdings nicht unter seinem offiziellen Namen auf, sondern unter dem Codenamen "FS FS P8801". Die ersten Einträge dieser Art stammen bereits von Ende August 2018.
+
+Dass es sich tatsächlich um das OnePlus 6T handelt, legt ein Blick auf den Vorgänger nahe. Das OnePlus 6 war im Frühjahr 2018 unter dem Codenamen "NS NS P7819" bei Geekbench aufgetaucht. Frühe Samples zeigten diese Modellnummer auch im Android-Menü "Über das Telefon" an. OnePlus hatte Pressevertretern das Gerät damals vorab mit genau dieser Angabe gezeigt.
+
+Snapdragon 845 und Android 9.0 Pie
+
+Laut dem Benchmark-Eintrag arbeitet im OnePlus 6T der Qualcomm Snapdragon 845. Der Octacore-SoC taktet mit bis zu 2,8 GHz. Das getestete Modell, bei dem es sich um die High-End-Variante handelt, verfügt über 8 GB RAM. Als Betriebssystem kommt ab Werk Android 9.0 "Pie" zum Einsatz.
+
+Fingerabdruckleser unter dem Display
+
+Beim Display dürfte OnePlus auf ein OLED-Panel mit einer Diagonale von vermutlich 6,4 Zoll setzen. Wie der Hersteller selbst bereits bestätigt hat, wird der Fingerabdruckleser direkt unter dem Display integriert sein.
+
+Inkrementelles Upgrade
+
+Insgesamt deutet alles darauf hin, dass das OnePlus 6T ein inkrementelles Upgrade gegenüber dem OnePlus 6 darstellt. Die Kernkomponenten bleiben weitgehend gleich, Neuerungen gibt es vor allem beim Fingerabdruckleser und bei der Software. Alle weiteren Details dürfte OnePlus bei der offiziellen Vorstellung am 30. Oktober in New York City bekannt geben.

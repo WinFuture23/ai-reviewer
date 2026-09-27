@@ -1,0 +1,15 @@
+1. Thema: Die Bundesnetzagentur will Messaging- und Internetdienste wie WhatsApp künftig wie klassische Telekommunikationsanbieter (z. B. SMS-Dienste) regulieren.
+
+2. Fakten:
+- Quelle: Interview des Bundesnetzagentur-Präsidenten Jochen Homann mit der Financial Times (FT).
+- Betroffene Dienste: WhatsApp (Facebook), iMessage (Apple), Gmail (Google) als Beispiele für webbasierte Kommunikationsdienste.
+- Zitat Jochen Homann: "Was wir sehen ist, dass die Grenze zwischen traditionellen Telekommunikationsdiensten und webbasierten Diensten wie [Google] Gmail und [Facebook] WhatsApp sehr verschwommen ist. Die Nutzer sehen oft gar keinen Unterschied."
+- Zitat Jochen Homann: "Es kann nicht sein, dass ein Unternehmen, das traditionelle Telekommunikationsdienste anbietet, bestimmte regulatorische Anforderungen erfüllen muss, wie zum Beispiel die des Datenschutzes, während ein Unternehmen, das vergleichbare Dienste über das Internet anbietet, dies nicht tut."
+- Regulierungsbereiche: Datenschutz sowie staatliche Zugriffsmöglichkeiten (z. B. Einrichtung von Überwachungsschnittstellen für Sicherheitsbehörden).
+- Politik hat laut Artikel bereits mehrfach staatlichen Zugriff auf WhatsApp-Daten gefordert.
+- Wettbewerbsaspekt: Homann will faires Umfeld für europäische Telekommunikationsanbieter gegenüber (teils US-amerikanischen) Internetdiensten schaffen.
+- Präzedenzfall: Bundesnetzagentur hat Google vor Gericht gebracht, weil Google sich weigerte, Gmail als „Telekommunikationsangebot" registrieren zu lassen.
+- Der Google/Gmail-Fall liegt aktuell beim Europäischen Gerichtshof (EuGH) und soll richtungsweisend für das weitere Vorgehen gegen WhatsApp sein.
+- Ankündigung: Bei Erfolg gegen Google will die Bundesnetzagentur zeitnah auch gegen andere Dienste vorgehen.
+
+3. Anlass/Nachrichtenwert: Der Bundesnetzagentur-Chef kündigt in einem FT-Interview an, WhatsApp und ähnliche Dienste künftig regulatorisch wie klassische Telekommunikationsanbieter zu behandeln, gestützt auf einen bereits laufenden EuGH-Rechtsstreit mit Google zu Gmail.

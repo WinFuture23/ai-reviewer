@@ -1,0 +1,19 @@
+KI-Forscher warnen: Heutige Systeme sind trotz Hype „strohdoof“
+
+Deep Learning und Verstärkungslernen gelten als die großen Erfolgsgeschichten der Künstlichen Intelligenz. Ein Bochumer Forscher relativiert nun den öffentlichen Hype und erklärt, warum diese Systeme trotz beeindruckender Leistungen fundamental unflexibel bleiben.
+
+Zwei Ansätze dominieren den Erfolg
+
+Laurenz Wiskott, Inhaber des Lehrstuhls Theorie Neuronaler Systeme an der Ruhr-Universität Bochum, benennt die beiden Techniken, die dem aktuellen KI-Boom zugrunde liegen: „Zwei Arten des maschinellen Lernens sind heute erfolgreich: zum einen tiefe neuronale Netze, auch als Deep Learning bekannt, zum anderen das Verstärkungslernen.“ Beide Ansätze könnten jedoch, so Wiskott, nur in einem sehr beschränkten Rahmen erfolgreich operieren.
+
+Alte Technik, neue Rechenleistung
+
+Besonders bemerkenswert ist laut Wiskott der historische Hintergrund der Methoden: „Die zugrundeliegenden Techniken stammen aus den 1980er-Jahren. Der Grund für ihren heutigen Erfolg liegt nur darin, dass wir heute größere Rechenkapazitäten haben und mehr Daten.“ Nicht neue methodische Durchbrüche also treiben die aktuelle KI-Welle an, sondern schlicht mehr Rechenleistung und größere Datenmengen, die auf jahrzehntealten Konzepten aufbauen.
+
+„Im Grunde strohdoof“
+
+Trotz der beeindruckenden Ergebnisse zieht Wiskott ein ernüchterndes Fazit: „Das Problem mit diesen Prozessen maschinellen Lernens ist, dass sie im Grunde strohdoof sind.“ Die Systeme werden mit erheblichem Aufwand auf eine ganz bestimmte Aufgabe trainiert und können diese anschließend oft schneller oder besser lösen als Menschen. Sobald jedoch geringfügige Abweichungen von der trainierten Aufgabe auftreten und Flexibilität gefragt ist, versagen die Systeme.
+
+Forschung an selbstlernenden Strukturen
+
+Am Institut für Neuroinformatik in Bochum arbeiten Wissenschaftler daher an neuen Strategien, die Maschinen befähigen sollen, Strukturen selbstständig zu entdecken. Ziel ist es, Systeme zu entwickeln, die ohne äußere Eingriffe lernen können. Langfristig sollen sich solche Systeme selbst dazu befähigen, Aufgaben zu lösen, für die sie ursprünglich nicht oder nur ansatzweise trainiert wurden. Diese Forschung zielt damit auf eine deutlich größere Flexibilität ab, als sie heutige Deep-Learning- und Verstärkungslernsysteme bieten können, und könnte langfristig einen Weg über die aktuellen Grenzen der Künstlichen Intelligenz hinaus aufzeigen.

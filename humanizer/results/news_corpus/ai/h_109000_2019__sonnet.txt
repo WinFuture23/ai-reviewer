@@ -1,0 +1,23 @@
+Google führt heimlich Einkaufsliste aus Gmail-Rechnungen
+
+Ein Bericht des US-Senders CNBC sorgt für neuen Ärger um Googles Umgang mit Nutzerdaten: Der Konzern erstellt aus Rechnungs-E-Mails in Gmail-Konten automatisch eine Liste sämtlicher getätigter Käufe. Besonders pikant ist der Zeitpunkt, denn erst kürzlich hatte Google-Chef Sundar Pichai betont, wie wichtig ihm der Schutz der Privatsphäre sei.
+
+Einkaufshistorie seit 2012
+
+Laut dem Bericht durchsucht Google systematisch Rechnungen und Bestellbestätigungen, die in Gmail-Postfächern landen, und fasst daraus eine persönliche Einkaufshistorie zusammen. Erfasst werden dabei Käufe aus verschiedensten Quellen, etwa aus Online-Shops, App Stores und von der Plattform Ebay. Besonders brisant: Diese Datensammlung soll bereits seit dem Jahr 2012 bestehen, wurde also über mehr als ein Jahrzehnt hinweg im Hintergrund aufgebaut, ohne dass viele Nutzer davon wussten.
+
+Der Bericht bezeichnet Google in diesem Zusammenhang erneut als „Datenkrake“, ein Vorwurf, der angesichts der langjährigen und weitreichenden Datensammlung neue Nahrung erhält.
+
+Pichais Aussagen zur Privatsphäre
+
+Für zusätzliche Brisanz sorgt, dass Sundar Pichai erst vor kurzem öffentlich betont hatte, Privatsphäre sei ein wichtiges Gut, das nicht zum Luxusgut werden dürfe, das sich nur wenige leisten können. Die nun bekannt gewordene Praxis der automatischen Auswertung von Rechnungs-Mails wirkt vor diesem Hintergrund wie ein Widerspruch zu den eigenen Ansprüchen des Unternehmens.
+
+Google betont, keine Werbung mit den Daten zu schalten
+
+Google selbst weist die schwersten Vorwürfe zurück und erklärt, dass die aus den Rechnungen gewonnenen Daten nicht für personalisierte Werbung genutzt und auch nicht an Dritte verkauft werden. Zudem sei die daraus erstellte Einkaufsliste ausschließlich für den jeweiligen Kontoinhaber selbst einsehbar, andere Personen hätten darauf keinen Zugriff.
+
+Löschen nur einzeln möglich
+
+Wer die gesammelten Daten loswerden möchte, hat es allerdings nicht ganz leicht: Eine komplette Löschung der Liste ist laut Google nicht vorgesehen. Einzelne Einträge lassen sich jedoch entfernen. Dazu muss zunächst die entsprechende Bestellung angeklickt werden, um die Details aufzurufen und sie aus der Liste zu löschen. Anschließend wählt man oben rechts das Infosymbol und dort den Punkt „Ursprungsdienst“ aus. Je nach Anbieter erscheint dann entweder direkt die Option „Löschen“, oder es öffnet sich eine Detailansicht beziehungsweise die ursprüngliche E-Mail, über die der Eintrag beim jeweiligen Dienst selbst verwaltet werden kann.
+
+Für viele Nutzer dürfte der Fall ein weiterer Beleg dafür sein, wie tief Google in persönliche Daten eingreift, selbst wenn keine Werbezwecke dahinterstehen.

@@ -1,0 +1,24 @@
+**Thema:** Google veröffentlicht das August-2017-Sicherheitsupdate für Android, das mehrere kritische Schwachstellen im Media Framework schließt.
+
+**Fakten:**
+- Herausgeber: Google
+- Quelle: Android Security Bulletins für August 2017
+- Update-Typ: reguläres August-Update für Android
+- Zehn kritisch eingestufte Schwachstellen im Media Framework
+- Betroffen ab Android 4.4.4
+- Konkret betroffene Android-Versionen: 4.4.4, 5.0.2, 5.1.1, 6.0, 6.0.1, 7.0, 7.1.1, 7.1.2
+- Zunächst verfügbar für: Google Pixel und Nexus
+- Google hat Partnern die Sicherheitslücken-Details bereits einen Monat zuvor mitgeteilt
+- Update-Rollout für Pixel/Nexus bereits gestartet, Versorgung innerhalb von 48 Stunden
+- Alternativ: Images zum Herunterladen verfügbar
+- Schwerwiegendste Lücke: kritische Media-Framework-Schwachstelle, ermöglicht entferntem Angreifer mittels präparierter Datei beliebige Code-Ausführung im Rahmen eines privilegierten Prozesses
+- Laut Google aktuell kein Hinweis auf aktive Ausnutzung dieser Schwachstelle
+- Zusätzlich behoben: fehlerhafte Komponenten von MediaTek und Qualcomm
+- Zwei Patch-Level-Versionen:
+  - 2017-08-01 (partieller Security Patch Level String): 10 kritische, 14 hoch eingestufte Sicherheitslücken
+  - 2017-08-05 (kompletter Security Patch Level String): 2 hoch, 12 moderat eingestufte Sicherheitslücken
+- Alle Android-Nutzer erhalten Update mit Kennzeichnung Version 2017-08-05 oder 2017-08-01
+- Nexus- und Pixel-Geräten wird ausschließlich Patch-Level 2017-08-05 angeboten
+- Keine wörtlichen Zitate im Artikel enthalten
+
+**Anlass/Nachrichtenwert:** Google schließt mit dem monatlichen Sicherheitsupdate zahlreiche, teils kritische Schwachstellen in Android, wobei Nutzern angesichts einer besonders schwerwiegenden Media-Framework-Lücke ein zeitnahes Update empfohlen wird.

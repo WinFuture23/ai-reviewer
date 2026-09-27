@@ -1,0 +1,15 @@
+OnePlus 6T im Benchmark: Snapdragon 845, 8 GB RAM & Android 9.0
+
+Der chinesische Hersteller OnePlus stellt gegen Ende des Monats sein neues Flaggschiff-Smartphone für die zweite Jahreshälfte vor. Das OnePlus 6T war zwar vor kurzem bei uns erstmals auf offiziellen Marketing-Bildern zu sehen, zum Innenleben liefert jetzt aber ein Benchmark erstmals nähere Infos.
+
+So taucht das Gerät bei Geekbench offenbar unter der Bezeichnung "FS FS P8801" und nicht unter seinem offiziellen Marketing-Namen auf. Die ersten Einträge stammen bereits von Ende August, schließlich sind allerhand Optimierungen und Tests nötig, um die maximale Performance aus dem Gerät zu kitzeln.
+
+Die Verwendung eines falschen Namens hat bei OnePlus unterdessen schon Tradition, denn das OnePlus 6 war im Frühjahr als "NS NS P7819" bei Geekbench zu finden - weil die frühen Samples nachweislich diese veränderte Modellnummer im Menü "Über das Telefon" von Android anzeigten. So zeigte OnePlus den Vorgänger des 6T Pressevertretern damals vorab mit genau dieser Angabe in seinem Einstellungsmenü.
+
+Natürlich wieder mit dem aktuellen Snapdragon 845
+
+Die Benchmark-Einträge für das OnePlus 6T liefern unterdessen natürlich kaum große Neuigkeiten, da es sich um ein inkrementelles Upgrade handelt. So steckt selbstverständlich der Qualcomm Snapdragon 845 Octacore-SoC unter der Haube, der hier wie üblich auf bis zu 2,8 Gigahertz Maximaltakt kommt.
+
+Hinzu kommen zumindest bei dem mit Geekbench getesteten Modell die in den High-End-Varianten bei OnePlus seit einiger Zeit üblichen acht Gigabyte Arbeitsspeicher. Als Betriebssystem wird ausdrücklich Android 9.0 "Pie" genannt, schließlich kommt das neue OnePlus 6T ab Werk mit der aktuellsten Version von Googles mobilem Betriebssystem auf den Markt.
+
+Das OnePlus 6T wird mit einiger Wahrscheinlichkeit mit einem 6,4 Zoll großen OLED-Display aufwarten und verfügt nach Angaben des Herstellers über einen Fingerabdruckleser, der direkt unter dem Display integriert ist. Die Vorstellung des neuen Top-Smartphones erfolgt am 30. Oktober 2018 im Rahmen eines großen Launch-Events in New York City.
