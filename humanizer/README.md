@@ -85,11 +85,11 @@ Messung: nachgebauter StoryScope-Klassifikator (narrativ, 257 Merkmale), P(Mensc
 
 | Version | DeepSeek-Story | Gemini-Story | Kimi-Story | Mittel | bestanden (≥0,5) |
 |---|---|---|---|---|---|
-| original | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 |
-| v1 | 0.99 | 0.0 | 0.69 | 0.56 | 2.0 |
-| v2 | 0.82 | 0.27 | 0.04 | 0.38 | 1.0 |
-| v3 | 0.48 | 0.25 | 0.33 | 0.35 | 0.0 |
-| v4 | 1.0 | 0.03 | 0.17 | 0.4 | 1.0 |
+| original | 0.0 | 0.0 | 0.0 | 0.0 | 0 |
+| v1 | 0.99 | 0.0 | 0.69 | 0.56 | 2 |
+| v2 | 0.82 | 0.27 | 0.04 | 0.38 | 1 |
+| v3 | 0.48 | 0.25 | 0.33 | 0.35 | 0 |
+| v4 | 1.0 | 0.03 | 0.17 | 0.4 | 1 |
 
 **Alle Messungen:**
 
