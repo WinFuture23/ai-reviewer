@@ -197,19 +197,19 @@ Die drei von den Lesern genannten Schwächen der Gewinnerfassung (Komma-Splice �
 
 ### Endfassung
 
-VW ID. Tiguan: Premiere im Oktober beendet die ID.4-Ära
+**VW ID. Tiguan: Premiere im Oktober beendet die ID.4-Ära**
 
 Volkswagen verabschiedet sich beim neuen ID. Tiguan wieder von reinen Ziffern im Namen und bringt physische Tasten zurück ins Cockpit.
 
 Ende 2026 soll im Werk Emden die Serienproduktion beginnen, wie Volkswagen mitteilt. Die Markteinführung ist für das erste Quartal 2027 vorgesehen. Zu sehen gibt es das Elektro-SUV schon vorher: Am 9. Oktober 2026 will Volkswagen den ID. Tiguan vorstellen. Er löst den ID.4 ab.
 
-1650 Liter, 2300 Kilogramm
+**1650 Liter, 2300 Kilogramm**
 
 Der Verbrenner-Tiguan bietet bis zu 1650 Liter Kofferraumvolumen bei umgeklappter Rückbank und eine Anhängelast von bis zu 2300 Kilogramm. Die Elektrovariante soll ähnliche Nutzwerte erreichen. Auch äußerlich soll sie sich mit einer kantigeren Karosserie stärker am Verbrenner-Tiguan orientieren. Mit dem Namen Tiguan richtet sich Volkswagen an die Stammkundschaft des bisherigen SUV. Beim ID.4 hatte eine Ziffer gereicht.
 
 Falls ihr euch über die berührungsempfindlichen Schieberegler geärgert habt: Sie sollen im Innenraum durch Tasten am Lenkrad und an der Mittelkonsole ersetzt werden. Geplant sind außerdem klassische Türgriffe und ein auf zehn Zoll vergrößertes Instrumentendisplay.
 
-400 Volt
+**400 Volt**
 
 Unter der Karosserie steckt die Plattform MEB+ (Modularer E-Antriebs-Baukasten), und mit ihr weiterhin die bekannte 400-Volt-Technik. Anders als zunächst gedacht ist ein 800-Volt-System für schnelleres Laden nicht vorgesehen.
 
@@ -221,7 +221,7 @@ Die Preise für das Basismodell sollen laut Hersteller bei rund 42.000 Euro begi
 
 Was haltet ihr von der Rückkehr zu echten Tasten und dem neuen Namen für das Elektro-SUV? Teilt eure Meinung und Erwartungen an den ID. Tiguan gerne unten in den Kommentaren mit uns!
 
-Zusammenfassung
+**Zusammenfassung**
 
 - VW stellt das neue Elektro-SUV ID. Tiguan am 9. Oktober 2026 offiziell vor
 - Der elektrische Nachfolger des ID.4 basiert auf der MEB-Plus-Plattform
