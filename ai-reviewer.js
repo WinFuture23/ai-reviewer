@@ -7,7 +7,7 @@
  * tokens injected by the PHP integration class (wfv4_model_aireviewer::render).
  *
  * @author  mesios
- * @version 4 2026-08-20
+ * @version 5 2026-10-11
  * @see     wfv4_model_aireviewer (aireviewer.class.php, im CMS gepflegt)
  */
 (function() {
@@ -33,9 +33,22 @@
     window.wfv4_ai_reviewer_loaded = true;
 
     // --- CSS ANIMATIONS (global, injected once) ---
+    // Dazu der Dunkelmodus: er folgt dem Schalter der Website (body[data-darkmode="on"],
+    // wechselt live ohne Neuladen). Die Inline-Farben unten lesen var(--kik-<rolle>, <Hellwert>);
+    // die Variablen gibt es nur im dunklen Fall, hell bleibt darum Pixel fuer Pixel wie bisher.
     if (!document.getElementById('ai-reviewer-styles')) {
         const style = document.createElement('style'); style.id = 'ai-reviewer-styles';
-        style.textContent = '@keyframes ai-reviewer-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }';
+        style.textContent = '@keyframes ai-reviewer-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }'
+            + ' body[data-darkmode="on"] {'
+            + ' --kik-bg: #1e1f22; --kik-bar: #24272b; --kik-btn: #2f3136; --kik-btn-hover: #3c4043;'
+            + ' --kik-line: #3c4043; --kik-btn-line: #5f6368;'
+            + ' --kik-text: #dfe0e0; --kik-text2: #b0b3b8; --kik-muted: #9aa0a6;'
+            + ' --kik-solid: #4a4e53; --kik-solid-hover: #5f6368;'
+            + ' --kik-ok: #81c995; --kik-warn: #f2c26b; --kik-err: #f0a6a0; --kik-err-bg: #4e3f42; --kik-accent: #6cb4ff;'
+            + ' --kik-save: #188038; --kik-save-hover: #137333;'
+            + ' --kik-shadow: 0 20px 50px rgba(0,0,0,.55), 0 2px 6px rgba(0,0,0,.4);'
+            + ' }'
+            + ' body[data-darkmode="on"] #ai-reviewer-terminal, body[data-darkmode="on"] .wfv4-link-preview { color-scheme: dark; }';
         document.head.appendChild(style);
     }
 
@@ -55,7 +68,7 @@
      *   wfv4_link_preview.attach( document.body, 'a[href*="winfuture.de/news"]', a => a.href );
      *
      * @author mesios
-     * @version 1 2026-03-10
+     * @version 2 2026-10-11
      */
     const wfv4_link_preview = (() => {
         const cache = new Map();
@@ -165,15 +178,15 @@
                 position: 'fixed', zIndex: '1000000',
                 minWidth: '360px', maxWidth: 'min(600px, calc(100vw - 24px))',
                 width: 'auto',
-                backgroundColor: '#fff', border: '1px solid #d0d4dc', borderRadius: '10px',
-                boxShadow: '0 12px 32px rgba(0,0,0,.14)', overflow: 'hidden',
+                backgroundColor: 'var(--kik-btn, #fff)', border: '1px solid var(--kik-btn-line, #d0d4dc)', borderRadius: '10px',
+                boxShadow: 'var(--kik-shadow, 0 12px 32px rgba(0,0,0,.14))', overflow: 'hidden',
                 opacity: '0', transform: 'translateY(6px)',
                 transition: 'opacity 0.18s ease, transform 0.18s ease, border-color 0.15s ease',
                 pointerEvents: 'auto', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
                 cursor: 'pointer', display: 'none'
             });
-            card.addEventListener( 'mouseenter', () => { clearTimeout( hide_timer ); card.style.borderColor = '#1f2328'; } );
-            card.addEventListener( 'mouseleave', () => { card.style.borderColor = '#d0d4dc'; hide(); } );
+            card.addEventListener( 'mouseenter', () => { clearTimeout( hide_timer ); card.style.borderColor = 'var(--kik-text, #1f2328)'; } );
+            card.addEventListener( 'mouseleave', () => { card.style.borderColor = 'var(--kik-btn-line, #d0d4dc)'; hide(); } );
             card.addEventListener( 'click', () => {
                 if (card._url) { window.open( card._url, '_blank', 'noopener' ); hide(); }
             });
@@ -210,10 +223,10 @@
             c._url = url;
             if (!content_changed) { reposition( c, x, y ); return; }
             const img_html = data.image
-                ? `<img src="${esc( data.image )}" style="width:160px; min-width:160px; height:auto; object-fit:contain; border-radius:8px; background:#f1f3f6;" onerror="this.style.display='none'">`
+                ? `<img src="${esc( data.image )}" style="width:160px; min-width:160px; height:auto; object-fit:contain; border-radius:8px; background:var(--kik-bar, #f1f3f6);" onerror="this.style.display='none'">`
                 : '';
             const desc_html = data.description
-                ? `<div style="font-size:12.5px; color:#3a3f46; line-height:1.45; margin-top:6px; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden;">${esc( data.description )}</div>`
+                ? `<div style="font-size:12.5px; color:var(--kik-text2, #3a3f46); line-height:1.45; margin-top:6px; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden;">${esc( data.description )}</div>`
                 : '';
             const pub = fmt_date( data.published_time );
             const mod = fmt_date( data.modified_time );
@@ -222,16 +235,16 @@
             let date_html = '';
             if (pub) {
                 const update_part = mod && mod_delta >= 2
-                    ? ` <span style="color:#94979d;">(Update: ${esc( mod )})</span>` : '';
-                date_html = `<div style="font-size:11px; color:#94979d; margin-bottom:4px; letter-spacing:0.2px;">${esc( pub )}${update_part}</div>`;
+                    ? ` <span style="color:var(--kik-muted, #94979d);">(Update: ${esc( mod )})</span>` : '';
+                date_html = `<div style="font-size:11px; color:var(--kik-muted, #94979d); margin-bottom:4px; letter-spacing:0.2px;">${esc( pub )}${update_part}</div>`;
             }
             c.innerHTML = `<div style="display:flex; gap:12px; padding:10px; align-items:flex-start;">`
                 + img_html
                 + `<div style="flex:1; min-width:0; display:flex; flex-direction:column;">`
                 + date_html
-                + `<div style="font-size:15px; font-weight:700; color:#1f2328; line-height:1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; text-wrap:balance;">${esc( data.title )}</div>`
+                + `<div style="font-size:15px; font-weight:700; color:var(--kik-text, #1f2328); line-height:1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; text-wrap:balance;">${esc( data.title )}</div>`
                 + desc_html
-                + `<div style="text-align:right; font-size:10px; color:#94979d; margin-top:4px;">↗ Artikel öffnen</div>`
+                + `<div style="text-align:right; font-size:10px; color:var(--kik-muted, #94979d); margin-top:4px;">↗ Artikel öffnen</div>`
                 + `</div></div>`;
 
             reposition( c, x, y );
@@ -1029,7 +1042,7 @@
         launcher_tab = document.createElement('div');
         launcher_tab.id = 'ai-reviewer-launcher';
         Object.assign(launcher_tab.style, {
-            position: 'fixed', bottom: '0', right: '40px', backgroundColor: '#1f2328', color: '#fff',
+            position: 'fixed', bottom: '0', right: '40px', backgroundColor: 'var(--kik-solid, #1f2328)', color: '#fff',
             padding: '10px 20px', borderTopLeftRadius: '8px', borderTopRightRadius: '8px',
             cursor: 'pointer', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif', fontWeight: '600',
             fontSize: '13px', letterSpacing: '.2px', zIndex: '999999', boxShadow: '0 -2px 14px rgba(0,0,0,.12)',
@@ -1045,8 +1058,8 @@
         });
         launcher_tab.appendChild( tab_badge_el );
 
-        launcher_tab.onmouseover = () => { launcher_tab.style.backgroundColor = '#3a3f46'; update_tab_status(); };
-        launcher_tab.onmouseout = () => launcher_tab.style.backgroundColor = '#1f2328';
+        launcher_tab.onmouseover = () => { launcher_tab.style.backgroundColor = 'var(--kik-solid-hover, #3a3f46)'; update_tab_status(); };
+        launcher_tab.onmouseout = () => launcher_tab.style.backgroundColor = 'var(--kik-solid, #1f2328)';
 
         launcher_tab.onclick = () => {
             launcher_tab.style.display = 'none';
@@ -1080,11 +1093,11 @@
         terminal_container.id = 'ai-reviewer-terminal';
         Object.assign(terminal_container.style, {
             position: 'fixed', bottom: '20px', right: '20px', width: '650px', height: '600px',
-            minWidth: '400px', minHeight: '350px', backgroundColor: '#fff', color: '#1f2328',
+            minWidth: '400px', minHeight: '350px', backgroundColor: 'var(--kik-bg, #fff)', color: 'var(--kik-text, #1f2328)',
             fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-            border: '1px solid #d0d4dc', borderRadius: '10px', zIndex: '999999',
+            border: '1px solid var(--kik-line, #d0d4dc)', borderRadius: '10px', zIndex: '999999',
             display: 'flex', flexDirection: 'column',
-            boxShadow: '0 20px 50px rgba(0,0,0,.18)', fontSize: '13px', overflow: 'hidden'
+            boxShadow: 'var(--kik-shadow, 0 20px 50px rgba(0,0,0,.18))', fontSize: '13px', overflow: 'hidden'
         });
 
         // Resize Handles
@@ -1102,14 +1115,14 @@
 
         // Header
         const header = document.createElement('div');
-        Object.assign(header.style, { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', backgroundColor: '#f8f9fb', borderBottom: '1px solid #e5e7eb', color: '#1f2328', fontSize: '13px', fontWeight: '600', letterSpacing: '.2px', userSelect: 'none' });
+        Object.assign(header.style, { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', backgroundColor: 'var(--kik-bar, #f8f9fb)', borderBottom: '1px solid var(--kik-line, #e5e7eb)', color: 'var(--kik-text, #1f2328)', fontSize: '13px', fontWeight: '600', letterSpacing: '.2px', userSelect: 'none' });
         header.innerHTML = '<span>🤖 KI-Korrektor</span>';
 
         const header_right = document.createElement('div'); Object.assign(header_right.style, { display: 'flex', gap: '14px', alignItems: 'center' });
 
         const debug_btn = document.createElement('span'); debug_btn.innerHTML = 'Debug';
-        Object.assign(debug_btn.style, { cursor: 'pointer', color: '#3a3f46', fontSize: '12px', fontWeight: '400', transition: 'color 0.2s' });
-        debug_btn.onmouseover = () => debug_btn.style.color = '#1f2328'; debug_btn.onmouseout = () => debug_btn.style.color = '#3a3f46';
+        Object.assign(debug_btn.style, { cursor: 'pointer', color: 'var(--kik-text2, #3a3f46)', fontSize: '12px', fontWeight: '400', transition: 'color 0.2s' });
+        debug_btn.onmouseover = () => debug_btn.style.color = 'var(--kik-text, #1f2328)'; debug_btn.onmouseout = () => debug_btn.style.color = 'var(--kik-text2, #3a3f46)';
         debug_btn.onclick = () => {
             const meta = `URL: ${location.href}\nJobID: ${debug_log.find(l => l.includes('JobID:'))?.match(/JobID:\s*(\S+)/)?.[1] || 'n/a'}\n\n`;
             navigator.clipboard.writeText(meta + debug_log.join('\n')).then(() => {
@@ -1119,8 +1132,8 @@
 
         // MINIMIEREN STATT LÖSCHEN
         const close_header_btn = document.createElement('span'); close_header_btn.innerHTML = '▼ Verbergen';
-        Object.assign(close_header_btn.style, { cursor: 'pointer', fontWeight: '500', fontSize: '12px', color: '#3a3f46', transition: 'color 0.2s' });
-        close_header_btn.onmouseover = () => close_header_btn.style.color = '#1f2328'; close_header_btn.onmouseout = () => close_header_btn.style.color = '#3a3f46';
+        Object.assign(close_header_btn.style, { cursor: 'pointer', fontWeight: '500', fontSize: '12px', color: 'var(--kik-text2, #3a3f46)', transition: 'color 0.2s' });
+        close_header_btn.onmouseover = () => close_header_btn.style.color = 'var(--kik-text, #1f2328)'; close_header_btn.onmouseout = () => close_header_btn.style.color = 'var(--kik-text2, #3a3f46)';
         close_header_btn.onclick = () => {
             terminal_container.style.display = 'none'; launcher_tab.style.display = 'flex'; wfv4_link_preview.destroy();
             // Lasche zeigt wieder Standard-Label + Status-Badge (statt "KI Fertig")
@@ -1132,40 +1145,40 @@
 
         // Content Area
         const content_area = document.createElement('div');
-        Object.assign(content_area.style, { flexGrow: '1', overflowY: 'auto', padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '12px', wordWrap: 'break-word', backgroundColor: '#fff' });
+        Object.assign(content_area.style, { flexGrow: '1', overflowY: 'auto', padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '12px', wordWrap: 'break-word', backgroundColor: 'var(--kik-bg, #fff)' });
         const status_el = document.createElement('div'); status_el.style.fontWeight = '600'; content_area.appendChild(status_el);
         const results_area = document.createElement('div'); Object.assign(results_area.style, { display: 'flex', flexDirection: 'column', gap: '12px' });
         content_area.appendChild(results_area);
 
         // Footer & Buttons
         const footer = document.createElement('div');
-        Object.assign(footer.style, { padding: '10px 14px', backgroundColor: '#f8f9fb', display: 'flex', gap: '8px', justifyContent: 'center', alignItems: 'stretch', borderTop: '1px solid #e5e7eb', width: '100%', boxSizing: 'border-box' });
+        Object.assign(footer.style, { padding: '10px 14px', backgroundColor: 'var(--kik-bar, #f8f9fb)', display: 'flex', gap: '8px', justifyContent: 'center', alignItems: 'stretch', borderTop: '1px solid var(--kik-line, #e5e7eb)', width: '100%', boxSizing: 'border-box' });
 
         // Base button style shared between btn_check and the three action buttons.
         // Sans-serif throughout, subtle 1px border + 6px radius like vw-close.
         const BASE_BTN_STYLE = { padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif', fontWeight: '500', fontSize: '13px', transition: 'all 0.15s ease', outline: 'none' };
 
         btn_check = document.createElement('button'); btn_check.type = 'button'; btn_check.innerHTML = '🚀 Artikel überprüfen';
-        Object.assign(btn_check.style, BASE_BTN_STYLE, { backgroundColor: '#1f2328', color: '#fff', border: '1px solid #1f2328', padding: '8px 20px', display: 'none' });
-        btn_check.onmouseover = () => btn_check.style.backgroundColor = '#3a3f46'; btn_check.onmouseout = () => btn_check.style.backgroundColor = '#1f2328';
+        Object.assign(btn_check.style, BASE_BTN_STYLE, { backgroundColor: 'var(--kik-solid, #1f2328)', color: '#fff', border: '1px solid var(--kik-solid, #1f2328)', padding: '8px 20px', display: 'none' });
+        btn_check.onmouseover = () => btn_check.style.backgroundColor = 'var(--kik-solid-hover, #3a3f46)'; btn_check.onmouseout = () => btn_check.style.backgroundColor = 'var(--kik-solid, #1f2328)';
 
         // Footer-action buttons (Unterschiede / Rückgängig / Speichern).
-        const ACTION_BTN_STYLE = Object.assign( {}, BASE_BTN_STYLE, { padding: '8px 10px', border: '1px solid #d0d4dc', backgroundColor: '#fff', color: '#1f2328', display: 'none', justifyContent: 'center', alignItems: 'center', gap: '6px', flex: '1', whiteSpace: 'nowrap' } );
+        const ACTION_BTN_STYLE = Object.assign( {}, BASE_BTN_STYLE, { padding: '8px 10px', border: '1px solid var(--kik-btn-line, #d0d4dc)', backgroundColor: 'var(--kik-btn, #fff)', color: 'var(--kik-text, #1f2328)', display: 'none', justifyContent: 'center', alignItems: 'center', gap: '6px', flex: '1', whiteSpace: 'nowrap' } );
 
         const btn_diff = document.createElement('button'); btn_diff.type = 'button'; btn_diff.innerHTML = '🔍 Unterschiede anzeigen';
         Object.assign(btn_diff.style, ACTION_BTN_STYLE);
-        btn_diff.onmouseover = () => btn_diff.style.backgroundColor = '#f1f3f6'; btn_diff.onmouseout = () => btn_diff.style.backgroundColor = '#fff';
+        btn_diff.onmouseover = () => btn_diff.style.backgroundColor = 'var(--kik-btn-hover, #f1f3f6)'; btn_diff.onmouseout = () => btn_diff.style.backgroundColor = 'var(--kik-btn, #fff)';
 
         const btn_undo = document.createElement('button'); btn_undo.type = 'button'; btn_undo.innerHTML = '↺ Rückgängig machen';
         // Outline-Variante: weißer Hintergrund, rote Schrift, dezenter rosa-Hover.
-        Object.assign(btn_undo.style, ACTION_BTN_STYLE, { color: '#a30015' });
-        btn_undo.onmouseover = () => btn_undo.style.backgroundColor = '#ffe1e1'; btn_undo.onmouseout = () => btn_undo.style.backgroundColor = '#fff';
+        Object.assign(btn_undo.style, ACTION_BTN_STYLE, { color: 'var(--kik-err, #a30015)' });
+        btn_undo.onmouseover = () => btn_undo.style.backgroundColor = 'var(--kik-err-bg, #ffe1e1)'; btn_undo.onmouseout = () => btn_undo.style.backgroundColor = 'var(--kik-btn, #fff)';
 
         const btn_close_bottom = document.createElement('button'); btn_close_bottom.type = 'button'; btn_close_bottom.innerHTML = '💾 Speichern';
         btn_close_bottom.className = 'css_button green';
         // Speichern ist die Primary-Aktion nach dem Lauf — gefüllt grün.
-        Object.assign(btn_close_bottom.style, ACTION_BTN_STYLE, { backgroundColor: '#176c1f', color: '#fff', border: '1px solid #176c1f', fontWeight: '600' });
-        btn_close_bottom.onmouseover = () => btn_close_bottom.style.backgroundColor = '#125a18'; btn_close_bottom.onmouseout = () => btn_close_bottom.style.backgroundColor = '#176c1f';
+        Object.assign(btn_close_bottom.style, ACTION_BTN_STYLE, { backgroundColor: 'var(--kik-save, #176c1f)', color: '#fff', border: '1px solid var(--kik-save, #176c1f)', fontWeight: '600' });
+        btn_close_bottom.onmouseover = () => btn_close_bottom.style.backgroundColor = 'var(--kik-save-hover, #125a18)'; btn_close_bottom.onmouseout = () => btn_close_bottom.style.backgroundColor = 'var(--kik-save, #176c1f)';
         btn_close_bottom.onclick = () => {
             // Safety-Net: Falls nach einem KI-Lauf noch kein Pruef-Marker
             // gestempelt wurde (z. B. Speichern-Klick bevor der Auto-Diff-
@@ -1220,19 +1233,19 @@
         document.body.appendChild(terminal_container);
 
         /** Update the status line in the content area (icon, text, optional subtitle). */
-        function set_status(icon, main_text, sub_text = null, color = '#1f2328', write_to_debug = true) {
-            status_el.innerHTML = `<div style="display: flex; align-items: flex-start; gap: 8px; color: ${color};"><span style="line-height: 1.4; font-size: 14px; width: 20px; text-align: center;">${icon}</span><div style="display: flex; flex-direction: column;"><span style="line-height: 1.4;">${main_text}</span>${sub_text ? `<span style="font-size: 11px; color: #94979d; font-weight: normal; margin-top: 2px;">${sub_text}</span>` : ''}</div></div>`;
+        function set_status(icon, main_text, sub_text = null, color = 'var(--kik-text, #1f2328)', write_to_debug = true) {
+            status_el.innerHTML = `<div style="display: flex; align-items: flex-start; gap: 8px; color: ${color};"><span style="line-height: 1.4; font-size: 14px; width: 20px; text-align: center;">${icon}</span><div style="display: flex; flex-direction: column;"><span style="line-height: 1.4;">${main_text}</span>${sub_text ? `<span style="font-size: 11px; color: var(--kik-muted, #94979d); font-weight: normal; margin-top: 2px;">${sub_text}</span>` : ''}</div></div>`;
             if (write_to_debug) log_debug(`Status: ${main_text}`);
         }
 
         /** Append a message to the results area (types: info, error, warning, success). */
         function add_message(msg, type = 'info') {
             const entry = document.createElement('div'); entry.innerHTML = msg;
-            if (type === 'error') entry.style.color = '#a30015'; if (type === 'warning') entry.style.color = '#b45309'; if (type === 'success') entry.style.color = '#176c1f';
+            if (type === 'error') entry.style.color = 'var(--kik-err, #a30015)'; if (type === 'warning') entry.style.color = 'var(--kik-warn, #b45309)'; if (type === 'success') entry.style.color = 'var(--kik-ok, #176c1f)';
             results_area.appendChild(entry); content_area.scrollTop = content_area.scrollHeight;
         }
 
-        set_status('🟢', 'Bereit.', null, '#176c1f');
+        set_status('🟢', 'Bereit.', null, 'var(--kik-ok, #176c1f)');
 
         // --- VERGLEICHSWIDGET ÖFFNEN ---
         // Lazy-load das Vorher/Nachher-Modal, baue die before/after-Bundles
@@ -1272,10 +1285,10 @@
                 btn.style.cursor = 'pointer';
                 btn.title = '';
             });
-            btn_diff.onmouseover = () => btn_diff.style.backgroundColor = '#f1f3f6';
-            btn_diff.onmouseout = () => btn_diff.style.backgroundColor = '#fff';
-            btn_undo.onmouseover = () => btn_undo.style.backgroundColor = '#ffe1e1';
-            btn_undo.onmouseout = () => btn_undo.style.backgroundColor = '#fff';
+            btn_diff.onmouseover = () => btn_diff.style.backgroundColor = 'var(--kik-btn-hover, #f1f3f6)';
+            btn_diff.onmouseout = () => btn_diff.style.backgroundColor = 'var(--kik-btn, #fff)';
+            btn_undo.onmouseover = () => btn_undo.style.backgroundColor = 'var(--kik-err-bg, #ffe1e1)';
+            btn_undo.onmouseout = () => btn_undo.style.backgroundColor = 'var(--kik-btn, #fff)';
         }
 
         async function open_diff_modal( opts ) {
@@ -1446,7 +1459,7 @@
                     const runs_note = status.entries.length > 1
                         ? ` Insgesamt ${status.entries.length} dokumentierte Prüf-Läufe.` : '';
 
-                    set_status( '✅', 'Exakt diese Version wurde bereits geprüft.', 'Eine erneute Prüfung ist nicht nötig — du entscheidest.', '#176c1f' );
+                    set_status( '✅', 'Exakt diese Version wurde bereits geprüft.', 'Eine erneute Prüfung ist nicht nötig — du entscheidest.', 'var(--kik-ok, #176c1f)' );
                     add_message(
                         `<b>Geprüft am:</b> ${escape_html( marker_format_ts( status.entry.ts ) )} von <b>${escape_html( who )}</b><br>`
                         + `<b>Ergebnis damals:</b> ${marker_format_result( status.entry.result )}<br><br>`
@@ -1490,12 +1503,12 @@
             let manual_poll_area = null;
 
             try {
-                set_status( '⏳', 'Erkenne Content-Type...', null, '#0550ae' );
+                set_status( '⏳', 'Erkenne Content-Type...', null, 'var(--kik-accent, #0550ae)' );
                 content_info = detect_content_info();
 
                 if( !content_info ) throw new Error( 'Content-Type konnte nicht ermittelt werden. Abbruch.' );
 
-                set_status( '⏳', 'Lese Editor-Inhalte aus...', null, '#0550ae' );
+                set_status( '⏳', 'Lese Editor-Inhalte aus...', null, 'var(--kik-accent, #0550ae)' );
                 const article_data = gather_article_data( content_info );
 
                 if( !article_data.content || !article_data.content.trim() ) throw new Error( 'Der Editor ist leer. Abbruch.' );
@@ -1538,12 +1551,12 @@
                         poll_active = false; unlock_editor();
                         launcher_tab.querySelector('span').innerText = '🔑 Token abgelaufen';
                         log_debug( 'Token abgelaufen oder ungueltig. Seite muss neu geladen werden.' );
-                        set_status( '🔑', 'Sitzung abgelaufen.', 'Bitte Seite neu laden, um ein neues Token zu erhalten.', '#b45309', true );
+                        set_status( '🔑', 'Sitzung abgelaufen.', 'Bitte Seite neu laden, um ein neues Token zu erhalten.', 'var(--kik-warn, #b45309)', true );
                         add_message( '<b>Das Sicherheits-Token ist abgelaufen.</b> Bitte laden Sie die Seite neu.', 'warning' );
                         const reload_btn = document.createElement('button');
                         reload_btn.className = 'css_button'; reload_btn.innerHTML = '🔄 Seite jetzt neu laden';
-                        Object.assign( reload_btn.style, { marginTop: '8px', padding: '8px 16px', cursor: 'pointer', backgroundColor: '#1f2328', color: '#fff', border: '1px solid #1f2328', borderRadius: '6px', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif', fontWeight: '500', fontSize: '13px', transition: 'background-color 0.15s ease' } );
-                        reload_btn.onmouseover = () => reload_btn.style.backgroundColor = '#3a3f46'; reload_btn.onmouseout = () => reload_btn.style.backgroundColor = '#1f2328';
+                        Object.assign( reload_btn.style, { marginTop: '8px', padding: '8px 16px', cursor: 'pointer', backgroundColor: 'var(--kik-solid, #1f2328)', color: '#fff', border: '1px solid var(--kik-solid, #1f2328)', borderRadius: '6px', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif', fontWeight: '500', fontSize: '13px', transition: 'background-color 0.15s ease' } );
+                        reload_btn.onmouseover = () => reload_btn.style.backgroundColor = 'var(--kik-solid-hover, #3a3f46)'; reload_btn.onmouseout = () => reload_btn.style.backgroundColor = 'var(--kik-solid, #1f2328)';
                         reload_btn.onclick = () => location.reload();
                         results_area.appendChild( reload_btn );
                         btn_check.style.display = 'block'; btn_check.disabled = false;
@@ -1556,7 +1569,7 @@
                 let elapsed_seconds = 0; 
                 const TIMEOUT_MAX = 300; // 5 Minuten
                 
-                set_status('⏳', `Artikel wird verarbeitet... (0 Sekunden)`, `Geschätzte Dauer: ca. 2 - 3 Minuten`, '#b45309', true);
+                set_status('⏳', `Artikel wird verarbeitet... (0 Sekunden)`, `Geschätzte Dauer: ca. 2 - 3 Minuten`, 'var(--kik-warn, #b45309)', true);
                 const start_time = Date.now();
 
                 let cached_poll_response = null;
@@ -1594,8 +1607,8 @@
                             // Visuelles Feedback im Countdown-Bereich
                             if (countdown_el) {
                                 countdown_el.textContent = job_status === 'pending' ? 'Abfrage erfolgreich — wird noch verarbeitet...' : 'Abfrage erfolgreich — Ergebnis wird geladen...';
-                                countdown_el.style.color = '#176c1f';
-                                setTimeout(() => { if (countdown_el) countdown_el.style.color = '#3a3f46'; }, 2000);
+                                countdown_el.style.color = 'var(--kik-ok, #176c1f)';
+                                setTimeout(() => { if (countdown_el) countdown_el.style.color = 'var(--kik-text2, #3a3f46)'; }, 2000);
                             }
                         }
                     } catch(e) { log_debug(`${label}: Fehlgeschlagen (${e.message})`); }
@@ -1611,18 +1624,18 @@
                     if (Date.now() - last_poll_time < 5000) { log_debug('Tab sichtbar, aber letzter Abruf <5s her. Übersprungen.'); return; }
                     tab_return_until = Date.now() + 60000; // 60s schnelles Polling nach Tab-Rückkehr
                     next_poll_time = Date.now(); // poll_loop soll nach Aufwachen sofort abfragen
-                    if (countdown_el) { countdown_el.textContent = 'Abfrage läuft...'; countdown_el.style.color = '#b45309'; }
+                    if (countdown_el) { countdown_el.textContent = 'Abfrage läuft...'; countdown_el.style.color = 'var(--kik-warn, #b45309)'; }
                     do_manual_poll('Tab-Rückkehr');
                 }
                 document.addEventListener('visibilitychange', on_visibility_change);
 
                 // Build persistent poll info area (below status, never destroyed by set_status)
                 manual_poll_area = document.createElement('div');
-                manual_poll_area.style.cssText = 'margin-top: 2px; margin-left: 28px; font-size: 12px; color: #94979d; display: none;';
+                manual_poll_area.style.cssText = 'margin-top: 2px; margin-left: 28px; font-size: 12px; color: var(--kik-muted, #94979d); display: none;';
 
                 // Countdown line: "Nächste Abfrage in 12s"
                 const countdown_el = document.createElement('div');
-                countdown_el.style.cssText = 'color: #3a3f46; margin-bottom: 4px;';
+                countdown_el.style.cssText = 'color: var(--kik-text2, #3a3f46); margin-bottom: 4px;';
                 manual_poll_area.appendChild(countdown_el);
 
                 // Last poll result (highlighted)
@@ -1637,7 +1650,7 @@
                     if (!poll_active) return;
                     elapsed_seconds = Math.round((Date.now() - start_time) / 1000);
                     const time_str = format_duration_friendly(elapsed_seconds);
-                    set_status('⏳', `Artikel wird verarbeitet... (${time_str})`, `Geschätzte Dauer: ca. 2 - 3 Minuten`, '#b45309', false);
+                    set_status('⏳', `Artikel wird verarbeitet... (${time_str})`, `Geschätzte Dauer: ca. 2 - 3 Minuten`, 'var(--kik-warn, #b45309)', false);
 
                     // Show poll area after 30s (countdown visible), manual button after 2 min
                     if (elapsed_seconds >= 30) {
@@ -1662,7 +1675,7 @@
                             document.removeEventListener('visibilitychange', on_visibility_change);
                             wakeup(); // unblock poll_loop so it exits
                             launcher_tab.querySelector('span').innerText = '🤖 KI-Korrektor';
-                            set_status('❌', 'Leider ist ein Fehler aufgetreten.', 'Bitte versuchen Sie es erneut.', '#a30015', true);
+                            set_status('❌', 'Leider ist ein Fehler aufgetreten.', 'Bitte versuchen Sie es erneut.', 'var(--kik-err, #a30015)', true);
                             manual_poll_area.style.display = 'none';
                             add_message(`Das Polling wurde nach ${format_duration_friendly(TIMEOUT_MAX)} abgebrochen.`, 'error');
                             btn_check.style.display = 'block'; btn_check.disabled = false;
@@ -1723,7 +1736,7 @@
                                 log_debug(`Fehlerdetails vom Server: ${err_msg}`);
 
                                 launcher_tab.querySelector('span').innerText = '❌ KI-Fehler';
-                                set_status('❌', 'Leider ist ein Fehler aufgetreten.', 'Bitte versuchen Sie es erneut.', '#a30015', true);
+                                set_status('❌', 'Leider ist ein Fehler aufgetreten.', 'Bitte versuchen Sie es erneut.', 'var(--kik-err, #a30015)', true);
                                 add_message('<b>Fehlerdetails:</b> Bei der Verarbeitung ist ein Fehler aufgetreten. Details im Debug-Log.', 'error');
                                 btn_check.style.display = 'block'; btn_check.disabled = false;
                                 return;
@@ -1745,7 +1758,7 @@
                                 // (halluzinierten) Pruef-Marker zurueckgeben, entfernen —
                                 // gestempelt wird ausschliesslich clientseitig.
                                 new_content = marker_strip( new_content );
-                                set_status( '⏳', 'Schreibe Korrekturen in Editor...', null, '#0550ae' );
+                                set_status( '⏳', 'Schreibe Korrekturen in Editor...', null, 'var(--kik-accent, #0550ae)' );
 
                                 // Write corrected content back to the content field
                                 if( !write_field_value( content_info.config.fields.content, new_content ) ) {
@@ -1762,7 +1775,7 @@
                                     write_field_value( content_info.config.fields.teaser, data.teaser );
                                 }
 
-                                set_status('✅', `Erfolgreich aktualisiert! (Dauer: ${final_duration_str})`, null, '#176c1f');
+                                set_status('✅', `Erfolgreich aktualisiert! (Dauer: ${final_duration_str})`, null, 'var(--kik-ok, #176c1f)');
                                 btn_diff.style.display = 'flex'; btn_undo.style.display = 'flex'; btn_close_bottom.style.display = 'flex';
 
                                 verl_block: {
@@ -1779,12 +1792,12 @@
                                         break verl_block;
                                     }
 
-                                    const verl_box = document.createElement('div'); Object.assign(verl_box.style, { backgroundColor: '#fafbfc', padding: '14px 16px', borderRadius: '8px', border: '1px solid #e5e7eb' });
+                                    const verl_box = document.createElement('div'); Object.assign(verl_box.style, { backgroundColor: 'var(--kik-bar, #fafbfc)', padding: '14px 16px', borderRadius: '8px', border: '1px solid var(--kik-line, #e5e7eb)' });
                                     const v_title = document.createElement('div');
-                                    Object.assign(v_title.style, { display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', paddingBottom: '10px', borderBottom: '1px solid #e5e7eb' });
+                                    Object.assign(v_title.style, { display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', paddingBottom: '10px', borderBottom: '1px solid var(--kik-line, #e5e7eb)' });
                                     const count_badge = `<span style="background:#176c1f; color:#fff; font-size:11px; font-weight:600; padding:1px 7px; border-radius:10px; line-height:1.5;">${link_count}</span>`;
                                     v_title.innerHTML = '<span style="font-size:15px;">🔗</span>'
-                                        + `<span style="color:#1f2328; font-weight:600; font-size:13px; letter-spacing:.2px;">${link_count === 1 ? 'Verlinkung' : 'Verlinkungen'}</span>`
+                                        + `<span style="color:var(--kik-text, #1f2328); font-weight:600; font-size:13px; letter-spacing:.2px;">${link_count === 1 ? 'Verlinkung' : 'Verlinkungen'}</span>`
                                         + count_badge;
                                     verl_box.appendChild(v_title);
                                     let current_group = null;
@@ -1819,13 +1832,13 @@
                                             // Strukturierte Darstellung: Type-Tag + Linktext (erste Zeile), URL (zweite Zeile)
                                             const safe_link_text = link_text ? escape_html(link_text) : null;
                                             const safe_url = link_url ? escape_html(link_url) : null;
-                                            const url_anchor = safe_url ? `<a href="${safe_url}" target="_blank" rel="noopener noreferrer" style="color: #2563eb; text-decoration: underline; font-size: 12px; word-break: break-all;">${safe_url}</a>` : '';
+                                            const url_anchor = safe_url ? `<a href="${safe_url}" target="_blank" rel="noopener noreferrer" style="color: var(--kik-accent, #2563eb); --link-color-blue: var(--kik-accent, #2563eb); text-decoration: underline; font-size: 12px; word-break: break-all;">${safe_url}</a>` : '';
 
-                                            current_group = document.createElement('div'); Object.assign(current_group.style, { borderLeft: '3px solid #0550ae', backgroundColor: '#fff', padding: '10px 12px 10px 12px', margin: '8px 0', borderRadius: '0 4px 4px 0', position: 'relative', transition: 'opacity 0.3s, max-height 0.3s, margin 0.3s, padding 0.3s', overflow: 'hidden', paddingRight: '38px' });
+                                            current_group = document.createElement('div'); Object.assign(current_group.style, { borderLeft: '3px solid var(--kik-accent, #0550ae)', backgroundColor: 'var(--kik-bg, #fff)', padding: '10px 12px 10px 12px', margin: '8px 0', borderRadius: '0 4px 4px 0', position: 'relative', transition: 'opacity 0.3s, max-height 0.3s, margin 0.3s, padding 0.3s', overflow: 'hidden', paddingRight: '38px' });
                                             if (link_url) current_group.dataset.previewUrl = link_url;
                                             const display_text = safe_link_text
-                                                ? `${url_type_tag}<span style="color:#1f2328; font-weight:bold;">\u201E${safe_link_text}\u201C</span>`
-                                                : `${url_type_tag}<span style="color:#1f2328; font-weight:bold;">${escape_html(clean_line)}</span>`;
+                                                ? `${url_type_tag}<span style="color:var(--kik-text, #1f2328); font-weight:bold;">\u201E${safe_link_text}\u201C</span>`
+                                                : `${url_type_tag}<span style="color:var(--kik-text, #1f2328); font-weight:bold;">${escape_html(clean_line)}</span>`;
                                             current_group.innerHTML = `<div style="margin-bottom:4px;">${display_text}</div>${url_anchor ? `<div>${url_anchor}</div>` : ''}`;
 
                                             // X-Button zum Entfernen des Links
@@ -1867,17 +1880,17 @@
                                             verl_box.appendChild(current_group);
                                         } else if (line_lower.startsWith('begründung') && current_group) {
                                             const safe_text = escape_html(clean_line);
-                                            const reason_div = document.createElement('div'); reason_div.innerHTML = `<span style="color:#3a3f46;">${safe_text}</span>`; reason_div.style.marginTop = '6px';
+                                            const reason_div = document.createElement('div'); reason_div.innerHTML = `<span style="color:var(--kik-text2, #3a3f46);">${safe_text}</span>`; reason_div.style.marginTop = '6px';
                                             current_group.appendChild(reason_div);
                                         } else {
                                             current_group = null;
                                             const safe_text = escape_html(clean_line);
                                             const div = document.createElement('div'); Object.assign(div.style, { marginTop: '6px', paddingLeft: '5px' });
                                             if(line_lower.includes('keine') || line_lower.includes('nicht') || line_lower.includes('wurden')) {
-                                                Object.assign(div.style, { borderLeft: '3px solid #b45309', backgroundColor: '#fff', padding: '10px 12px', margin: '8px 0', borderRadius: '0 4px 4px 0' });
-                                                div.innerHTML = `<span style="color:#b45309;">►</span> <span style="color:#1f2328;">${safe_text}</span>`;
+                                                Object.assign(div.style, { borderLeft: '3px solid var(--kik-warn, #b45309)', backgroundColor: 'var(--kik-bg, #fff)', padding: '10px 12px', margin: '8px 0', borderRadius: '0 4px 4px 0' });
+                                                div.innerHTML = `<span style="color:var(--kik-warn, #b45309);">►</span> <span style="color:var(--kik-text, #1f2328);">${safe_text}</span>`;
                                             } else {
-                                                div.innerHTML = `<span style="color:#3a3f46;">►</span> <span style="color:#1f2328;">${safe_text}</span>`;
+                                                div.innerHTML = `<span style="color:var(--kik-text2, #3a3f46);">►</span> <span style="color:var(--kik-text, #1f2328);">${safe_text}</span>`;
                                             }
                                             verl_box.appendChild(div);
                                         }
@@ -1916,7 +1929,7 @@
                             log_debug(`Polling-Fehler: ${poll_err.message}`);
                             launcher_tab.querySelector('span').innerText = '🤖 KI-Korrektor';
                             btn_check.style.display = 'block'; btn_check.disabled = false;
-                            set_status('❌', 'Leider ist ein Fehler aufgetreten.', 'Bitte versuchen Sie es erneut.', '#a30015', true);
+                            set_status('❌', 'Leider ist ein Fehler aufgetreten.', 'Bitte versuchen Sie es erneut.', 'var(--kik-err, #a30015)', true);
                             add_message('Bei der Statusabfrage ist ein Fehler aufgetreten. Details im Debug-Log.', 'error');
                         }
                     }
@@ -1928,7 +1941,7 @@
                 log_debug(`Allgemeiner Fehler: ${error.message}`);
                 launcher_tab.querySelector('span').innerText = '🤖 KI-Korrektor';
                 btn_check.style.display = 'block'; btn_check.disabled = false;
-                set_status('❌', 'Leider ist ein Fehler aufgetreten.', 'Bitte versuchen Sie es erneut.', '#a30015', true);
+                set_status('❌', 'Leider ist ein Fehler aufgetreten.', 'Bitte versuchen Sie es erneut.', 'var(--kik-err, #a30015)', true);
                 add_message('Ein unerwarteter Fehler ist aufgetreten. Details im Debug-Log.', 'error');
             }
         });
@@ -1978,7 +1991,7 @@
         const tab = document.createElement( 'div' );
         tab.id = 'ai-reviewer-launcher';
         Object.assign( tab.style, {
-            position: 'fixed', bottom: '0', right: '40px', backgroundColor: '#1f2328', color: '#fff',
+            position: 'fixed', bottom: '0', right: '40px', backgroundColor: 'var(--kik-solid, #1f2328)', color: '#fff',
             padding: '10px 20px', borderTopLeftRadius: '8px', borderTopRightRadius: '8px',
             cursor: 'pointer', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif', fontWeight: '600',
             fontSize: '13px', letterSpacing: '.2px', zIndex: '999999', boxShadow: '0 -2px 14px rgba(0,0,0,.12)',
@@ -1987,8 +2000,8 @@
         const badge_cfg = state_cfg ? state_cfg.badge : { label: 'Status n/a', bg: '#6b7280' };
         tab.innerHTML = '<span>🤖 KI-Korrektor</span>'
             + `<span style="font-size:11px; font-weight:600; padding:2px 8px; border-radius:10px; background-color:${badge_cfg.bg}; color:#fff; letter-spacing:.2px; line-height:1.5; white-space:nowrap;">${badge_cfg.label}</span>`;
-        tab.onmouseover = () => tab.style.backgroundColor = '#3a3f46';
-        tab.onmouseout = () => tab.style.backgroundColor = '#1f2328';
+        tab.onmouseover = () => tab.style.backgroundColor = 'var(--kik-solid-hover, #3a3f46)';
+        tab.onmouseout = () => tab.style.backgroundColor = 'var(--kik-solid, #1f2328)';
 
         // Info-Panel (lazy aufgebaut, Toggle per Klick auf die Lasche)
         let panel = null;
@@ -1997,8 +2010,8 @@
             panel = document.createElement( 'div' );
             Object.assign( panel.style, {
                 position: 'fixed', bottom: '20px', right: '20px', width: '460px', maxWidth: 'calc(100vw - 40px)',
-                backgroundColor: '#fff', color: '#1f2328', border: '1px solid #d0d4dc', borderRadius: '10px',
-                zIndex: '999999', boxShadow: '0 20px 50px rgba(0,0,0,.18)', fontSize: '13px', overflow: 'hidden',
+                backgroundColor: 'var(--kik-bg, #fff)', color: 'var(--kik-text, #1f2328)', border: '1px solid var(--kik-line, #d0d4dc)', borderRadius: '10px',
+                zIndex: '999999', boxShadow: 'var(--kik-shadow, 0 20px 50px rgba(0,0,0,.18))', fontSize: '13px', overflow: 'hidden',
                 fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif'
             });
 
@@ -2006,15 +2019,15 @@
 
             if( !raw ) {
                 body_html = '<div style="font-weight:600; margin-bottom:8px;">Prüf-Status nicht verfügbar</div>'
-                    + '<div style="color:#3a3f46; line-height:1.5;">Diese Seite stellt die Artikel-Rohdaten nicht bereit '
+                    + '<div style="color:var(--kik-text2, #3a3f46); line-height:1.5;">Diese Seite stellt die Artikel-Rohdaten nicht bereit '
                     + '(<code>window.wfv4_ki_raw</code> fehlt). Der Prüf-Status kann hier nicht berechnet werden.</div>';
             } else {
                 const e = status.entry;
                 const who = e ? ( USER_NAMES[e.uid] || ( 'User ' + e.uid ) ) : null;
                 const detail = e
-                    ? `<div style="color:#3a3f46; line-height:1.6;">Zuletzt geprüft: <b>${escape_html( marker_format_ts( e.ts ) )}</b> von <b>${escape_html( who )}</b><br>`
+                    ? `<div style="color:var(--kik-text2, #3a3f46); line-height:1.6;">Zuletzt geprüft: <b>${escape_html( marker_format_ts( e.ts ) )}</b> von <b>${escape_html( who )}</b><br>`
                         + `Ergebnis: <b>${marker_format_result( e.result )}</b></div>`
-                    : '<div style="color:#3a3f46; line-height:1.6;">Für diesen Artikel existiert kein Prüf-Nachweis im Artikeltext.</div>';
+                    : '<div style="color:var(--kik-text2, #3a3f46); line-height:1.6;">Für diesen Artikel existiert kein Prüf-Nachweis im Artikeltext.</div>';
 
                 const reason = {
                     ok:     'Headline, Teaser und Text sind unverändert gegenüber der geprüften Version. <b>Nichts zu tun.</b>',
@@ -2024,7 +2037,7 @@
                 }[status.state];
 
                 const history_html = status.entries.length > 0
-                    ? '<div style="margin-top:10px; font-size:11px; color:#94979d;">'
+                    ? '<div style="margin-top:10px; font-size:11px; color:var(--kik-muted, #94979d);">'
                         + status.entries.slice( -5 ).reverse().map( function( h ) {
                             const h_who = USER_NAMES[h.uid] || ( 'User ' + h.uid );
                             return `• ${escape_html( marker_format_ts( h.ts ) )} — ${escape_html( h_who )} — ${marker_format_result( h.result )}`;
@@ -2033,20 +2046,20 @@
                     : '';
 
                 const action_html = ( status.state === 'stale' || status.state === 'none' || status.state === 'markup' ) && news_id
-                    ? `<a href="/admin/news/${news_id}/edit/#ki-check" style="display:inline-block; margin-top:14px; padding:8px 16px; background-color:#176c1f; color:#fff; border-radius:6px; text-decoration:none; font-weight:600;">🚀 Im Editor prüfen</a>`
-                        + '<div style="font-size:11px; color:#94979d; margin-top:6px;">Öffnet den Artikel-Editor — die KI-Prüfung startet dort automatisch.</div>'
+                    ? `<a href="/admin/news/${news_id}/edit/#ki-check" style="display:inline-block; margin-top:14px; padding:8px 16px; background-color:var(--kik-save, #176c1f); color:#fff; --link-color-blue:#fff; border-radius:6px; text-decoration:none; font-weight:600;">🚀 Im Editor prüfen</a>`
+                        + '<div style="font-size:11px; color:var(--kik-muted, #94979d); margin-top:6px;">Öffnet den Artikel-Editor — die KI-Prüfung startet dort automatisch.</div>'
                     : '';
 
                 body_html = `<div style="font-weight:600; font-size:14px; margin-bottom:10px;">${state_cfg.icon} ${state_cfg.title}</div>`
                     + detail
-                    + `<div style="margin-top:10px; color:#1f2328; line-height:1.5;">${reason}</div>`
+                    + `<div style="margin-top:10px; color:var(--kik-text, #1f2328); line-height:1.5;">${reason}</div>`
                     + action_html
                     + history_html;
             }
 
-            panel.innerHTML = '<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background-color:#f8f9fb; border-bottom:1px solid #e5e7eb; font-weight:600;">'
+            panel.innerHTML = '<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background-color:var(--kik-bar, #f8f9fb); border-bottom:1px solid var(--kik-line, #e5e7eb); font-weight:600;">'
                 + '<span>🤖 KI-Korrektor — Prüf-Status</span>'
-                + '<span data-ki-close style="cursor:pointer; font-weight:500; font-size:12px; color:#3a3f46;">▼ Verbergen</span>'
+                + '<span data-ki-close style="cursor:pointer; font-weight:500; font-size:12px; color:var(--kik-text2, #3a3f46);">▼ Verbergen</span>'
                 + '</div>'
                 + `<div style="padding:14px 16px;">${body_html}</div>`;
             panel.querySelector( '[data-ki-close]' ).onclick = function() {

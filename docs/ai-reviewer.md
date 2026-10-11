@@ -204,6 +204,40 @@ Wird im Verlinkungsbereich des Terminals aufgerufen und in
 `close_header_btn.onclick` per `destroy()` wieder abgebaut, wenn der
 Redakteur das Terminal verbirgt.
 
+## Dunkelmodus
+
+Das Widget folgt dem Tag/Nacht-Schalter der Website. Es ist dunkel,
+sobald `<body data-darkmode="on">` gesetzt ist. Der Schalter wirkt
+sofort, auch bei offenem Fenster. Die Systemeinstellung
+(`prefers-color-scheme`) zählt nicht, wie auf allen Admin-Seiten.
+
+- Jede Farbe in Inline-Stilen und Hover-Handlern lautet
+  `var(--kik-<rolle>, <Hellwert>)`.
+- Die Variablen setzt nur `<style id="ai-reviewer-styles">`, und nur
+  unter `body[data-darkmode="on"]`. Hell gibt es sie nicht, der Browser
+  nimmt den Hellwert. Hell bleibt darum Pixel für Pixel gleich.
+- Farbige Abzeichen mit weißer Schrift (Prüf-Status, Typ-Chips, ✕,
+  Zähler) sehen in beiden Modi gleich aus.
+- Die Website färbt dunkel jeden Link per `!important` über
+  `--link-color-blue`. Die zwei Links im Widget setzen diese Variable
+  darum selbst im Inline-Stil.
+- Neue Farben immer als `var(--kik-<rolle>, <Hellwert>)` schreiben.
+
+| Variable | Dunkel | Hell (Rückfall) | Zweck |
+|---|---|---|---|
+| `--kik-bg` | `#1e1f22` | `#fff` | Fenster, Inhalt, Link-Kästen |
+| `--kik-bar` | `#24272b` | `#f8f9fb`, `#fafbfc`, `#f1f3f6` | Kopf, Fuß, Verlinkungen, Bildfläche |
+| `--kik-btn`, `--kik-btn-hover` | `#2f3136`, `#3c4043` | `#fff`, `#f1f3f6` | Knöpfe, Vorschaukarte |
+| `--kik-line` | `#3c4043` | `#d0d4dc`, `#e5e7eb` | Rahmen, Trennlinien |
+| `--kik-btn-line` | `#5f6368` | `#d0d4dc` | Rand von Knöpfen und Vorschaukarte |
+| `--kik-text`, `--kik-text2`, `--kik-muted` | `#dfe0e0`, `#b0b3b8`, `#9aa0a6` | `#1f2328`, `#3a3f46`, `#94979d` | Text, Nebentext, Hinweis |
+| `--kik-solid`, `--kik-solid-hover` | `#4a4e53`, `#5f6368` | `#1f2328`, `#3a3f46` | Lasche, „Artikel überprüfen“, „Seite neu laden“ |
+| `--kik-ok`, `--kik-warn` | `#81c995`, `#f2c26b` | `#176c1f`, `#b45309` | Erfolg, Verarbeitung und Hinweis |
+| `--kik-err`, `--kik-err-bg` | `#f0a6a0`, `#4e3f42` | `#a30015`, `#ffe1e1` | Fehler, „Rückgängig machen“ |
+| `--kik-accent` | `#6cb4ff` | `#0550ae`, `#2563eb` | Status-Schritte, Links, Linie der Verlinkungen |
+| `--kik-save`, `--kik-save-hover` | `#188038`, `#137333` | `#176c1f`, `#125a18` | „Speichern“, „Im Editor prüfen“ |
+| `--kik-shadow` | Schwarz 55 % und 40 % | bisheriger Schatten | Fenster, Vorschaukarte |
+
 ## Security-Anker
 
 - **§7/§11 Token-Bindung**: HMAC enthält `content_type` und
