@@ -147,7 +147,7 @@ einführt:
 | Zeilennummern als Superscript vor jedem Absatz | optisch unruhig |
 | „ÜBERSCHRIFT" / „TEASER"-Labels über Section-Zeilen | redundant — der gelbliche/bläuliche Hintergrund reicht |
 | Pfeil-Bubbles (`→` / `←`) am Cell-Boundary für angenommen/abgelehnt | Doppelkommunikation zur Mittel-Linie + Opacity |
-| Dark Mode | Light Mode genügt, weniger Komplexität |
+| Dunkelmodus nach Systemeinstellung (`prefers-color-scheme`) | Dunkel nur über den Schalter der Website (`body[data-darkmode="on"]`), siehe „Dunkelmodus“ |
 | Wort-Level `×`/`✓`-Buttons (statt Absatz-Level) | zu unübersichtlich, Fehlerquelle |
 | Whitelist von HTML-Tags fürs Rendering | Eingabe-Texte können beliebige Tags enthalten — wir akzeptieren alle, blacklisten nur Tags, die im Widget-Kontext aktiv eingreifen würden |
 | `form`/`input`/`button`/`textarea` in `DANGEROUS_TAGS` | legitimer Artikelinhalt — der Redakteur muss diese Elemente sehen |
@@ -159,6 +159,42 @@ einführt:
 | „⎋ Schließen" im Footer-Hint | `× Schließen`-Button oben rechts reicht |
 | Toggle-Label „HTML + Shortcodes" | umbenannt zu „HTML-Code" |
 | Stripping von gefährlichen Konstrukten aus dem SOURCE | wird **nur aus der DISPLAY-Kopie** gestrippt; `row.before`/`row.after` und damit `resolve_text()` bleiben byte-exakt |
+
+## Dunkelmodus
+
+Das Modal folgt dem Tag/Nacht-Schalter der Website. Es ist dunkel,
+sobald `<body data-darkmode="on">` gesetzt ist, auch während es offen
+ist. Die Systemeinstellung (`prefers-color-scheme`) zählt nicht.
+
+- Jede Farbe im `CSS`-Block und in den Inline-Stilen der Spaltenköpfe
+  lautet `var(--vw-<rolle>,<Hellwert>)`. Eigenes Präfix `--vw-`, weil
+  das Modul auch ohne `ai-reviewer.js` läuft (Demo).
+- Die Variablen stehen nur im Block `body[data-darkmode="on"]{…}` am
+  Ende von `CSS`. Hell gibt es sie nicht, hell bleibt Pixel für Pixel
+  gleich.
+- Zwei Website-Regeln greifen dunkel ins Modal ein; der Block hebt sie
+  auf: Links bekommen per `!important` `--link-color-blue` (darum setzt
+  der Block diese Variable an den Links), und `input[type="text"]` bekommt
+  Rand und Fläche (darum ist das Suchfeld dunkel randlos und durchsichtig).
+- Neue Farben immer als `var(--vw-<rolle>,<Hellwert>)` schreiben.
+
+| Variable | Dunkel | Zweck |
+|---|---|---|
+| `--vw-bg`, `--vw-bar` | `#1e1f22`, `#24272b` | Modal und Zellen; Kopf, Fuß, Spaltenköpfe, Knopf-Spalte |
+| `--vw-btn`, `--vw-btn-hover`, `--vw-btn-line` | `#2f3136`, `#3c4043`, `#5f6368` | Knöpfe, Umschalter, Tasten-Kappen |
+| `--vw-solid` | `#4a4e53` | aktiver Teil des Umschalters |
+| `--vw-field`, `--vw-field-line` | `#232a33`, `#4d6079` | Suchfeld (wie Admin-Eingabefelder) |
+| `--vw-line`, `--vw-line2` | `#3c4043`, `#2e3033` | Linien, Zeilen-Trenner |
+| `--vw-text`, `--vw-text2`, `--vw-muted` | `#dfe0e0`, `#b0b3b8`, `#9aa0a6` | Text, Nebentext, Hinweis |
+| `--vw-link`, `--vw-link-line` | `#aab4c3`, Schiefergrau 45 % | Links im Lesbar-Modus (gedämpft) |
+| `--vw-mod`, `--vw-add`, `--vw-remove` | `#292726`, `#262d2b`, `#2f282a` | Zeilen geändert, neu, entfernt |
+| `--vw-headline`, `--vw-teaser` | `#2f2c28`, `#232931` | Überschrift-, Teaser-Zeile |
+| `--vw-ins`, `--vw-ins-bg` | `#9fe0b0`, Grün 18 % | eingefügt (Text, Markierung, ✓, Mittellinie) |
+| `--vw-del`, `--vw-del-bg`, `--vw-del-line` | `#ffb4ab`, Rot 18 %, Rot 60 % | entfernt (Text, Markierung, ×, Mittellinie) |
+| `--vw-active`, `--vw-hit-bg` | `#f2c26b`, Orange 22 % | aktive Zeile, Suchtreffer |
+| `--vw-save`, `--vw-save-hover` | `#188038`, `#137333` | Fußknopf, angenommenes ✓ |
+| `--vw-scrim`, `--vw-shadow` | Schwarz 60 %, Linie `#3c4043` + Schatten | Abdunklung, Rand des Modals |
+| `--vw-syn-*` | `bracket #aab3be`, `tag #8cc4ff`, `attr #f0b86e`, `string #5fd0dc`, `url #8ec5ff`, `sign #b4b9bf`, `code #bfb4ff` | Syntax im HTML-Code-Modus |
 
 ## Tastatur
 

@@ -81,34 +81,34 @@
 	var CSS = ''
 		+ '.vw-overlay,.vw-overlay *{box-sizing:border-box;text-transform:none;letter-spacing:normal;font-style:normal;text-align:left;}'
 		+ '.vw-overlay button,.vw-overlay input,.vw-overlay label{font-weight:400;}'
-		+ '.vw-overlay{position:fixed;inset:0;background:rgba(20,22,28,.55);z-index:2147483600;display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:#1f2328;}'
+		+ '.vw-overlay{position:fixed;inset:0;background:var(--vw-scrim,rgba(20,22,28,.55));z-index:2147483600;display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--vw-text,#1f2328);}'
 		// Höhe orientiert sich am Inhalt — bei kurzen Texten wird das Modal
 		// kompakt, bei längeren wächst es bis max 94vh und der Body scrollt.
-		+ '.vw-modal{background:#fff;border-radius:10px;box-shadow:0 24px 60px rgba(0,0,0,.35);width:min(1280px,96vw);max-height:94vh;display:flex;flex-direction:column;overflow:hidden;}'
+		+ '.vw-modal{background:var(--vw-bg,#fff);border-radius:10px;box-shadow:var(--vw-shadow,0 24px 60px rgba(0,0,0,.35));width:min(1280px,96vw);max-height:94vh;display:flex;flex-direction:column;overflow:hidden;}'
 		+ '.vw-body{min-height:0;}'
-		+ '.vw-header{display:flex;align-items:center;gap:14px;padding:10px 14px;border-bottom:1px solid #e5e7eb;background:#f8f9fb;flex-shrink:0;}'
+		+ '.vw-header{display:flex;align-items:center;gap:14px;padding:10px 14px;border-bottom:1px solid var(--vw-line,#e5e7eb);background:var(--vw-bar,#f8f9fb);flex-shrink:0;}'
 		+ '.vw-title{font-size:15px;font-weight:600;letter-spacing:.2px;}'
 		+ '.vw-checkbox{display:inline-flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;user-select:none;}'
-		+ '.vw-checkbox input{accent-color:#1f2328;}'
+		+ '.vw-checkbox input{accent-color:var(--vw-text,#1f2328);}'
 		+ '.vw-grow{flex:1 1 auto;}'
-		+ '.vw-nav{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#3a3f46;}'
-		+ '.vw-icon-btn{appearance:none;border:1px solid #d0d4dc;background:#fff;width:28px;height:26px;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:#3a3f46;}'
-		+ '.vw-icon-btn:hover{background:#f1f3f6;}'
+		+ '.vw-nav{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--vw-text2,#3a3f46);}'
+		+ '.vw-icon-btn{appearance:none;border:1px solid var(--vw-btn-line,#d0d4dc);background:var(--vw-btn,#fff);width:28px;height:26px;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:var(--vw-text2,#3a3f46);}'
+		+ '.vw-icon-btn:hover{background:var(--vw-btn-hover,#f1f3f6);}'
 		+ '.vw-icon-btn:disabled{opacity:.4;cursor:not-allowed;}'
 		+ '.vw-counter{min-width:42px;text-align:center;font-variant-numeric:tabular-nums;}'
-		+ '.vw-search{display:inline-flex;align-items:center;gap:6px;border:1px solid #d0d4dc;background:#fff;border-radius:6px;padding:4px 10px;}'
+		+ '.vw-search{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--vw-field-line,#d0d4dc);background:var(--vw-field,#fff);border-radius:6px;padding:4px 10px;}'
 		+ '.vw-search svg{opacity:.55;}'
 		+ '.vw-search input{appearance:none;border:0;outline:none;font:inherit;font-size:13px;width:160px;background:transparent;color:inherit;}'
-		+ '.vw-close{appearance:none;border:1px solid #d0d4dc;background:#fff;border-radius:6px;padding:4px 12px;font:inherit;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;color:inherit;}'
-		+ '.vw-close:hover{background:#f1f3f6;}'
+		+ '.vw-close{appearance:none;border:1px solid var(--vw-btn-line,#d0d4dc);background:var(--vw-btn,#fff);border-radius:6px;padding:4px 12px;font:inherit;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;color:inherit;}'
+		+ '.vw-close:hover{background:var(--vw-btn-hover,#f1f3f6);}'
 
 		// Body is a 3-column grid: Vorher | Nachher | Buttons.
 		// Each row in the grid corresponds to one paragraph (or one paragraph
 		// boundary in the merged sequence). Same row = same vertical slot in
 		// both panes, so the editor can compare paragraph-by-paragraph.
-		+ '.vw-body{flex:1 1 auto;overflow:auto;background:#fff;}'
+		+ '.vw-body{flex:1 1 auto;overflow:auto;background:var(--vw-bg,#fff);}'
 		+ '.vw-grid{display:grid;grid-template-columns:1fr 1fr 60px;column-gap:0;align-items:stretch;}'
-		+ '.vw-cell{padding:14px 18px;border-bottom:1px solid #eef0f3;line-height:1.55;color:#1f2328;background:#fff;overflow-wrap:anywhere;}'
+		+ '.vw-cell{padding:14px 18px;border-bottom:1px solid var(--vw-line2,#eef0f3);line-height:1.55;color:var(--vw-text,#1f2328);background:var(--vw-bg,#fff);overflow-wrap:anywhere;}'
 
 		// Quelltext-Modus: monospace, Whitespace-erhaltend, alles roh (HTML-Tags
 		// und ##-Codes werden als Text angezeigt). Default.
@@ -117,9 +117,9 @@
 		// Wrapping. HTML-Tags & ##-Codes (außer ##a) sind hier unsichtbar,
 		// damit der Redakteur sich nur auf den Text und die Diffs konzentriert.
 		+ '.vw-mode-pseudo .vw-cell{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;font-size:13px;white-space:pre-wrap;tab-size:4;font-weight:400;}'
-		+ '.vw-cell-before{border-right:1px solid #e5e7eb;}'
-		+ '.vw-cell-after{border-right:1px solid #e5e7eb;}'
-		+ '.vw-cell-actions{display:flex;align-items:flex-start;justify-content:center;padding:14px 4px;gap:2px;background:#fafbfc;border-bottom:1px solid #eef0f3;}'
+		+ '.vw-cell-before{border-right:1px solid var(--vw-line,#e5e7eb);}'
+		+ '.vw-cell-after{border-right:1px solid var(--vw-line,#e5e7eb);}'
+		+ '.vw-cell-actions{display:flex;align-items:flex-start;justify-content:center;padding:14px 4px;gap:2px;background:var(--vw-bar,#fafbfc);border-bottom:1px solid var(--vw-line2,#eef0f3);}'
 
 		// Important: row-state classes (vw-row-mod, vw-row-add, vw-row-active,
 		// vw-row-resolved, vw-row-rejected) are applied DIRECTLY to each cell
@@ -127,10 +127,10 @@
 		// cells of a logical row are siblings in the same grid — no shared
 		// wrapper. Hence the compound selectors below (".vw-cell-before.vw-row-mod"
 		// instead of ".vw-row-mod .vw-cell-before").
-		+ '.vw-cell-before.vw-row-mod,.vw-cell-after.vw-row-mod{background:#fffdf6;}'
-		+ '.vw-cell-after.vw-row-add{background:#f1faf1;}'
-		+ '.vw-cell-before.vw-row-del{background:#fef1f1;}'
-		+ '.vw-cell-before.vw-row-add,.vw-cell-after.vw-row-del{background:#fafbfc;color:#94979d;font-style:italic;font-size:12px;}'
+		+ '.vw-cell-before.vw-row-mod,.vw-cell-after.vw-row-mod{background:var(--vw-mod,#fffdf6);}'
+		+ '.vw-cell-after.vw-row-add{background:var(--vw-add,#f1faf1);}'
+		+ '.vw-cell-before.vw-row-del{background:var(--vw-remove,#fef1f1);}'
+		+ '.vw-cell-before.vw-row-add,.vw-cell-after.vw-row-del{background:var(--vw-bar,#fafbfc);color:var(--vw-muted,#94979d);font-style:italic;font-size:12px;}'
 
 		// Status-Akzent in der MITTE zwischen Vorher und Nachher
 		// (rechter Rand der Vorher-Zelle = linker Rand der Nachher-Zelle).
@@ -138,18 +138,18 @@
 		+ '.vw-cell-after{position:relative;}'
 
 		// Aktive Zeile (per Tastatur fokussiert): gelber Akzent in der Mitte.
-		+ '.vw-cell-before.vw-row-active{box-shadow:inset -3px 0 0 0 #f5b942;}'
-		+ '.vw-cell-after.vw-row-active{box-shadow:inset 3px 0 0 0 #f5b942;}'
+		+ '.vw-cell-before.vw-row-active{box-shadow:inset -3px 0 0 0 var(--vw-active,#f5b942);}'
+		+ '.vw-cell-after.vw-row-active{box-shadow:inset 3px 0 0 0 var(--vw-active,#f5b942);}'
 
 		// Entscheidung wird nur über die farbige Mittellinie + Opacity der
 		// abgewählten Seite kommuniziert. Keine Pfeil-Bubbles, keine Labels —
 		// das wäre Doppelung.
 		// Zugestimmt: grüne Mittellinie + Vorher ausgegraut.
-		+ '.vw-cell-before.vw-row-resolved{box-shadow:inset -3px 0 0 0 #2da44e;opacity:.4;}'
-		+ '.vw-cell-after.vw-row-resolved{box-shadow:inset 3px 0 0 0 #2da44e;}'
+		+ '.vw-cell-before.vw-row-resolved{box-shadow:inset -3px 0 0 0 var(--vw-ins,#2da44e);opacity:.4;}'
+		+ '.vw-cell-after.vw-row-resolved{box-shadow:inset 3px 0 0 0 var(--vw-ins,#2da44e);}'
 		// Abgelehnt: rote Mittellinie + Nachher ausgegraut.
-		+ '.vw-cell-before.vw-row-rejected{box-shadow:inset -3px 0 0 0 #cf222e;}'
-		+ '.vw-cell-after.vw-row-rejected{box-shadow:inset 3px 0 0 0 #cf222e;opacity:.4;}'
+		+ '.vw-cell-before.vw-row-rejected{box-shadow:inset -3px 0 0 0 var(--vw-del,#cf222e);}'
+		+ '.vw-cell-after.vw-row-rejected{box-shadow:inset 3px 0 0 0 var(--vw-del,#cf222e);opacity:.4;}'
 
 		// Lesbar-Modus: Links bleiben erkennbar, strong/em werden flach,
 		// Listen rendern inline. Überschriften (h1-6) bekommen Fett-Render
@@ -161,7 +161,7 @@
 		// blau mit halbtransparenter Unterstreichung. So bleibt klar, dass es
 		// Links sind, aber die Farbe konkurriert nicht mit den eigentlichen
 		// Diff-Markierungen (rot/grün).
-		+ '.vw-mode-pseudo .vw-cell a{color:#475569;text-decoration:underline;text-decoration-color:rgba(71,85,105,.45);}'
+		+ '.vw-mode-pseudo .vw-cell a{color:var(--vw-link,#475569);text-decoration:underline;text-decoration-color:var(--vw-link-line,rgba(71,85,105,.45));}'
 		// Headings: nur fett, kein Abstand zum folgenden Text (wie im HTML-
 		// Quelltext steht auch dort kein Leerzeichen dazwischen).
 		+ '.vw-mode-pseudo .vw-cell h1,.vw-mode-pseudo .vw-cell h2,.vw-mode-pseudo .vw-cell h3,.vw-mode-pseudo .vw-cell h4,.vw-mode-pseudo .vw-cell h5,.vw-mode-pseudo .vw-cell h6{font-weight:700;font-size:inherit;display:block;margin:0;}'
@@ -179,81 +179,81 @@
 		// Überschrift- und Teaser-Sektion: erste zwei Zeilen sind visuell
 		// hervorgehoben. Cells sind Sibling-Grid-Items (kein Wrapper), darum
 		// die compound-Selektoren.
-		+ '.vw-cell-before.vw-row-headline,.vw-cell-after.vw-row-headline{background:#fbf7e8;font-weight:700;font-size:15px;line-height:1.4;}'
+		+ '.vw-cell-before.vw-row-headline,.vw-cell-after.vw-row-headline{background:var(--vw-headline,#fbf7e8);font-weight:700;font-size:15px;line-height:1.4;}'
 		// Teaser: gleich fett wie die Headline, aber bläulicher Hintergrund
 		// als visueller Unterschied. Vorher: kursiv — Nutzer wollte fett.
-		+ '.vw-cell-before.vw-row-teaser,.vw-cell-after.vw-row-teaser{background:#f3f6fb;font-weight:700;color:#1f2328;}'
+		+ '.vw-cell-before.vw-row-teaser,.vw-cell-after.vw-row-teaser{background:var(--vw-teaser,#f3f6fb);font-weight:700;color:var(--vw-text,#1f2328);}'
 		+ '.vw-mode-pseudo .vw-cell-before.vw-row-headline,.vw-mode-pseudo .vw-cell-after.vw-row-headline{font-size:16px;}'
 		// Keine Section-Labels mehr — der Hintergrund (gelblich für Headline,
 		// bläulich für Teaser) ist Hervorhebung genug. Eine zusätzliche
 		// "Über-Überschrift" wäre Doppelung.
 
 		// Mode toggle (segmented buttons im Header)
-		+ '.vw-segmented{display:inline-flex;border:1px solid #d0d4dc;border-radius:6px;overflow:hidden;background:#fff;}'
-		+ '.vw-segmented button{appearance:none;border:0;background:transparent;font:inherit;font-size:13px;padding:6px 12px;cursor:pointer;color:#3a3f46;}'
-		+ '.vw-segmented button.vw-active{background:#1f2328;color:#fff;font-weight:500;}'
+		+ '.vw-segmented{display:inline-flex;border:1px solid var(--vw-btn-line,#d0d4dc);border-radius:6px;overflow:hidden;background:var(--vw-btn,#fff);}'
+		+ '.vw-segmented button{appearance:none;border:0;background:transparent;font:inherit;font-size:13px;padding:6px 12px;cursor:pointer;color:var(--vw-text2,#3a3f46);}'
+		+ '.vw-segmented button.vw-active{background:var(--vw-solid,#1f2328);color:#fff;font-weight:500;}'
 
-		+ '.vw-del{background:#ffe1e1;border-radius:3px;padding:0 2px;}'
-		+ '.vw-del:not(:has(.vw-syn)){color:#a30015;text-decoration:line-through;text-decoration-color:rgba(163,0,21,.55);}'
-		+ '.vw-ins{background:#d6f0d6;border-radius:3px;padding:0 2px;}'
-		+ '.vw-ins:not(:has(.vw-syn)){color:#176c1f;}'
+		+ '.vw-del{background:var(--vw-del-bg,#ffe1e1);border-radius:3px;padding:0 2px;}'
+		+ '.vw-del:not(:has(.vw-syn)){color:var(--vw-del,#a30015);text-decoration:line-through;text-decoration-color:var(--vw-del-line,rgba(163,0,21,.55));}'
+		+ '.vw-ins{background:var(--vw-ins-bg,#d6f0d6);border-radius:3px;padding:0 2px;}'
+		+ '.vw-ins:not(:has(.vw-syn)){color:var(--vw-ins,#176c1f);}'
 		// Im Lesbar-Modus wird ein <a>-Tag aus dem Markup gelöscht — die
 		// Tag-Klammer selbst ist unsichtbar, weil sie als Link gerendert wird.
 		// Damit der Redakteur trotzdem sieht "hier wurde ein Link hinzugefügt
 		// bzw. entfernt", markieren wir das <a>-Element mit einem dezenten
 		// farbigen Hintergrund: grün bei eingefügtem Link, rot bei entferntem.
-		+ '.vw-mode-pseudo a.vw-link-ins{background:#d6f0d6;border-radius:3px;padding:0 2px;text-decoration-color:#176c1f;}'
-		+ '.vw-mode-pseudo a.vw-link-del{background:#ffe1e1;border-radius:3px;padding:0 2px;text-decoration-color:#a30015;}'
+		+ '.vw-mode-pseudo a.vw-link-ins{background:var(--vw-ins-bg,#d6f0d6);border-radius:3px;padding:0 2px;text-decoration-color:var(--vw-ins,#176c1f);}'
+		+ '.vw-mode-pseudo a.vw-link-del{background:var(--vw-del-bg,#ffe1e1);border-radius:3px;padding:0 2px;text-decoration-color:var(--vw-del,#a30015);}'
 
 		// Editor-Syntax-Highlighting (nur HTML+Shortcodes-Modus). WICHTIG:
 		// kein Rot — Rot ist für Diff-Löschungen reserviert. Stattdessen:
 		// Tags blau, Attribute braun-orange, Strings teal, URLs blau,
 		// Shortcodes indigo. So bleibt der Diff-Farbcode (rot=raus, grün=rein)
 		// eindeutig.
-		+ '.vw-mode-editor .vw-syn-tag-bracket{color:#5c6975;}'
-		+ '.vw-mode-editor .vw-syn-tag-name{color:#0550ae;font-weight:600;}'
-		+ '.vw-mode-editor .vw-syn-attr{color:#b45309;}'
-		+ '.vw-mode-editor .vw-syn-string{color:#0e7490;}'
-		+ '.vw-mode-editor .vw-syn-url{color:#2563eb;text-decoration:underline;}'
-		+ '.vw-mode-editor .vw-syn-equals{color:#6b7280;}'
-		+ '.vw-mode-editor .vw-syn-sc-mark{color:#6b7280;font-weight:600;}'
-		+ '.vw-mode-editor .vw-syn-sc-name{color:#4338ca;font-weight:600;}'
+		+ '.vw-mode-editor .vw-syn-tag-bracket{color:var(--vw-syn-bracket,#5c6975);}'
+		+ '.vw-mode-editor .vw-syn-tag-name{color:var(--vw-syn-tag,#0550ae);font-weight:600;}'
+		+ '.vw-mode-editor .vw-syn-attr{color:var(--vw-syn-attr,#b45309);}'
+		+ '.vw-mode-editor .vw-syn-string{color:var(--vw-syn-string,#0e7490);}'
+		+ '.vw-mode-editor .vw-syn-url{color:var(--vw-syn-url,#2563eb);text-decoration:underline;}'
+		+ '.vw-mode-editor .vw-syn-equals{color:var(--vw-syn-sign,#6b7280);}'
+		+ '.vw-mode-editor .vw-syn-sc-mark{color:var(--vw-syn-sign,#6b7280);font-weight:600;}'
+		+ '.vw-mode-editor .vw-syn-sc-name{color:var(--vw-syn-code,#4338ca);font-weight:600;}'
 		// HTML-Kommentare: dezent grau + kursiv, damit man sie als
 		// "nicht im Output sichtbar" sofort erkennt.
-		+ '.vw-mode-editor .vw-syn-comment{color:#94979d;font-style:italic;}'
-		+ '.vw-mode-editor .vw-cell{color:#1f2328;}'
+		+ '.vw-mode-editor .vw-syn-comment{color:var(--vw-syn-sign,#94979d);font-style:italic;}'
+		+ '.vw-mode-editor .vw-cell{color:var(--vw-text,#1f2328);}'
 
-		+ '.vw-actions-btn{appearance:none;border:1px solid #d0d4dc;background:#fff;width:24px;height:24px;border-radius:4px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:13px;line-height:1;color:#3a3f46;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}'
-		+ '.vw-actions-btn:hover{background:#f1f3f6;}'
-		+ '.vw-actions-btn.vw-accept{color:#176c1f;}'
-		+ '.vw-actions-btn.vw-reject{color:#a30015;}'
-		+ '.vw-actions-btn.vw-on-accept{background:#176c1f;color:#fff;border-color:#176c1f;}'
+		+ '.vw-actions-btn{appearance:none;border:1px solid var(--vw-btn-line,#d0d4dc);background:var(--vw-btn,#fff);width:24px;height:24px;border-radius:4px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:13px;line-height:1;color:var(--vw-text2,#3a3f46);padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}'
+		+ '.vw-actions-btn:hover{background:var(--vw-btn-hover,#f1f3f6);}'
+		+ '.vw-actions-btn.vw-accept{color:var(--vw-ins,#176c1f);}'
+		+ '.vw-actions-btn.vw-reject{color:var(--vw-del,#a30015);}'
+		+ '.vw-actions-btn.vw-on-accept{background:var(--vw-save,#176c1f);color:#fff;border-color:var(--vw-save,#176c1f);}'
 		+ '.vw-actions-btn.vw-on-reject{background:#a30015;color:#fff;border-color:#a30015;}'
 		+ '.vw-row-eq .vw-cell-actions{visibility:hidden;}'
 
-		+ '.vw-empty{color:#94979d;font-style:italic;font-size:12px;}'
+		+ '.vw-empty{color:var(--vw-muted,#94979d);font-style:italic;font-size:12px;}'
 
-		+ '.vw-search-hit{outline:2px solid #f5b942;outline-offset:1px;border-radius:3px;background:#fff5d8;}'
+		+ '.vw-search-hit{outline:2px solid var(--vw-active,#f5b942);outline-offset:1px;border-radius:3px;background:var(--vw-hit-bg,#fff5d8);}'
 
-		+ '.vw-footer{display:flex;align-items:center;gap:14px;padding:8px 14px;border-top:1px solid #e5e7eb;background:#f8f9fb;flex-shrink:0;font-size:12px;color:#3a3f46;}'
+		+ '.vw-footer{display:flex;align-items:center;gap:14px;padding:8px 14px;border-top:1px solid var(--vw-line,#e5e7eb);background:var(--vw-bar,#f8f9fb);flex-shrink:0;font-size:12px;color:var(--vw-text2,#3a3f46);}'
 		+ '.vw-legend{display:inline-flex;align-items:center;gap:6px;}'
-		+ '.vw-legend-label{color:#94979d;font-size:11px;font-weight:500;letter-spacing:.5px;text-transform:uppercase;margin-right:2px;}'
+		+ '.vw-legend-label{color:var(--vw-muted,#94979d);font-size:11px;font-weight:500;letter-spacing:.5px;text-transform:uppercase;margin-right:2px;}'
 		// Legenden-Tags benutzen denselben Hintergrund wie die Diff-Highlights
 		// im Body — damit der Redakteur sofort erkennt: das sind Beispiele
 		// für die Markierungen im Diff darüber.
 		+ '.vw-legend-tag{padding:1px 8px;border-radius:3px;font-weight:600;font-size:11px;}'
-		+ '.vw-legend-tag.vw-del{background:#ffe1e1;color:#a30015;text-decoration:none;}'
-		+ '.vw-legend-tag.vw-ins{background:#d6f0d6;color:#176c1f;}'
+		+ '.vw-legend-tag.vw-del{background:var(--vw-del-bg,#ffe1e1);color:var(--vw-del,#a30015);text-decoration:none;}'
+		+ '.vw-legend-tag.vw-ins{background:var(--vw-ins-bg,#d6f0d6);color:var(--vw-ins,#176c1f);}'
 		+ '.vw-keys{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;}'
-		+ '.vw-key{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border:1px solid #c5cad2;border-bottom-width:2px;border-radius:4px;background:#fff;font-family:ui-monospace,Menlo,Monaco,Consolas,monospace;font-size:11px;color:#1f2328;}'
-		+ '.vw-keys .vw-sep{color:#94979d;}'
+		+ '.vw-key{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border:1px solid var(--vw-btn-line,#c5cad2);border-bottom-width:2px;border-radius:4px;background:var(--vw-btn,#fff);font-family:ui-monospace,Menlo,Monaco,Consolas,monospace;font-size:11px;color:var(--vw-text,#1f2328);}'
+		+ '.vw-keys .vw-sep{color:var(--vw-muted,#94979d);}'
 		// Footer-Action-Button: immer grün. Der Text wechselt je nach
 		// Decision-State zwischen "✓ Alle annehmen" und "Übernehmen",
 		// damit dem Redakteur klar ist ob bei Klick alles angenommen
 		// wird oder seine manuelle Auswahl übernommen — der Button-Look
 		// bleibt gleich.
-		+ '.vw-footer-action{appearance:none;border:1px solid #176c1f;background:#176c1f;color:#fff;border-radius:6px;padding:6px 14px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;line-height:1.2;transition:background-color .15s ease,border-color .15s ease;}'
-		+ '.vw-footer-action:hover{background:#125a18;border-color:#125a18;}'
+		+ '.vw-footer-action{appearance:none;border:1px solid var(--vw-save,#176c1f);background:var(--vw-save,#176c1f);color:#fff;border-radius:6px;padding:6px 14px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;line-height:1.2;transition:background-color .15s ease,border-color .15s ease;}'
+		+ '.vw-footer-action:hover{background:var(--vw-save-hover,#125a18);border-color:var(--vw-save-hover,#125a18);}'
 		// Fade-out-Animation beim Schließen — kurz und unaufdringlich.
 		// Der User soll noch sehen, dass alle Haken grün werden, bevor
 		// das Modal weg ist. CSS-Transition läuft parallel zum DOM-Update.
@@ -262,7 +262,30 @@
 		+ '.vw-overlay.vw-closing{opacity:0;pointer-events:none;}'
 		+ '.vw-overlay.vw-closing .vw-modal{transform:scale(.97);}'
 
-		// Widget runs in light mode only — no @media prefers-color-scheme.
+		// Dunkelmodus: folgt nur dem Schalter der Website (body[data-darkmode="on"],
+		// wechselt live ohne Neuladen), kein @media prefers-color-scheme. Die Regeln
+		// oben lesen var(--vw-<rolle>, <Hellwert>); die Variablen gibt es nur hier,
+		// hell bleibt darum Pixel fuer Pixel wie bisher. Farben aus dem Admin-Design.
+		+ 'body[data-darkmode="on"]{'
+		+ '--vw-scrim:rgba(0,0,0,.6);--vw-shadow:0 0 0 1px #3c4043,0 24px 60px rgba(0,0,0,.6);'
+		+ '--vw-bg:#1e1f22;--vw-bar:#24272b;--vw-btn:#2f3136;--vw-btn-hover:#3c4043;--vw-solid:#4a4e53;'
+		+ '--vw-line:#3c4043;--vw-line2:#2e3033;--vw-btn-line:#5f6368;--vw-field:#232a33;--vw-field-line:#4d6079;'
+		+ '--vw-text:#dfe0e0;--vw-text2:#b0b3b8;--vw-muted:#9aa0a6;--vw-link:#aab4c3;--vw-link-line:rgba(170,180,195,.45);'
+		+ '--vw-mod:#292726;--vw-add:#262d2b;--vw-remove:#2f282a;--vw-headline:#2f2c28;--vw-teaser:#232931;'
+		+ '--vw-active:#f2c26b;--vw-hit-bg:rgba(242,194,107,.22);'
+		+ '--vw-ins:#9fe0b0;--vw-ins-bg:rgba(129,201,149,.18);--vw-del:#ffb4ab;--vw-del-bg:rgba(242,139,130,.18);--vw-del-line:rgba(255,180,171,.6);'
+		+ '--vw-save:#188038;--vw-save-hover:#137333;'
+		+ '--vw-syn-bracket:#aab3be;--vw-syn-tag:#8cc4ff;--vw-syn-attr:#f0b86e;--vw-syn-string:#5fd0dc;--vw-syn-url:#8ec5ff;--vw-syn-sign:#b4b9bf;--vw-syn-code:#bfb4ff;'
+		+ '}'
+		+ 'body[data-darkmode="on"] .vw-overlay{color-scheme:dark;}'
+		// Die Website faerbt im Dunkelmodus jedes <a> mit !important ueber
+		// --link-color-blue (style_org.css); darum die Linkfarben dort setzen.
+		+ 'body[data-darkmode="on"] .vw-mode-pseudo .vw-cell a{--link-color-blue:var(--vw-link);}'
+		+ 'body[data-darkmode="on"] .vw-mode-editor .vw-syn-url{--link-color-blue:var(--vw-syn-url);}'
+		// Die Website gibt input[type="text"] im Dunkelmodus Rand, Flaeche und beim
+		// Fokus eine helle Flaeche; das Suchfeld liegt aber im eigenen Rahmen.
+		+ 'body[data-darkmode="on"] .vw-search input,body[data-darkmode="on"] .vw-search input:focus{border:0;background:transparent;box-shadow:none;transition:none;}'
+		+ 'body[data-darkmode="on"] .vw-search input::placeholder{color:var(--vw-muted);opacity:1;}'
 	;
 
 	function inject_css() {
@@ -2201,9 +2224,9 @@
 			+ ' </div>'
 			+ ' <div class="vw-body" data-vw-body>'
 			+ '   <div class="vw-grid" data-vw-grid>'
-			+ '     <div class="vw-cell vw-cell-before vw-pane-label" style="font-weight:700;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;background:#f8f9fb;border-bottom-color:#e5e7eb;padding:8px 18px;">Vorher</div>'
-			+ '     <div class="vw-cell vw-cell-after vw-pane-label" style="font-weight:700;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;background:#f8f9fb;border-bottom-color:#e5e7eb;padding:8px 18px;">Nachher</div>'
-			+ '     <div class="vw-cell vw-cell-actions" style="background:#f8f9fb;border-bottom-color:#e5e7eb;padding:8px 4px;"></div>'
+			+ '     <div class="vw-cell vw-cell-before vw-pane-label" style="font-weight:700;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;background:var(--vw-bar,#f8f9fb);border-bottom-color:var(--vw-line,#e5e7eb);padding:8px 18px;">Vorher</div>'
+			+ '     <div class="vw-cell vw-cell-after vw-pane-label" style="font-weight:700;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;background:var(--vw-bar,#f8f9fb);border-bottom-color:var(--vw-line,#e5e7eb);padding:8px 18px;">Nachher</div>'
+			+ '     <div class="vw-cell vw-cell-actions" style="background:var(--vw-bar,#f8f9fb);border-bottom-color:var(--vw-line,#e5e7eb);padding:8px 4px;"></div>'
 			+ '   </div>'
 			+ ' </div>'
 			+ ' <div class="vw-footer">'
