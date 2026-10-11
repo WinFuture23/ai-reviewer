@@ -6,8 +6,8 @@ Verlinkungen prüfen und zeigt das Ergebnis in einem schwebenden
 Overlay-Panel direkt im CMS-Editor an. Inklusive einem Vorher/Nachher-
 Diff-Modal, mit dem der Redakteur die KI-Vorschläge absatzweise
 annehmen oder verwerfen kann. Beide Komponenten teilen denselben
-hellen, system-nativen Look (System-Sans-Serif, dezente Border und
-Akzent-Palette).
+system-nativen Look (System-Sans-Serif, dezente Border und
+Akzent-Palette): hell, im Dunkelmodus der Website dunkel.
 
 ## Module
 
