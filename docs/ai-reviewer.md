@@ -13,25 +13,52 @@ angepasst (helles Theme, System-Sans-Serif, sanfte Akzent-Palette).
 
 ## Zugriffsmodell
 
-Das Widget startet nur, wenn beide Bedingungen erfüllt sind:
+Seit Version 6 (12.10.2026) steht das Widget allen Redakteuren mit
+Recht `r` offen. Die feste Liste von 9 User-IDs im Skript ist weg.
 
-1. Der Cookie `wfv4uid` ist eine der freigegebenen User-IDs
-   (`ALLOWED_USERS` im Source — aktuell Sebastian Kuhbach,
-   Witold Pryjda, Felix Krauth, Nadine Dressler, Stefan Trunzik,
-   Christian Kahle, Roland Quandt, Thomas Zick, Sebastian Kasparek).
-2. Das CMS hat den Script-Tag ausgegeben — d. h. die PHP-Klasse
-   `wfv4_model_aireviewer::render()` wurde aufgerufen (Klasse wird
-   intern im CMS gepflegt).
+1. Das CMS gibt den Script-Tag nur für Redakteure mit Recht `r` aus
+   (`wfv4_model_aireviewer`, alle `render*`-Methoden prüfen das Recht;
+   Klasse wird intern im CMS gepflegt).
+2. Das Widget startet nur mit Daten des CMS: Auth-Token
+   (`window.wfv4_ai_reviewer_auth`, Editor) oder Rohdaten im Modus
+   `pending` bzw. `status` (`window.wfv4_content.mode`). Ohne diese
+   Daten returnt die IIFE silent, ohne DOM-Elemente anzulegen.
+3. Den Backend-Aufruf sichert weiter der HMAC-Token des CMS
+   (Artikel-gebunden, 90 Minuten gültig).
 
-Schlägt eine der beiden Prüfungen fehl, returnt die IIFE silent, ohne
-DOM-Elemente anzulegen. Doppelt-Eingebundene Scripts werden über das
-Flag `window.wfv4_ai_reviewer_loaded` abgefangen.
+Die Namen der Prüfer liefert das CMS in `window.wfv4_ki_user_names`
+(User-ID → Name). Die kurze feste Namensliste im Skript bleibt als
+Rückfall. Doppelt eingebundene Scripts werden über das Flag
+`window.wfv4_ai_reviewer_loaded` abgefangen.
+
+Das CMS lädt das Skript mit fester Version in der Adresse
+(`ai-reviewer.js?v=6`) und `async`. Der Browser behält es so
+(GitHub Pages: 600 s, danach Prüfung per ETag). Ein langsames oder
+fehlendes GitHub Pages hält die CMS-Seite nie auf.
+
+## Prüf-Status für das CMS (seit Version 6)
+
+In allen Modi meldet das Widget den Prüf-Status der aktuellen Fassung:
+
+- `window.wfv4_ki_status = { state, ts, uid }` mit `state` aus
+  `ok`, `markup`, `stale`, `none` oder `unknown` (keine Rohdaten).
+- Ereignis `wfv4_ki_status` am `document` (`detail` wie oben).
+- `wfv4_ki_marker.current()` rechnet den Status der Editor-Felder neu
+  (`null` ohne Editor), `wfv4_ki_marker.open()` öffnet das Widget und
+  startet die Prüfung wie ein Klick auf die Lasche.
+
+Modus `status` (`window.wfv4_content = { type, id, mode: 'status' }`
+plus `window.wfv4_ki_raw`): keine Lasche, kein Panel, nur der Status.
+Das CMS nutzt ihn auf Seiten ohne Editor, auf denen man freigibt
+(Artikel-Ansicht, Video-Einstellungen, FAQ-Eintrag), und warnt vor
+dem Freigeben einer ungeprüften Fassung. Ohne Status (Widget nicht
+geladen) geht die Freigabe wie bisher: Das Widget ist Hilfe, nie Stopper.
 
 ## Lebenszyklus
 
 ```
 [Page Load]
-  └─ IIFE prüft Cookie + Loaded-Flag → exit oder weiter
+  └─ IIFE prüft CMS-Daten + Loaded-Flag → exit oder weiter
   └─ init_widget() → Launcher-Tab rechts unten am Viewport
                      [🤖 KI-Korrektor]
 

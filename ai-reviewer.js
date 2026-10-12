@@ -7,26 +7,27 @@
  * tokens injected by the PHP integration class (wfv4_model_aireviewer::render).
  *
  * @author  mesios
- * @version 5 2026-10-11
+ * @version 6 2026-10-12
  * @see     wfv4_model_aireviewer (aireviewer.class.php, im CMS gepflegt)
  */
 (function() {
-    // Allowed user IDs (wfv4uid cookie)
-    // 1 = Sebastian Kuhbach, 124363 = Witold Pryjda, 174525 = Felix Krauth,
-    // 132191 = Nadine Dressler, 157090 = Stefan Trunzik, 99800 = Christian Kahle,
-    // 76 = Roland Quandt, 105382 = Thomas Zick, 63721 = Sebastian Kasparek
-    const ALLOWED_USERS = [1, 124363, 174525, 132191, 157090, 99800, 76, 105382, 63721];
-
-    // Anzeigenamen fuer die Status-UI (im Marker selbst steht nur die numerische ID)
-    const USER_NAMES = {
+    // Anzeigenamen fuer die Status-UI (im Marker selbst steht nur die numerische ID).
+    // Das CMS liefert die Namen der Pruefer dieses Artikels in window.wfv4_ki_user_names
+    // (wfv4_model_aireviewer); die feste Liste bleibt als Rueckfall.
+    const USER_NAMES = Object.assign( {
         1: 'Sebastian Kuhbach', 124363: 'Witold Pryjda', 174525: 'Felix Krauth',
         132191: 'Nadine Dressler', 157090: 'Stefan Trunzik', 99800: 'Christian Kahle',
         76: 'Roland Quandt', 105382: 'Thomas Zick', 63721: 'Sebastian Kasparek'
-    };
+    }, window.wfv4_ki_user_names || {} );
 
-    // Check user access before anything else
-    const uid_match = document.cookie.match( /(?:^|;\s*)wfv4uid=(\d+)/ );
-    if( !uid_match || !ALLOWED_USERS.includes( Number( uid_match[1] ) ) ) return;
+    // Zugang (seit 2026-10-12 fuer alle Redakteure statt einer festen Liste von 9 Nutzern):
+    // Das CMS bindet das Skript nur fuer Redakteure mit Recht r ein (wfv4_model_aireviewer) und
+    // liefert dazu den Auth-Token (Editor) oder die Rohdaten (Modus pending/status). Ohne diese
+    // Daten laeuft nichts. Den Backend-Aufruf sichert weiter der HMAC-Token des CMS.
+    const page_mode = window.wfv4_content && window.wfv4_content.mode ? String( window.wfv4_content.mode ) : '';
+    if( !window.wfv4_ai_reviewer_auth && page_mode !== 'pending' && page_mode !== 'status' ) return;
+    // Nutzer-ID fuer den Pruef-Marker (0, falls das Cookie fehlt)
+    const uid_match = document.cookie.match( /(?:^|;\s*)wfv4uid=(\d+)/ ) || [ '', '0' ];
 
     // Guard: prevent double initialisation when script is included twice
     if (window.wfv4_ai_reviewer_loaded) return;
@@ -743,6 +744,26 @@
         return { state: 'none', entry: null, entries: entries, hashes: hashes };
     }
 
+    /**
+     * Pruef-Status fuer das CMS bereitstellen (seit 2026-10-12): window.wfv4_ki_status und das
+     * Ereignis "wfv4_ki_status" am document. Das CMS warnt damit vor dem Freigeben (Wartend,
+     * Aktivieren), wenn die aktuelle Version nicht geprueft ist. Ohne Status: state 'unknown'.
+     * @param {object|null} status Ergebnis von marker_status_for()
+     */
+    function publish_status( status ) {
+        const s = {
+            state: status ? status.state : 'unknown',
+            ts: status && status.entry ? status.entry.ts : '',
+            uid: status && status.entry ? status.entry.uid : 0
+        };
+        window.wfv4_ki_status = s;
+        try {
+            document.dispatchEvent( new CustomEvent( 'wfv4_ki_status', { detail: s } ) );
+        } catch( e ) {
+            // altes Browser-Ereignismodell: der Status steht trotzdem in window.wfv4_ki_status
+        }
+    }
+
     /** ISO-Timestamp (Sekunden-Genauigkeit) fuer den Marker. */
     function marker_now_ts() {
         return new Date().toISOString().replace( /\.\d{3}Z$/, 'Z' );
@@ -829,7 +850,20 @@
         parse: marker_parse,
         hashes: marker_version_hashes,
         projection: marker_text_projection,
-        status_for: marker_status_for
+        status_for: marker_status_for,
+        // Status der aktuellen Editor-Felder (null ohne Editor), z. B. beim Speichern
+        current: function() {
+            const ci = content_info || detect_content_info();
+            return ci ? marker_status_for( marker_read_fields( ci ) ) : null;
+        },
+        // Widget oeffnen und die Pruefung starten wie ein Klick auf die Lasche (nur im Editor)
+        open: function() {
+            if( launcher_tab ) {
+                launcher_tab.click();
+                return true;
+            }
+            return false;
+        }
     };
 
     // --- UTILITY FUNCTIONS ---
@@ -1021,6 +1055,7 @@
             return;
         }
         const status = marker_status_for( marker_read_fields( ci ) );
+        publish_status( status );
         const cfg = TAB_BADGE_STATES[status.state] || TAB_BADGE_STATES.none;
         tab_badge_el.textContent = cfg.label;
         tab_badge_el.style.backgroundColor = cfg.bg;
@@ -1978,6 +2013,7 @@
         const raw = window.wfv4_ki_raw || null;
         const news_id = detect_pending_id();
         const status = raw ? marker_status_for( raw ) : null;
+        publish_status( status );
 
         const PENDING_STATES = {
             ok:     { icon: '✅', badge: TAB_BADGE_STATES.ok,     title: 'KI-geprüft — Version aktuell' },
@@ -2085,11 +2121,23 @@
         }
     }
 
+    // --- STATUS-MODUS (seit 2026-10-12) ---
+    // Seiten ohne Editor, auf denen man freigibt (Artikel-Ansicht, Video-Seite, FAQ-Eintrag):
+    // keine Lasche, kein Panel, nur der Pruef-Status fuer die Warnung des CMS.
+    // Erwartet window.wfv4_content = { type, id, mode: 'status' } und
+    // window.wfv4_ki_raw = { headline, teaser, content } genau wie in den Editor-Feldern.
+    function init_status_widget() {
+        const raw = window.wfv4_ki_raw || null;
+        publish_status( raw ? marker_status_for( raw ) : null );
+    }
+
     // Start immediately if DOM is ready, otherwise wait for DOMContentLoaded
     function init_by_mode() {
         // Fail-open: ein Widget-Fehler darf die CMS-Seite nie beeintraechtigen.
         try {
-            if( detect_pending_mode() ) {
+            if( page_mode === 'status' ) {
+                init_status_widget();
+            } else if( detect_pending_mode() ) {
                 init_pending_widget();
             } else {
                 init_widget();

@@ -78,7 +78,9 @@ Das gibt zwei `<script>`-Tags aus:
 1. Inline-Script, das `window.wfv4_ai_reviewer_auth` mit einem
    HMAC-SHA256-Token belegt, gebunden an Timestamp + Content-Type +
    Content-ID (90 Minuten gültig).
-2. Script-Tag, das `ai-reviewer.js` von GitHub Pages lädt.
+2. Script-Tag, das `ai-reviewer.js` von GitHub Pages lädt (feste
+   Version in der Adresse, `async`: Der Browser behält das Skript, und
+   die CMS-Seite wartet nie auf GitHub Pages).
 
 Setup im Detail: [`docs/SETUP.md`](docs/SETUP.md).
 
@@ -138,7 +140,13 @@ Editor-Template:
 wfv4_model_aireviewer::render( WFV4_AI_REVIEWER_SECRET, $content_type, $content_id );
 // Pending-Seite (read-only Pruef-Status, ohne Auth-Token):
 wfv4_model_aireviewer::render_pending( $news_id, $headline, $teaser, $content );
+// Seiten ohne Editor, auf denen man freigibt (nur der Pruef-Status, seit Version 6):
+wfv4_model_aireviewer::render_status( $content_type, $content_id, $headline, $teaser, $content );
 ```
+
+Alle Methoden geben das Widget nur für Redakteure mit Recht `r` aus.
+Der Prüf-Status steht danach in `window.wfv4_ki_status` (Details:
+[`docs/ai-reviewer.md`](docs/ai-reviewer.md), Abschnitt „Prüf-Status für das CMS“).
 
 ## Dateien
 
