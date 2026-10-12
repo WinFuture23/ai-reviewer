@@ -54,6 +54,15 @@ Das CMS nutzt ihn auf Seiten ohne Editor, auf denen man freigibt
 dem Freigeben einer ungeprüften Fassung. Ohne Status (Widget nicht
 geladen) geht die Freigabe wie bisher: Das Widget ist Hilfe, nie Stopper.
 
+Modus `pending` (Seite `/admin/news/ID/pending/`): Lasche und
+Status-Panel stehen fest unten rechts. Bei `none` oder `stale` klappt
+das Panel von selbst auf, aber nur ab 600 px Fensterbreite. Am Handy
+zeigt die Lasche den Status, und das CMS warnt beim Aktivieren selbst.
+Ein Abstandhalter am Ende von `body` (`#ai-reviewer-spacer`) ist so
+hoch wie die sichtbare Lasche oder das Panel. So lassen sich die
+letzten Knöpfe der Seite immer über das Widget scrollen (seit
+12.10.2026, vorher verdeckte das Panel am Handy „Aktivieren“).
+
 ## Lebenszyklus
 
 ```

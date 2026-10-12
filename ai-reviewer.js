@@ -2042,6 +2042,26 @@
         // Info-Panel (lazy aufgebaut, Toggle per Klick auf die Lasche)
         let panel = null;
 
+        // Platz am Seitenende (seit 2026-10-12): Lasche und Panel stehen fest unten rechts und verdeckten am
+        // Handy die letzten Knoepfe der Seite ("Aktivieren", "Speichern"), die sich nicht weiter hochscrollen
+        // liessen. Ein Abstandhalter am Ende von body macht die Seite genau so viel laenger, wie Lasche oder
+        // Panel hoch sind; so laesst sich alles ueber sie schieben
+        const spacer = document.createElement( 'div' );
+        spacer.id = 'ai-reviewer-spacer';
+        spacer.setAttribute( 'aria-hidden', 'true' );
+        spacer.style.clear = 'both';
+        function reserve_space() {
+            const shown = panel && panel.style.display !== 'none' ? panel : tab;
+            const h = shown.offsetHeight;
+            // Panel steht 20 px ueber dem Rand, die Lasche direkt darauf; 10 px Luft darueber
+            spacer.style.height = h > 0 ? ( h + ( shown === panel ? 20 : 0 ) + 10 ) + 'px' : '0';
+        }
+        // Hoehe folgt der Breite (Umbruch im Panel bei schmalen Fenstern)
+        const watch = typeof window.ResizeObserver === 'function' ? new ResizeObserver( reserve_space ) : null;
+        if( !watch ) {
+            window.addEventListener( 'resize', reserve_space );
+        }
+
         function build_panel() {
             panel = document.createElement( 'div' );
             Object.assign( panel.style, {
@@ -2101,24 +2121,36 @@
             panel.querySelector( '[data-ki-close]' ).onclick = function() {
                 panel.style.display = 'none';
                 tab.style.display = 'flex';
+                reserve_space();
             };
             document.body.appendChild( panel );
+            if( watch ) {
+                watch.observe( panel );
+            }
         }
 
         tab.onclick = function() {
             tab.style.display = 'none';
             if( !panel ) build_panel();
             else panel.style.display = 'block';
+            reserve_space();
         };
 
+        document.body.appendChild( spacer );
         document.body.appendChild( tab );
+        if( watch ) {
+            watch.observe( tab );
+        }
 
         // Ungeprueft/veraltet vor der Freischaltung geht in der Lasche leicht
         // unter — Panel dann direkt aufklappen. "Verbergen" bleibt moeglich.
-        if( status && ( status.state === 'none' || status.state === 'stale' ) ) {
+        // Nur ab 600 px Breite: am Handy deckte das offene Panel einen grossen Teil der Seite ab, dort
+        // zeigt die Lasche den Status, und das CMS warnt beim Aktivieren selbst (news_pending_box.js)
+        if( status && ( status.state === 'none' || status.state === 'stale' ) && window.innerWidth >= 600 ) {
             tab.style.display = 'none';
             build_panel();
         }
+        reserve_space();
     }
 
     // --- STATUS-MODUS (seit 2026-10-12) ---
