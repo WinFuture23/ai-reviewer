@@ -7,7 +7,7 @@
  * tokens injected by the PHP integration class (wfv4_model_aireviewer::render).
  *
  * @author  mesios
- * @version 6 2026-10-12
+ * @version 7 2026-10-13
  * @see     wfv4_model_aireviewer (aireviewer.class.php, im CMS gepflegt)
  */
 (function() {
@@ -606,10 +606,15 @@
     // - hash:   FNV-1a ueber Headline+Teaser+Text, byte-nah (exakte Dedupe-Bremse)
     // - th:     FNV-1a ueber die Text-Projektion (Tags/Shortcodes/Entities raus,
     //           Whitespace kollabiert) — tolerant gegen Markup-only-Aenderungen
+    // - algo:   1 bis 2026-10-12; 2 seit 2026-10-13: beide Hashes gleichen vorher die
+    //           Zeichen an, die das CMS beim Speichern ersetzt (marker_save_norm). Sonst
+    //           war eine eben gepruefte Fassung nach dem Speichern "veraltet", sobald die
+    //           KI typografische Anfuehrungszeichen, Striche oder Auslassungspunkte schrieb.
+    //           Jeder Eintrag wird mit seinem eigenen algo verglichen.
     // Kein '>' und kein '--' im Kommentar-Body, einzeilig — sonst zerlegen
     // Paragraph-Splitter/Tokenizer des VergleichsWidgets den Marker.
     const MARKER_VERSION = 1;
-    const MARKER_ALGO = 1;
+    const MARKER_ALGO = 2;
     const MARKER_MAX_ENTRIES = 10;
     const MARKER_LINE_RE = /<!-- ki-korrektor v\d+[^>]*-->/g;
     const MARKER_STRIP_RE = /[ \t]*<!-- ki-korrektor v\d+[^>]*-->[ \t]*\r?\n?/g;
@@ -655,9 +660,37 @@
         return entries;
     }
 
-    /** Roh-Normalisierung (algo=1): Zeilenenden vereinheitlichen, Trailing-Whitespace trimmen. */
-    function marker_norm_raw( text ) {
-        return ( text || '' ).replace( /\r\n?/g, '\n' ).replace( /\s+$/, '' );
+    /**
+     * Zeichen wie beim Speichern im CMS angleichen (algo=2, seit 2026-10-13). Das CMS ersetzt
+     * beim Speichern einer News typografische Anfuehrungszeichen, Striche, Auslassungspunkte und
+     * besondere Leerzeichen (news-editspec-execute.php: wfv4_lib_text::clean_msword und
+     * clean_msword_utf8). Die KI schreibt diese Zeichen oft. Ohne Angleichen passte der Hash
+     * der geprueften Fassung nach dem Speichern nicht mehr, obwohl niemand etwas geaendert hatte.
+     * Gleicht auch Zeichen an, die das CMS stehen laesst (z. B. U+2018), damit Editor und
+     * gespeicherter Text sicher gleich rechnen.
+     * @param {string} text Feldwert
+     * @return {string} Text mit den Zeichen, die nach dem Speichern dastehen
+     */
+    function marker_save_norm( text ) {
+        return ( text || '' )
+            .replace( /[\u201C\u201D\u201E\u201F\u2033]/g, '"' )
+            .replace( /[\u2018\u2019\u201A\u201B]/g, '\'' )
+            .replace( /[\u2010-\u2015]/g, '-' )
+            .replace( /\u2026/g, '...' )
+            .replace( /\u200B/g, '' )
+            .replace( /[\u00A0\u2002-\u2006\u2008-\u200A\u202F\u3000]/g, ' ' );
+    }
+
+    /**
+     * Roh-Normalisierung: Zeilenenden vereinheitlichen, Trailing-Whitespace trimmen;
+     * ab algo=2 vorher die Zeichen wie beim Speichern angleichen (marker_save_norm).
+     * @param {string} text Feldwert
+     * @param {number} [algo] Verfahren des Markers (Standard: MARKER_ALGO)
+     * @return {string}
+     */
+    function marker_norm_raw( text, algo ) {
+        const t = ( algo || MARKER_ALGO ) >= 2 ? marker_save_norm( text ) : ( text || '' );
+        return t.replace( /\r\n?/g, '\n' ).replace( /\s+$/, '' );
     }
 
     /**
@@ -665,8 +698,12 @@
      * Entities dekodieren, &shy;/&nbsp; neutralisieren, Whitespace kollabieren.
      * Ergebnis ist im Editor (Rohfelder) und auf der Pending-Seite identisch
      * berechenbar, solange der sichtbare Text uebereinstimmt.
+     * Ab algo=2 gleicht sie danach die Zeichen wie beim Speichern an (marker_save_norm).
+     * @param {string} text Feldwert
+     * @param {number} [algo] Verfahren des Markers (Standard: MARKER_ALGO)
+     * @return {string}
      */
-    function marker_text_projection( text ) {
+    function marker_text_projection( text, algo ) {
         if( !text ) return '';
         let t = text
             .replace( /<!--[\s\S]*?-->/g, ' ' )
@@ -679,6 +716,9 @@
             ta.innerHTML = t;
             t = ta.value;
         }
+        if( ( algo || MARKER_ALGO ) >= 2 ) {
+            t = marker_save_norm( t );
+        }
         return t
             .replace( /\u00AD/g, '' )
             .replace( /\u00A0/g, ' ' )
@@ -689,16 +729,18 @@
     /**
      * Beide Versions-Hashes ueber Headline+Teaser+Content berechnen.
      * @param {object} f { headline, teaser, content } — content darf Marker enthalten (werden entfernt)
+     * @param {number} [algo] Verfahren (Standard: MARKER_ALGO; 1 fuer Eintraege bis 2026-10-12)
      * @return {{hash: string, th: string}}
      */
-    function marker_version_hashes( f ) {
+    function marker_version_hashes( f, algo ) {
+        const a = algo || MARKER_ALGO;
         const content_clean = marker_strip( f.content || '' );
-        const raw_material = marker_norm_raw( f.headline ) + '\u0001'
-            + marker_norm_raw( f.teaser ) + '\u0001'
-            + marker_norm_raw( content_clean );
-        const text_material = marker_text_projection( f.headline ) + '\u0001'
-            + marker_text_projection( f.teaser ) + '\u0001'
-            + marker_text_projection( content_clean );
+        const raw_material = marker_norm_raw( f.headline, a ) + '\u0001'
+            + marker_norm_raw( f.teaser, a ) + '\u0001'
+            + marker_norm_raw( content_clean, a );
+        const text_material = marker_text_projection( f.headline, a ) + '\u0001'
+            + marker_text_projection( f.teaser, a ) + '\u0001'
+            + marker_text_projection( content_clean, a );
         return { hash: marker_fnv1a( raw_material ), th: marker_fnv1a( text_material ) };
     }
 
@@ -725,15 +767,20 @@
         const entries = marker_parse( f.content || '' );
         const hashes = marker_version_hashes( f );
 
+        // Jeder Eintrag mit seinem Verfahren: algo=1 (bis 2026-10-12) ohne Angleichen der Zeichen
+        const hashes_v1 = entries.some( function( e ) { return !( e.algo >= 2 ); } )
+            ? marker_version_hashes( f, 1 ) : null;
+        const hashes_for = function( e ) { return e.algo >= 2 ? hashes : hashes_v1; };
+
         // Neueste Treffer zuerst suchen
         for( let i = entries.length - 1; i >= 0; i-- ) {
-            if( entries[i].hash === hashes.hash ) {
+            if( entries[i].hash === hashes_for( entries[i] ).hash ) {
                 return { state: 'ok', entry: entries[i], entries: entries, hashes: hashes };
             }
         }
 
         for( let i = entries.length - 1; i >= 0; i-- ) {
-            if( entries[i].th === hashes.th ) {
+            if( entries[i].th === hashes_for( entries[i] ).th ) {
                 return { state: 'markup', entry: entries[i], entries: entries, hashes: hashes };
             }
         }

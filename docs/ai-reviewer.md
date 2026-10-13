@@ -47,6 +47,13 @@ In allen Modi meldet das Widget den Prüf-Status der aktuellen Fassung:
   (`null` ohne Editor), `wfv4_ki_marker.open()` öffnet das Widget und
   startet die Prüfung wie ein Klick auf die Lasche.
 
+Seit Version 7 stempelt das Widget mit `algo=2`. Beide Hashes gleichen
+vorher die Zeichen an, die das CMS beim Speichern ersetzt: „ “ ” werden
+zu `"`, ‚ ‘ ’ zu `'`, – und — zu `-`, … zu `...`, besondere Leerzeichen
+zu einem Leerzeichen. Vorher galt eine eben geprüfte Fassung nach dem
+Speichern als „veraltet“, sobald die KI solche Zeichen geschrieben hatte.
+Einträge mit `algo=1` vergleicht das Widget weiter ohne Angleichen.
+
 Modus `status` (`window.wfv4_content = { type, id, mode: 'status' }`
 plus `window.wfv4_ki_raw`): keine Lasche, kein Panel, nur der Status.
 Das CMS nutzt ihn auf Seiten ohne Editor, auf denen man freigibt
