@@ -19,6 +19,8 @@
 | `software_name` | String | Nur Downloads (8) | Name der Software |
 | `username` | String | Alle, wenn vorhanden | Login-Name des Redakteurs (max 50 Zeichen) |
 | `missing_specials` | Array | Alle, wenn vorhanden | Fehlende Special-Verlinkungen |
+| `tags` | String | Alle, seit 14.10.2026 immer | Tags wie im CMS, Komma plus Leerzeichen (`"Schnäppchen, Deals, Advertorial"`); bei News live aus dem Tag-Editor (auch ungespeichert), sonst gespeichert; leer `""`. Groß-/Kleinschreibung kann abweichen |
+| `published_at` | String | Alle, seit 14.10.2026 immer | ISO 8601 mit Zeitzone (`"2026-10-14T10:12:15+02:00"`): nächste geplante Zeit (Veröffentlichung, Neuveröffentlichung, Startseiten-Herz), sonst die Zeit der Online-News, sonst `""` |
 
 ## Content-Types
 

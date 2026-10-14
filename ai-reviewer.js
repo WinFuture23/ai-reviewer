@@ -7,7 +7,7 @@
  * tokens injected by the PHP integration class (wfv4_model_aireviewer::render).
  *
  * @author  mesios
- * @version 7 2026-10-13
+ * @version 8 2026-10-14
  * @see     wfv4_model_aireviewer (aireviewer.class.php, im CMS gepflegt)
  */
 (function() {
@@ -582,7 +582,45 @@
         if( username ) {
             data.username = username;
         }
+
+        // Seit 2026-10-14 (Make.com, Sebastians Ja): immer dabei, leer = ""
+        const meta = read_meta();
+
+        data.tags = meta.tags;
+        data.published_at = meta.published_at;
         return data;
+    }
+
+    /**
+     * Tags und Veroeffentlichungszeit fuer Make. Tags live aus dem Tag-Editor
+     * der News (#news_tags, auch ungespeichert), sonst der gespeicherte Stand
+     * aus dem CMS (window.wfv4_ai_reviewer_meta, wfv4_model_aireviewer::render).
+     * Die Zeit kommt immer aus dem CMS (ISO 8601 mit Zeitzone: geplant, sonst
+     * online, sonst leer). Fehlt etwas, bleibt das Feld "" und Make arbeitet
+     * wie bisher.
+     * @return {{tags: string, published_at: string}}
+     */
+    function read_meta() {
+        const cms = window.wfv4_ai_reviewer_meta || {};
+        let tags = typeof cms.tags === 'string' ? cms.tags : '';
+
+        try {
+            const jq = window.jQuery;
+
+            if( jq && jq.fn && jq.fn.tagit && document.getElementById( 'news_tags' ) ) {
+                const live = jq( '#news_tags' ).tagit( 'tags' );
+
+                if( Array.isArray( live ) ) {
+                    tags = live.map( function( t ) { return String( t ).trim(); } ).filter( Boolean ).join( ', ' );
+                }
+            }
+        } catch( e ) { /* Tag-Editor noch nicht bereit: gespeicherter Stand */ }
+
+        const published_at =
+            typeof cms.published_at === 'string' && /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d[+-]\d\d:\d\d$/.test( cms.published_at )
+            ? cms.published_at : '';
+
+        return { tags: tags.slice( 0, 2000 ), published_at: published_at };
     }
 
     /**
