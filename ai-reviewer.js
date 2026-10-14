@@ -7,7 +7,7 @@
  * tokens injected by the PHP integration class (wfv4_model_aireviewer::render).
  *
  * @author  mesios
- * @version 8 2026-10-14
+ * @version 9 2026-10-14
  * @see     wfv4_model_aireviewer (aireviewer.class.php, im CMS gepflegt)
  */
 (function() {
@@ -648,11 +648,17 @@
     //           Zeichen an, die das CMS beim Speichern ersetzt (marker_save_norm). Sonst
     //           war eine eben gepruefte Fassung nach dem Speichern "veraltet", sobald die
     //           KI typografische Anfuehrungszeichen, Striche oder Auslassungspunkte schrieb.
-    //           Jeder Eintrag wird mit seinem eigenen algo verglichen.
+    //           3 seit 2026-10-14: die Text-Projektion behaelt das Wort automatischer
+    //           Links (##a i="220" t="Netflix"## zaehlt als "Netflix"). Der Autolinker der
+    //           Vorschau /pending/ setzt solche Links nach der Pruefung und speichert den
+    //           Text; sonst war die gepruefte Fassung danach "veraltet", obwohl sich am
+    //           sichtbaren Text nichts geaendert hatte (161949, Redaktion 14.10.2026).
+    //           Jeder Eintrag wird mit seinem eigenen algo verglichen; Eintraege vor algo 3
+    //           zusaetzlich mit behaltenen Link-Woertern (marker_status_for).
     // Kein '>' und kein '--' im Kommentar-Body, einzeilig — sonst zerlegen
     // Paragraph-Splitter/Tokenizer des VergleichsWidgets den Marker.
     const MARKER_VERSION = 1;
-    const MARKER_ALGO = 2;
+    const MARKER_ALGO = 3;
     const MARKER_MAX_ENTRIES = 10;
     const MARKER_LINE_RE = /<!-- ki-korrektor v\d+[^>]*-->/g;
     const MARKER_STRIP_RE = /[ \t]*<!-- ki-korrektor v\d+[^>]*-->[ \t]*\r?\n?/g;
@@ -737,14 +743,25 @@
      * Ergebnis ist im Editor (Rohfelder) und auf der Pending-Seite identisch
      * berechenbar, solange der sichtbare Text uebereinstimmt.
      * Ab algo=2 gleicht sie danach die Zeichen wie beim Speichern an (marker_save_norm).
+     * Ab algo=3 bleibt von automatischen Links ##a ... t="Wort"## das Wort stehen: Der
+     * Autolinker setzt sie nach der Pruefung, am sichtbaren Text aendern sie nichts.
      * @param {string} text Feldwert
      * @param {number} [algo] Verfahren des Markers (Standard: MARKER_ALGO)
+     * @param {boolean} [keep_links] Link-Woerter behalten (Standard: ab algo=3)
      * @return {string}
      */
-    function marker_text_projection( text, algo ) {
+    function marker_text_projection( text, algo, keep_links ) {
+        const a = algo || MARKER_ALGO;
         if( !text ) return '';
-        let t = text
-            .replace( /<!--[\s\S]*?-->/g, ' ' )
+        let t = text.replace( /<!--[\s\S]*?-->/g, ' ' );
+
+        if( keep_links === undefined ? a >= 3 : keep_links ) {
+            t = t.replace( /##a\s((?:[^#]|#(?!#))*?)##/g, function( code, attributes ) {
+                const word = attributes.match( /(?:^|\s)t="([^"]*)"/ );
+                return word ? word[1] : ' ';
+            } );
+        }
+        t = t
             .replace( /##(?:[^#]|#(?!#))*?##/g, ' ' )
             .replace( /<[^>]*>/g, ' ' );
 
@@ -754,7 +771,7 @@
             ta.innerHTML = t;
             t = ta.value;
         }
-        if( ( algo || MARKER_ALGO ) >= 2 ) {
+        if( a >= 2 ) {
             t = marker_save_norm( t );
         }
         return t
@@ -768,17 +785,18 @@
      * Beide Versions-Hashes ueber Headline+Teaser+Content berechnen.
      * @param {object} f { headline, teaser, content } — content darf Marker enthalten (werden entfernt)
      * @param {number} [algo] Verfahren (Standard: MARKER_ALGO; 1 fuer Eintraege bis 2026-10-12)
+     * @param {boolean} [keep_links] Link-Woerter in th behalten (Standard: ab algo=3)
      * @return {{hash: string, th: string}}
      */
-    function marker_version_hashes( f, algo ) {
+    function marker_version_hashes( f, algo, keep_links ) {
         const a = algo || MARKER_ALGO;
         const content_clean = marker_strip( f.content || '' );
         const raw_material = marker_norm_raw( f.headline, a ) + '\u0001'
             + marker_norm_raw( f.teaser, a ) + '\u0001'
             + marker_norm_raw( content_clean, a );
-        const text_material = marker_text_projection( f.headline, a ) + '\u0001'
-            + marker_text_projection( f.teaser, a ) + '\u0001'
-            + marker_text_projection( content_clean, a );
+        const text_material = marker_text_projection( f.headline, a, keep_links ) + '\u0001'
+            + marker_text_projection( f.teaser, a, keep_links ) + '\u0001'
+            + marker_text_projection( content_clean, a, keep_links );
         return { hash: marker_fnv1a( raw_material ), th: marker_fnv1a( text_material ) };
     }
 
@@ -803,22 +821,37 @@
      */
     function marker_status_for( f ) {
         const entries = marker_parse( f.content || '' );
-        const hashes = marker_version_hashes( f );
+        const cache = {};
 
-        // Jeder Eintrag mit seinem Verfahren: algo=1 (bis 2026-10-12) ohne Angleichen der Zeichen
-        const hashes_v1 = entries.some( function( e ) { return !( e.algo >= 2 ); } )
-            ? marker_version_hashes( f, 1 ) : null;
-        const hashes_for = function( e ) { return e.algo >= 2 ? hashes : hashes_v1; };
+        // Hashes je Verfahren, nur bei Bedarf berechnet
+        const hashes_with = function( algo, keep_links ) {
+            const key = algo + ( keep_links ? '+links' : '' );
+            if( !cache[key] ) {
+                cache[key] = marker_version_hashes( f, algo, keep_links );
+            }
+            return cache[key];
+        };
+        const hashes = hashes_with( MARKER_ALGO );
+
+        // Jeder Eintrag mit seinem Verfahren: algo=1 (bis 2026-10-12) ohne Angleichen der
+        // Zeichen, 2 mit, 3 zusaetzlich mit den Woertern automatischer Links
+        const algo_of = function( e ) { return e.algo >= 3 ? 3 : ( e.algo >= 2 ? 2 : 1 ); };
 
         // Neueste Treffer zuerst suchen
         for( let i = entries.length - 1; i >= 0; i-- ) {
-            if( entries[i].hash === hashes_for( entries[i] ).hash ) {
+            if( entries[i].hash === hashes_with( algo_of( entries[i] ) ).hash ) {
                 return { state: 'ok', entry: entries[i], entries: entries, hashes: hashes };
             }
         }
 
+        // Eintraege vor algo 3 auch mit behaltenen Link-Woertern: hat der Autolinker nach der
+        // Pruefung Links gesetzt, ist der sichtbare Text trotzdem derselbe
         for( let i = entries.length - 1; i >= 0; i-- ) {
-            if( entries[i].th === hashes_for( entries[i] ).th ) {
+            const a = algo_of( entries[i] );
+            if(
+                entries[i].th === hashes_with( a ).th
+                || ( a < 3 && entries[i].th === hashes_with( a, true ).th )
+            ) {
                 return { state: 'markup', entry: entries[i], entries: entries, hashes: hashes };
             }
         }

@@ -54,6 +54,15 @@ zu einem Leerzeichen. Vorher galt eine eben geprüfte Fassung nach dem
 Speichern als „veraltet“, sobald die KI solche Zeichen geschrieben hatte.
 Einträge mit `algo=1` vergleicht das Widget weiter ohne Angleichen.
 
+Seit Version 9 stempelt das Widget mit `algo=3`. Im Text-Hash zählen
+automatische Links mit ihrem Wort: `##a i="220" t="Netflix"##` gilt als
+„Netflix“. Der Autolinker der Vorschau `/pending/` setzt solche Links
+nach der Prüfung und speichert den Text. Vorher galt die geprüfte Fassung
+danach als „veraltet“, obwohl sich am sichtbaren Text nichts geändert
+hatte. Einträge mit `algo=1` und `algo=2` prüft das Widget zusätzlich auf
+diese Weise, damit auch ältere Prüfungen nach dem Autolinker „nur
+Markup geändert“ melden statt „veraltet“.
+
 Modus `status` (`window.wfv4_content = { type, id, mode: 'status' }`
 plus `window.wfv4_ki_raw`): keine Lasche, kein Panel, nur der Status.
 Das CMS nutzt ihn auf Seiten ohne Editor, auf denen man freigibt
