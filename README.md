@@ -32,10 +32,10 @@ Browser (CMS-Editor)
        ├─ Start-Request (HMAC-Token, content_type, content_id)
        │       ↓
        │   Val.town Proxy  ─▶  Make.com Worker  ─▶  KI-Agenten
-       │                                                ↓
-       │                                          Val.town Poller-DB (SQLite)
-       │                                                ↑
-       └─ Poll-Request (API-Key) ──────────────────────┘
+       │        │                                       ↓
+       │        └─ liest (Server) ─▶  Val.town Poller-DB (SQLite)
+       │        ↑
+       └─ Poll-Request (HMAC-Token, wie Start; seit v10 kein Schlüssel im Skript)
 
        beim Klick auf „Unterschiede anzeigen":
        └─ vergleichswidget.js (nachgeladen, gleicher Origin)
@@ -48,7 +48,7 @@ Browser (CMS-Editor)
 | `ai-reviewer.js` | Frontend-Widget, GitHub Pages |
 | `vergleichswidget.js` | Frontend-Diff-Modal, GitHub Pages |
 | PHP-Klasse `wfv4_model_aireviewer` | Auth-Token-Generierung im CMS (`aireviewer.class.php`, wird intern im CMS gepflegt — nicht Teil dieses Repos) |
-| Val.town Proxy | Leitet HMAC-authentifizierte Start-Requests an Make.com weiter |
+| Val.town Proxy | Leitet HMAC-authentifizierte Start-Requests an Make.com weiter und fragt für das Widget die Poller-DB ab (`action: poll`) |
 | Val.town Poller-DB | SQLite-API, in der Make.com das KI-Ergebnis ablegt und das Widget es abholt |
 | Make.com Worker | Orchestriert die KI-Agenten (Korrektor + Verlinker) |
 

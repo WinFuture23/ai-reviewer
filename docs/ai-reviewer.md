@@ -179,8 +179,11 @@ Der Val.town-Proxy verifiziert HMAC + Alter (max. 90 Min) und leitet
 erst dann an Make.com weiter. Bei `HTTP 403` zeigt das Widget einen
 „Seite neu laden"-Button (Token abgelaufen).
 
-Der Poller-DB-Zugriff läuft separat über einen statischen API-Key
-(`x-api-key: POLLER_API_KEY` Header).
+Seit v10 fragt das Widget das Ergebnis ebenfalls beim Proxy ab: `POST`
+mit denselben Kopfzeilen und `{ "action": "poll", "jobId": "…" }`. Der Proxy
+liest die Poller-DB auf dem Server; im Skript steht kein Schlüssel mehr.
+Antworten: 200 = JSON der Poller-DB, 403 = anhalten und „Seite neu laden",
+400 = anhalten mit Fehlermeldung, 502 = nach 3 s erneut fragen.
 
 ## Editor-Lock / -Unlock
 
@@ -324,7 +327,7 @@ sofort, auch bei offenem Fenster. Die Systemeinstellung
 Folgt der WinFuture-Konvention (siehe [Programmierstil.md](Programmierstil.md)):
 
 - Snake_case für Funktionen und Variablen
-- ALL_CAPS für Modul-Konstanten (`PROXY_URL`, `POLLER_URL`, `CONTENT_TYPES`, …)
+- ALL_CAPS für Modul-Konstanten (`PROXY_URL`, `CONTENT_TYPES`, …)
 - Tabs zum Einrücken
 - K&R-Klammern, öffnende Klammer auf derselben Zeile
 - Spaces innerhalb der Klammern: `if( cond )`, `for( i = 0; …; i++ )`

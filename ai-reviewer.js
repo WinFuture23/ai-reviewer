@@ -2,11 +2,15 @@
  * wfv4_model_aireviewer — AI-powered article review widget for WinFuture.de.
  *
  * Sends the current editor content to a Make.com backend (via Val.town proxy),
- * polls for the result (via Val.town Poller-DB), and displays corrections and
- * link suggestions in a terminal-style overlay. Auth is handled via HMAC-SHA256
- * tokens injected by the PHP integration class (wfv4_model_aireviewer::render).
+ * polls for the result (also via the proxy, which reads the Val.town Poller-DB
+ * on the server), and displays corrections and link suggestions in a
+ * terminal-style overlay. Auth is handled via HMAC-SHA256 tokens injected by
+ * the PHP integration class (wfv4_model_aireviewer::render); start and poll
+ * send the same token, the script holds no key.
  *
  * @author  mesios
+ * @version 10 2026-10-17 Poll over the proxy ({action:'poll'}) instead of the Poller with a key in the script
+ *                         (the key was public); 403 on poll stops and offers a reload, 400 stops, 502 retries
  * @version 9 2026-10-14
  * @see     wfv4_model_aireviewer (aireviewer.class.php, im CMS gepflegt)
  */
@@ -319,10 +323,8 @@
     let maybe_autostart_fn = null;  // Dedupe-Vorabcheck + ggf. Auto-Start (gesetzt in build_terminal)
 
     // --- CONFIGURATION ---
-    // Val.town proxy endpoints
+    // Val.town proxy endpoint: start ({action:'start'}) and poll ({action:'poll'}), both with the HMAC token of the CMS
     const PROXY_URL = 'https://mesios--43bb6c1c197111f18d1642dde27851f2.web.val.run';
-    const POLLER_URL = 'https://mesios--f12a09281c8f11f1845142dde27851f2.web.val.run';
-    const POLLER_API_KEY = 'wf_super_secret_key_2026_xyz';
 
     // --- COMPANION SCRIPT (VergleichsWidget) ---
     // The Vorher/Nachher diff modal lives in vergleichswidget.js, which sits
@@ -1690,6 +1692,31 @@
 
                 if( !reviewer_auth.token ) log_debug( 'Warnung: Kein Auth-Token gefunden (window.wfv4_ai_reviewer_auth fehlt).' );
 
+                // Token abgelaufen oder ungueltig ( 403 beim Start oder beim Abfragen ): anhalten und neu laden anbieten
+                function show_token_expired() {
+                    poll_active = false; unlock_editor();
+                    launcher_tab.querySelector('span').innerText = '🔑 Token abgelaufen';
+                    log_debug( 'Token abgelaufen oder ungueltig. Seite muss neu geladen werden.' );
+                    set_status( '🔑', 'Sitzung abgelaufen.', 'Bitte Seite neu laden, um ein neues Token zu erhalten.', 'var(--kik-warn, #b45309)', true );
+                    add_message( '<b>Das Sicherheits-Token ist abgelaufen.</b> Bitte laden Sie die Seite neu.', 'warning' );
+                    const reload_btn = document.createElement('button');
+                    reload_btn.className = 'css_button'; reload_btn.innerHTML = '🔄 Seite jetzt neu laden';
+                    Object.assign( reload_btn.style, { marginTop: '8px', padding: '8px 16px', cursor: 'pointer', backgroundColor: 'var(--kik-solid, #1f2328)', color: '#fff', border: '1px solid var(--kik-solid, #1f2328)', borderRadius: '6px', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif', fontWeight: '500', fontSize: '13px', transition: 'background-color 0.15s ease' } );
+                    reload_btn.onmouseover = () => reload_btn.style.backgroundColor = 'var(--kik-solid-hover, #3a3f46)'; reload_btn.onmouseout = () => reload_btn.style.backgroundColor = 'var(--kik-solid, #1f2328)';
+                    reload_btn.onclick = () => location.reload();
+                    results_area.appendChild( reload_btn );
+                    btn_check.style.display = 'block'; btn_check.disabled = false;
+                }
+
+                // Ergebnis ueber den Proxy abfragen, mit demselben Token wie der Start ( v10; bis v9 direkt beim Poller mit
+                // einem Schluessel im Skript ). Antwort 200: das JSON des Pollers unveraendert
+                function poll_job() {
+                    return fetch( PROXY_URL, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json', ...auth_headers },
+                        body: JSON.stringify( { action: 'poll', jobId: job_id } )
+                    });
+                }
+
                 log_debug( `Sende Artikel an Proxy. Content-Type: ${content_info.config.name}, ID: ${content_info.id}. JobID: ${job_id}` );
                 const start_res = await fetch( PROXY_URL, {
                     method: 'POST', headers: { 'Content-Type': 'application/json', ...auth_headers },
@@ -1701,18 +1728,7 @@
                     log_debug( `Start-Request fehlgeschlagen: HTTP ${start_res.status}` );
 
                     if( start_res.status === 403 ) {
-                        poll_active = false; unlock_editor();
-                        launcher_tab.querySelector('span').innerText = '🔑 Token abgelaufen';
-                        log_debug( 'Token abgelaufen oder ungueltig. Seite muss neu geladen werden.' );
-                        set_status( '🔑', 'Sitzung abgelaufen.', 'Bitte Seite neu laden, um ein neues Token zu erhalten.', 'var(--kik-warn, #b45309)', true );
-                        add_message( '<b>Das Sicherheits-Token ist abgelaufen.</b> Bitte laden Sie die Seite neu.', 'warning' );
-                        const reload_btn = document.createElement('button');
-                        reload_btn.className = 'css_button'; reload_btn.innerHTML = '🔄 Seite jetzt neu laden';
-                        Object.assign( reload_btn.style, { marginTop: '8px', padding: '8px 16px', cursor: 'pointer', backgroundColor: 'var(--kik-solid, #1f2328)', color: '#fff', border: '1px solid var(--kik-solid, #1f2328)', borderRadius: '6px', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif', fontWeight: '500', fontSize: '13px', transition: 'background-color 0.15s ease' } );
-                        reload_btn.onmouseover = () => reload_btn.style.backgroundColor = 'var(--kik-solid-hover, #3a3f46)'; reload_btn.onmouseout = () => reload_btn.style.backgroundColor = 'var(--kik-solid, #1f2328)';
-                        reload_btn.onclick = () => location.reload();
-                        results_area.appendChild( reload_btn );
-                        btn_check.style.display = 'block'; btn_check.disabled = false;
+                        show_token_expired();
                         return;
                     }
 
@@ -1747,9 +1763,11 @@
                     log_debug(`${label}: Server-Abfrage...`);
                     last_poll_time = Date.now();
                     try {
-                        const poll_res = await fetch(`${POLLER_URL}?jobId=${encodeURIComponent(job_id)}`, {
-                            method: 'GET', headers: { 'x-api-key': POLLER_API_KEY }
-                        });
+                        const poll_res = await poll_job();
+                        if (poll_res.status === 403 || poll_res.status === 400) {
+                            stop_polling(poll_res.status);
+                            return false;
+                        }
                         if (poll_res.ok) {
                             const data = await poll_res.json();
                             const job_status = data.status || 'pending';
@@ -1766,6 +1784,26 @@
                         }
                     } catch(e) { log_debug(`${label}: Fehlgeschlagen (${e.message})`); }
                     wakeup(); // poll_loop sofort aufwecken
+                    return true;
+                }
+
+                // Der Proxy lehnt die Abfrage ab ( 403 Token abgelaufen oder ungueltig, 400 falsche jobId ): Abfragen beenden,
+                // nicht weiter alle 3 s fragen. 403 bietet neu laden an wie beim Start
+                function stop_polling(status) {
+                    poll_active = false; cached_poll_response = null; clearInterval(timer_interval);
+                    document.removeEventListener('visibilitychange', on_visibility_change);
+                    if (manual_poll_area) manual_poll_area.style.display = 'none';
+                    wakeup(); // poll_loop beendet sich
+                    log_debug(`Abfrage abgelehnt: HTTP ${status}`);
+                    if (status === 403) {
+                        show_token_expired();
+                        return;
+                    }
+                    unlock_editor();
+                    launcher_tab.querySelector('span').innerText = '🤖 KI-Korrektor';
+                    btn_check.style.display = 'block'; btn_check.disabled = false;
+                    set_status('❌', 'Leider ist ein Fehler aufgetreten.', 'Bitte versuchen Sie es erneut.', 'var(--kik-err, #a30015)', true);
+                    add_message('Bei der Statusabfrage ist ein Fehler aufgetreten. Details im Debug-Log.', 'error');
                 }
 
                 // Tab return handler: fires reliably when user switches back to this tab
@@ -1818,7 +1856,8 @@
                         // Prevent multiple timeout handlers from firing
                         clearInterval(timer_interval);
                         (async () => {
-                            await do_manual_poll('Timeout-Abfrage');
+                            // abgelehnt ( 403, 400 ): stop_polling hat schon angehalten und gemeldet
+                            if (!await do_manual_poll('Timeout-Abfrage')) return;
                             if (cached_poll_response) {
                                 // Result arrived — poll_loop will process it (wakeup already called)
                                 return;
@@ -1858,9 +1897,9 @@
                                 log_debug(`Frage Status ab...`);
                                 last_poll_time = Date.now();
                                 try {
-                                    const poll_res = await fetch(`${POLLER_URL}?jobId=${encodeURIComponent(job_id)}`, {
-                                        method: 'GET', headers: { 'x-api-key': POLLER_API_KEY }
-                                    });
+                                    const poll_res = await poll_job();
+                                    if (poll_res.status === 403 || poll_res.status === 400) { stop_polling(poll_res.status); break; }
+                                    // 502 ( Poller nicht erreichbar ) und andere: nach 3 s erneut
                                     if (!poll_res.ok) { next_poll_time = Date.now() + 3000; await interruptible_sleep(3000); continue; }
                                     data = await poll_res.json();
                                 } catch(e) { log_debug(`Poll-Fehler: ${e.message}`); next_poll_time = Date.now() + 3000; await interruptible_sleep(3000); continue; }
